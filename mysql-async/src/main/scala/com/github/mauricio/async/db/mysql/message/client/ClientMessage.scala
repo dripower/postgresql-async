@@ -26,7 +26,9 @@ object ClientMessage {
   final val PreparedStatementPrepare = 0x16 // COM_STMT_PREPARE
   final val PreparedStatementExecute = 0x17 // COM_STMT_EXECUTE
   final val PreparedStatementSendLongData = 0x18 // COM_STMT_SEND_LONG_DATA
+  final val PreparedStatementClose = 0x19
   final val AuthSwitchResponse = 0xfe // AuthSwitchRequest
+
 
 }
 

@@ -29,6 +29,7 @@ import com.github.mauricio.async.db.mysql.message.server._
 import com.github.mauricio.async.db.mysql.util.CharsetMapper
 import com.github.mauricio.async.db.util.ChannelFutureTransformer.toFuture
 import com.github.mauricio.async.db.util._
+import com.google.common.cache._
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.{ByteBuf, ByteBufAllocator, Unpooled}
 import io.netty.channel._
@@ -59,7 +60,12 @@ class MySQLConnectionHandler(
   private final val sendLongDataEncoder = new SendLongDataEncoder()
   private final val currentParameters = new ArrayBuffer[ColumnDefinitionMessage]()
   private final val currentColumns = new ArrayBuffer[ColumnDefinitionMessage]()
-  private final val parsedStatements = new HashMap[String,PreparedStatementHolder]()
+  private final val parsedStatements: Cache[String, PreparedStatementHolder] = CacheBuilder
+    .newBuilder()
+    .maximumSize(configuration.preparedStatementCacheSize)
+    .expireAfterWrite(configuration.preparedStatementExpireTime.toSeconds, TimeUnit.SECONDS)
+    .build()
+
   private final val binaryRowDecoder = new BinaryRowDecoder()
 
   private var currentPreparedStatementHolder : PreparedStatementHolder = null
@@ -199,7 +205,7 @@ class MySQLConnectionHandler(
 
     this.currentPreparedStatement = preparedStatement
 
-    this.parsedStatements.get(preparedStatement.statement) match {
+    Option(this.parsedStatements.getIfPresent(preparedStatement.statement)) match {
       case Some( item ) => {
         this.executePreparedStatement(item.statementId, item.columns.size, preparedStatement.values, item.parameters)
       }
@@ -235,6 +241,11 @@ class MySQLConnectionHandler(
     } else {
       false
     }
+  }
+
+  private def closePreparedStatment(statementId: Array[Byte]) = {
+
+    writeAndHandleError(new PreparedStatementCloseMessage(statementId))
   }
 
   private def executePreparedStatement( statementId : Array[Byte], columnsCount : Int, values : Seq[Any], parameters : Seq[ColumnDefinitionMessage] ): Future[ChannelFuture] = {

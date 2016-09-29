@@ -23,4 +23,4 @@ case class PreparedStatementExecuteMessage (
                                              values : Seq[Any],
                                              valuesToInclude : Set[Int],
                                              parameters : Seq[ColumnDefinitionMessage] )
-  extends ClientMessage( ClientMessage.PreparedStatementExecute )
+    extends ClientMessage( ClientMessage.PreparedStatementExecute )

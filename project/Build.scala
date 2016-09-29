@@ -49,8 +49,8 @@ object ProjectBuild extends Build {
 
 object Configuration {
 
-  val commonVersion = "0.2.20"
-  val projectScalaVersion = "2.11.7"
+  val commonVersion = "0.2.20-DRIP"
+  val projectScalaVersion = "2.11.8"
   val specs2Version = "2.5"
 
   val specs2Dependency = "org.specs2" %% "specs2-core" % specs2Version % "test"
@@ -62,8 +62,10 @@ object Configuration {
     "org.slf4j" % "slf4j-api" % "1.7.18",
     "joda-time" % "joda-time" % "2.9.2",
     "org.joda" % "joda-convert" % "1.8.1",
-    "io.netty" % "netty-all" % "4.1.1.Final",
+    "io.netty" % "netty-all" % "4.0.41.Final",
     "org.javassist" % "javassist" % "3.20.0-GA",
+    "com.google.guava" % "guava" % "19.0",
+    "com.google.code.findbugs" % "jsr305" % "3.0.1",
     specs2Dependency,
     specs2JunitDependency,
     specs2MockDependency,
@@ -76,6 +78,7 @@ object Configuration {
   )
 
   val baseSettings = Defaults.defaultSettings ++ Seq(
+    scalaVersion := "2.11.8",
     scalacOptions :=
       Opts.compile.encoding("UTF8")
         :+ Opts.compile.deprecation
@@ -83,7 +86,7 @@ object Configuration {
         :+ "-feature"
     ,
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
-    crossScalaVersions := Seq(projectScalaVersion, "2.10.6"),
+    crossScalaVersions := Seq(projectScalaVersion),
     javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
     organization := "com.github.mauricio",
     version := commonVersion,

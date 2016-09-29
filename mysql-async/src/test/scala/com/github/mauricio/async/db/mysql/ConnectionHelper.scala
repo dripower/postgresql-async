@@ -99,7 +99,8 @@ trait ConnectionHelper {
     "localhost",
     port = 3306,
     password = Some("root"),
-    database = Some("mysql_async_tests")
+    database = Some("mysql_async_tests"),
+    preparedStatementCacheSize = 1
   )
 
   def withPool[T]( fn : (ConnectionPool[MySQLConnection]) => T ) : T = {

@@ -52,14 +52,16 @@ object Configuration {
  */
 
 case class Configuration(username: String,
-                         host: String = "localhost",
-                         port: Int = 5432,
-                         password: Option[String] = None,
-                         database: Option[String] = None,
-                         ssl: SSLConfiguration = SSLConfiguration(),
-                         charset: Charset = Configuration.DefaultCharset,
-                         maximumMessageSize: Int = 16777216,
-                         allocator: ByteBufAllocator = PooledByteBufAllocator.DEFAULT,
-                         connectTimeout: Duration = 5.seconds,
-                         testTimeout: Duration = 5.seconds,
-                         queryTimeout: Option[Duration] = None)
+  host: String = "localhost",
+  port: Int = 5432,
+  password: Option[String] = None,
+  database: Option[String] = None,
+  ssl: SSLConfiguration = SSLConfiguration(),
+  charset: Charset = Configuration.DefaultCharset,
+  maximumMessageSize: Int = 16777216,
+  allocator: ByteBufAllocator = PooledByteBufAllocator.DEFAULT,
+  connectTimeout: Duration = 5.seconds,
+  testTimeout: Duration = 5.seconds,
+  preparedStatementCacheSize: Int = 4096,
+  preparedStatementExpireTime: Duration = 60.seconds,
+  queryTimeout: Option[Duration] = None)
