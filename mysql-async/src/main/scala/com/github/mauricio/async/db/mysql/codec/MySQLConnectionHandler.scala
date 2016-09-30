@@ -49,7 +49,7 @@ class MySQLConnectionHandler(
                               executionContext : ExecutionContext,
                               connectionId : String
                               )
-  extends SimpleChannelInboundHandler[Object] {
+    extends SimpleChannelInboundHandler[Object] {
 
   private implicit val internalPool = executionContext
   private final val log = Log.getByName(s"[connection-handler]${connectionId}")
@@ -64,6 +64,13 @@ class MySQLConnectionHandler(
     .newBuilder()
     .maximumSize(configuration.preparedStatementCacheSize)
     .expireAfterWrite(configuration.preparedStatementExpireTime.toSeconds, TimeUnit.SECONDS)
+    .removalListener(new RemovalListener[String, PreparedStatementHolder] {
+      def onRemoval(removal: RemovalNotification[String, PreparedStatementHolder]) {
+        log.info("Closing preparestatement...")
+        closePreparedStatment(removal.getValue().statementId)
+      }
+    }
+  )
     .build()
 
   private final val binaryRowDecoder = new BinaryRowDecoder()
@@ -244,7 +251,6 @@ class MySQLConnectionHandler(
   }
 
   private def closePreparedStatment(statementId: Array[Byte]) = {
-
     writeAndHandleError(new PreparedStatementCloseMessage(statementId))
   }
 

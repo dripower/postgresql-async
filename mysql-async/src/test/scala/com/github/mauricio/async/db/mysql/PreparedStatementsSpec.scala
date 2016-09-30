@@ -212,6 +212,23 @@ class PreparedStatementsSpec extends Specification with ConnectionHelper {
       }
     }
 
+    "close when prepared statement too much" in {
+      val create = """CREATE TEMPORARY TABLE posts (
+                     |       id INT NOT NULL AUTO_INCREMENT,
+                     |       some_text TEXT not null,
+                     |       some_date DATE,
+                     |       primary key (id) )""".stripMargin
+
+      val insert = "insert into posts (some_text) values (?)"
+      withConnection { c =>
+        executeQuery(c, create)
+        val rs = (1 to 1000).map { i =>
+          val rs = executePreparedStatement(c, s"select * from posts where id > ? and $i = $i", i).rows.get
+        }
+        rs.size === 1000
+      }
+    }
+
     "bind timestamp parameters to a table" in {
 
       val insert =

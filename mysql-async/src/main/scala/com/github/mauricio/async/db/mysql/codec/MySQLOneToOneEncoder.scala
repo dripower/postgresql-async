@@ -41,6 +41,7 @@ class MySQLOneToOneEncoder(charset: Charset, charsetMapper: CharsetMapper)
   private final val queryEncoder = new QueryMessageEncoder(charset)
   private final val rowEncoder = new BinaryRowEncoder(charset)
   private final val prepareEncoder = new PreparedStatementPrepareEncoder(charset)
+  private final val closeEncoder = new PreparedStatementCloseEncoder
   private final val executeEncoder = new PreparedStatementExecuteEncoder(rowEncoder)
   private final val authenticationSwitchEncoder = new AuthenticationSwitchResponseEncoder(charset)
 
@@ -65,6 +66,9 @@ class MySQLOneToOneEncoder(charset: Charset, charsetMapper: CharsetMapper)
         sequence = 0
         this.prepareEncoder
       }
+      case ClientMessage.PreparedStatementClose =>
+        sequence = 0
+        this.closeEncoder
       case ClientMessage.AuthSwitchResponse => {
         sequence += 1
         this.authenticationSwitchEncoder
