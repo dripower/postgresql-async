@@ -100,7 +100,7 @@ trait ConnectionHelper {
     port = 3306,
     password = Some("root"),
     database = Some("mysql_async_tests"),
-    preparedStatementCacheSize = 1
+    preparedStatementCacheSize = 10
   )
 
   def withPool[T]( fn : (ConnectionPool[MySQLConnection]) => T ) : T = {

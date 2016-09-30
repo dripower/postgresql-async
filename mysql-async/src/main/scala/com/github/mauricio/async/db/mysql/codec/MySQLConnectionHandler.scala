@@ -66,7 +66,7 @@ class MySQLConnectionHandler(
     .expireAfterWrite(configuration.preparedStatementExpireTime.toSeconds, TimeUnit.SECONDS)
     .removalListener(new RemovalListener[String, PreparedStatementHolder] {
       def onRemoval(removal: RemovalNotification[String, PreparedStatementHolder]) {
-        log.info("Closing preparestatement...")
+        log.debug("Closing preparestatement...")
         closePreparedStatment(removal.getValue().statementId)
       }
     }
