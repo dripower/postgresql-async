@@ -62,7 +62,7 @@ object Configuration {
     "org.slf4j" % "slf4j-api" % "1.7.18",
     "joda-time" % "joda-time" % "2.9.2",
     "org.joda" % "joda-convert" % "1.8.1",
-    "io.netty" % "netty-all" % "4.0.41.Final",
+    "io.netty" % "netty-all" % "4.0.36.Final",
     "org.javassist" % "javassist" % "3.20.0-GA",
     "com.google.guava" % "guava" % "19.0",
     "com.google.code.findbugs" % "jsr305" % "3.0.1",
