@@ -8,29 +8,28 @@ import org.slf4j._
 import scala.util._
 import scala.concurrent.Future
 
+case class Stat(
+  min: AtomicLong = new AtomicLong(Long.MaxValue),
+  max: AtomicLong = new AtomicLong(0),
+  total: AtomicLong = new AtomicLong(0),
+  times: AtomicLong = new AtomicLong(0)) {
+
+  def add(duration: Long) = {
+    if(duration < min.get()) {
+      min.set(duration)
+    }
+    if(duration > max.get()) {
+      max.set(duration)
+    }
+    times.incrementAndGet()
+    total.addAndGet(duration)
+  }
+}
 
 object Metrics {
 
   private val metricsLogger = LoggerFactory.getLogger("async.metrics")
   private val slowLogger = LoggerFactory.getLogger("async.slow")
-
-  case class Stat(
-    min: AtomicLong,
-    max: AtomicLong,
-    total: AtomicLong,
-    times: AtomicLong) {
-
-    def add(duration: Long) = {
-      if(duration < min.get()) {
-        min.set(duration)
-      }
-      if(duration > max.get()) {
-        max.set(duration)
-      }
-      times.incrementAndGet()
-      total.addAndGet(duration)
-    }
-  }
 
   val stats = CacheBuilder
     .newBuilder()
@@ -38,12 +37,7 @@ object Metrics {
     .expireAfterWrite(1, TimeUnit.HOURS)
     .build(new CacheLoader[String, Stat] {
       def load(key: String) = {
-        new Stat(
-          min = new AtomicLong(Long.MaxValue),
-          max = new AtomicLong(0),
-          total = new AtomicLong(0),
-          times = new AtomicLong(0)
-        )
+        Stat()
       }
     }
   )
@@ -52,7 +46,7 @@ object Metrics {
     val start = System.currentTimeMillis()
     val fut = f
     fut.onSuccess {
-      case Success(v) =>
+      case _ =>
         val end = System.currentTimeMillis()
         val time = end - start
         stats.get(key).add(time)

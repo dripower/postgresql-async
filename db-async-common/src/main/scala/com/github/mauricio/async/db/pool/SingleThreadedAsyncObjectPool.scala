@@ -17,8 +17,8 @@
 package com.github.mauricio.async.db.pool
 
 import java.util.concurrent.RejectedExecutionException
-
-import com.github.mauricio.async.db.util.{Log, Worker}
+import java.util.concurrent.ConcurrentHashMap
+import com.github.mauricio.async.db.util.{Log, Worker, Stat}
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Timer, TimerTask}
 
@@ -52,19 +52,28 @@ class SingleThreadedAsyncObjectPool[T](
   import SingleThreadedAsyncObjectPool.{Counter, log}
 
   private val mainPool = Worker()
+  private val id = Counter.incrementAndGet()
   private var poolables = new Stack[PoolableHolder[T]]()
   private val checkouts = new ArrayBuffer[T](configuration.maxObjects)
   private val waitQueue = new Queue[Promise[T]]()
-  private val timer = new Timer("async-object-pool-timer-" + Counter.incrementAndGet(), true)
+  private val timer = new Timer("async-object-pool-timer-" + id, true)
+  private val waitQueueStat = Stat()
+  private val promiseMap = new ConcurrentHashMap[Promise[_], Long]
+
   timer.scheduleAtFixedRate(new TimerTask {
     def run() {
       mainPool.action {
+        logPoolStat()
         testObjects
       }
     }
   }, configuration.validationInterval, configuration.validationInterval)
 
   private var closed = false
+
+  private def logPoolStat() = {
+    log.info(s"[Mysql-Async-${id}] Waiting queue: ${queued.size}, inUse: ${inUse.size}, avaliable: ${availables.size}")
+  }
 
   /**
    *
@@ -194,6 +203,7 @@ class SingleThreadedAsyncObjectPool[T](
       exception.fillInStackTrace()
       promise.failure(exception)
     } else {
+      promiseMap.put(promise, System.currentTimeMillis)
       this.waitQueue += promise
     }
   }
@@ -229,6 +239,18 @@ class SingleThreadedAsyncObjectPool[T](
       val item = this.poolables.pop().item
       this.checkouts += item
       promise.success(item)
+    }
+    if(promiseMap.get(promise) != null){
+      val t = promiseMap.get(promise)
+      waitQueueStat.add(System.currentTimeMillis - t)
+      logWaitQueueStat()
+    }
+  }
+
+  private def logWaitQueueStat(): Unit = {
+    val times = waitQueueStat.times.get()
+    if(times % 10 == 0 && times > 0) {
+      log.info(s"[MySQL-Async-$id] Waiting queue count: ${times}, max: ${waitQueueStat.max.get()}, min: ${waitQueueStat.min.get()}, avg: ${waitQueueStat.total.get / times}")
     }
   }
 
