@@ -69,7 +69,7 @@ object Metrics {
     val min = stat.min.get()
     val max = stat.max.get()
     if(c % 100 == 0) {
-      metricsLogger.info(s"[SQL-$key], count:$c, avg:${t/c}ms, max:${max}, min:${min}")
+      metricsLogger.info(s"[SQL-$key], count:$c, avg:${t/math.max(1, c)}ms, max:${max}, min:${min}")
     }
   }
 }
