@@ -49,7 +49,8 @@ object ProjectBuild extends Build {
 
 object Configuration {
 
-  val commonVersion = "0.2.20-DRIP-5"
+  val nettyVersion = "4.0.42.Final"
+  val commonVersion = "0.2.20-DRIP-6-SNAPSHOT"
   val projectScalaVersion = "2.11.8"
   val specs2Version = "2.5"
 
@@ -62,10 +63,12 @@ object Configuration {
     "org.slf4j" % "slf4j-api" % "1.7.18",
     "joda-time" % "joda-time" % "2.9.2",
     "org.joda" % "joda-convert" % "1.8.1",
-    "io.netty" % "netty-all" % "4.0.36.Final",
-    "org.javassist" % "javassist" % "3.20.0-GA",
+    "io.netty" % "netty-codec"                    % nettyVersion,
+    "io.netty" % "netty-handler"                  % nettyVersion,
+    "io.netty" % "netty-transport-native-epoll"   % nettyVersion  classifier "linux-x86_64",
+    "org.javassist" % "javassist" % "3.21.0-GA",
     "com.google.guava" % "guava" % "19.0",
-    "com.google.code.findbugs" % "jsr305" % "3.0.1",
+    "com.google.code.findbugs" % "jsr305" % "3.0.1" % "provided",
     specs2Dependency,
     specs2JunitDependency,
     specs2MockDependency,

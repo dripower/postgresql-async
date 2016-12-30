@@ -37,7 +37,6 @@ import com.github.mauricio.async.db.postgresql.messages.backend.ProcessData
 import scala.util.Success
 import com.github.mauricio.async.db.postgresql.messages.backend.RowDescriptionMessage
 import com.github.mauricio.async.db.postgresql.messages.backend.ParameterStatusMessage
-import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.CodecException
 import io.netty.handler.ssl.{SslContextBuilder, SslHandler}
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory
@@ -81,7 +80,7 @@ class PostgreSQLConnectionHandler
 
   def connect: Future[PostgreSQLConnectionHandler] = {
     this.bootstrap.group(this.group)
-    this.bootstrap.channel(classOf[NioSocketChannel])
+    this.bootstrap.channel(NettyUtils.SocketChannelClass)
     this.bootstrap.handler(new ChannelInitializer[channel.Channel]() {
 
       override def initChannel(ch: channel.Channel): Unit = {

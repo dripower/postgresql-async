@@ -33,7 +33,6 @@ import com.google.common.cache._
 import io.netty.bootstrap.Bootstrap
 import io.netty.buffer.{ByteBuf, ByteBufAllocator, Unpooled}
 import io.netty.channel._
-import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.handler.codec.CodecException
 
 import scala.annotation.switch
@@ -81,7 +80,7 @@ class MySQLConnectionHandler(
   private var currentContext: ChannelHandlerContext = null
 
   def connect: Future[MySQLConnectionHandler] = {
-    this.bootstrap.channel(classOf[NioSocketChannel])
+    this.bootstrap.channel(NettyUtils.SocketChannelClass)
     this.bootstrap.handler(new ChannelInitializer[io.netty.channel.Channel]() {
 
       override def initChannel(channel: io.netty.channel.Channel): Unit = {
