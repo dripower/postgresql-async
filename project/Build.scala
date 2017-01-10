@@ -50,7 +50,7 @@ object ProjectBuild extends Build {
 object Configuration {
 
   val nettyVersion = "4.0.42.Final"
-  val commonVersion = "0.2.20-DRIP-6-SNAPSHOT"
+  val commonVersion = "0.2.20-DRIP-6"
   val projectScalaVersion = "2.11.8"
   val specs2Version = "2.5"
 
@@ -87,6 +87,7 @@ object Configuration {
         :+ Opts.compile.deprecation
         :+ Opts.compile.unchecked
         :+ "-feature"
+        :+ "-Ydelambdafy:method"
     ,
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
     crossScalaVersions := Seq(projectScalaVersion),
