@@ -16,10 +16,12 @@
 
 package com.github.mauricio.async.db
 
+import com.github.mauricio.async.db.util.NettyUtils
 import java.nio.charset.Charset
-
 import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator}
+import io.netty.channel.EventLoopGroup
 import io.netty.util.CharsetUtil
+import io.netty.channel.socket.SocketChannel
 
 import scala.concurrent.duration._
 
@@ -62,6 +64,8 @@ case class Configuration(username: String,
   allocator: ByteBufAllocator = PooledByteBufAllocator.DEFAULT,
   connectTimeout: Duration = 5.seconds,
   testTimeout: Duration = 5.seconds,
-  preparedStatementCacheSize: Int = 4096,
+  preparedStatementCacheSize: Int = 1024,
   preparedStatementExpireTime: Duration = 60.seconds,
+  eventLoopGroup: EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
+  channelClass: Class[_ <: SocketChannel] = NettyUtils.SocketChannelClass,
   queryTimeout: Option[Duration] = None)

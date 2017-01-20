@@ -42,7 +42,6 @@ object MySQLConnection {
 class MySQLConnection(
                        configuration: Configuration,
                        charsetMapper: CharsetMapper = CharsetMapper.Instance,
-                       group : EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
                        implicit val executionContext : ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
                        )
   extends MySQLHandlerDelegate
@@ -62,7 +61,6 @@ class MySQLConnection(
     configuration,
     charsetMapper,
     this,
-    group,
     executionContext,
     connectionId)
 
@@ -78,7 +76,7 @@ class MySQLConnection(
   def lastException : Throwable = this._lastException
   def count : Long = this.connectionCount
 
-  override def eventLoopGroup : EventLoopGroup = group
+  override def eventLoopGroup : EventLoopGroup = configuration.eventLoopGroup
 
   def connect: Future[Connection] = {
     this.connectionHandler.connect.onFailure {

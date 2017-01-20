@@ -29,6 +29,7 @@ import scala.util.{Failure, Success}
 object SingleThreadedAsyncObjectPool {
   val Counter = new AtomicLong()
   val log = Log.get[SingleThreadedAsyncObjectPool[Nothing]]
+  val timer = new Timer("async-object-pool-timer", true)
 }
 
 /**
@@ -56,7 +57,7 @@ class SingleThreadedAsyncObjectPool[T](
   private var poolables = new Stack[PoolableHolder[T]]()
   private val checkouts = new ArrayBuffer[T](configuration.maxObjects)
   private val waitQueue = new Queue[Promise[T]]()
-  private val timer = new Timer("async-object-pool-timer-" + id, true)
+  private val timer = SingleThreadedAsyncObjectPool.timer
   private val waitQueueStat = Stat()
   private val promiseMap = new ConcurrentHashMap[Promise[_], Long]
 
