@@ -62,7 +62,7 @@ class MySQLConnectionHandler(
   private final val parsedStatements: Cache[String, PreparedStatementHolder] = CacheBuilder
     .newBuilder()
     .maximumSize(configuration.preparedStatementCacheSize)
-    .expireAfterWrite(configuration.preparedStatementExpireTime.toSeconds, TimeUnit.SECONDS)
+    .expireAfterAccess(configuration.preparedStatementExpireTime.toSeconds, TimeUnit.SECONDS)
     .removalListener(new RemovalListener[String, PreparedStatementHolder] {
       def onRemoval(removal: RemovalNotification[String, PreparedStatementHolder]) {
         log.debug("Closing preparestatement...")

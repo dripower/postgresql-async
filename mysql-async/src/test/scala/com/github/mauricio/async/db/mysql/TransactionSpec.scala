@@ -13,7 +13,7 @@ import scala.concurrent.{Await, Future}
 import scala.util.{Success, Failure}
 
 object TransactionSpec {
-
+  val CreateTable = """CREATE TABLE IF NOT EXISTS transaction_test(id bigint primary key)"""
   val BrokenInsert = """INSERT INTO users (id, name) VALUES (1, 'Maurício Aragão')"""
   val InsertUser = """INSERT INTO users (name) VALUES (?)"""
   val TransactionInsert = "insert into transaction_test (id) values (?)"
@@ -29,6 +29,7 @@ class TransactionSpec extends Specification with ConnectionHelper {
     "correctly store the values of the transaction" in {
       withConnection {
         connection =>
+          executeQuery(connection,TransactionSpec.CreateTable)
           executeQuery(connection, this.createTable)
 
           val future = connection.inTransaction {
