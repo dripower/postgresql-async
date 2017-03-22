@@ -6,6 +6,8 @@ import javax.net.ssl.SSLHandshakeException
 
 class PostgreSQLSSLConnectionSpec extends Specification with DatabaseTestHelper {
 
+   args(skipAll = true)
+
   "ssl handler" should {
 
     "connect to the database in ssl without verifying CA" in {

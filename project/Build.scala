@@ -52,7 +52,7 @@ object Configuration {
   val nettyVersion = "4.0.44.Final"
   val commonVersion = "0.2.20-8"
   val projectScalaVersion = "2.11.8"
-  val specs2Version = "2.5"
+  val specs2Version = "2.4.17"
 
   val specs2Dependency = "org.specs2" %% "specs2-core" % specs2Version % "test"
   val specs2JunitDependency = "org.specs2" %% "specs2-junit" % specs2Version % "test"
@@ -81,6 +81,7 @@ object Configuration {
   )
 
   val baseSettings = Defaults.defaultSettings ++ Seq(
+    crossScalaVersions := Seq("2.11.8", "2.12.1"),
     scalaVersion := "2.11.8",
     scalacOptions :=
       Opts.compile.encoding("UTF8")
@@ -90,7 +91,6 @@ object Configuration {
         :+ "-Ydelambdafy:method"
     ,
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
-    crossScalaVersions := Seq(projectScalaVersion),
     javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
     organization := "com.github.mauricio",
     version := commonVersion,

@@ -1,7 +1,7 @@
 language: scala
 scala:
-  - 2.10.4
-  - 2.11.7
+   - 2.11.8
+   - 2.12.1
 jdk:
   - oraclejdk7
   - oraclejdk8
@@ -16,7 +16,5 @@ cache:
     - $HOME/.sbt
 before_script:
   - ./script/prepare_build.sh
-
-notifications:
-  email:
-    - linhares.mauricio@gmail.com
+script:
+  - sbt +test

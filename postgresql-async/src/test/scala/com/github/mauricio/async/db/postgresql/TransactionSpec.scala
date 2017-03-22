@@ -2,7 +2,6 @@ package com.github.mauricio.async.db.postgresql
 
 import org.specs2.mutable.Specification
 import com.github.mauricio.async.db.util.Log
-import scala.concurrent.ExecutionContext.Implicits.global
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException
 
 class TransactionSpec extends Specification with DatabaseTestHelper {
