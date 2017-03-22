@@ -82,6 +82,7 @@ object Configuration {
 
   val baseSettings = Defaults.defaultSettings ++ Seq(
     crossScalaVersions := Seq("2.11.8", "2.12.1"),
+    testOptions in Test += Tests.Argument("sequential"),
     scalaVersion := "2.11.8",
     scalacOptions :=
       Opts.compile.encoding("UTF8")
