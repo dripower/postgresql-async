@@ -8,14 +8,22 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.specification.After
 import language.reflectiveCalls
 import com.github.mauricio.async.db.util.ExecutorServiceUtils
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 
-class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
-    isolated
-    sequential
+
+class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit with After {
+  isolated
+  sequential
+
+  def after: Unit = {
+    println("closing pool......................................")
+    await(pool.close)
+  }
+
 
     val config =
         PoolConfiguration(100, Long.MaxValue, 100, Int.MaxValue)
@@ -265,7 +273,7 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
 
         val takes =
             for (_ <- 0 until 30) yield {
-                Future().flatMap(_ => pool.take)
+                Future({}).flatMap(_ => pool.take)
             }
         val takesAndReturns =
             Future.sequence(takes).flatMap { items =>
@@ -285,5 +293,7 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
             await(pool.take)
 
     private def await[T](future: Future[T]) =
-        Await.result(future, Duration.Inf)
+      Await.result(future, Duration.Inf)
+
+
 }
