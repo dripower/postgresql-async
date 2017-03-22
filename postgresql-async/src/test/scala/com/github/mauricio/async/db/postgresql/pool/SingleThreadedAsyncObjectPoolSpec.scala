@@ -48,7 +48,7 @@ class SingleThreadedAsyncObjectPoolSpec extends Specification with DatabaseTestH
 
           val connection = get(pool)
           val promises = List(pool.take, pool.take, pool.take)
-
+          Thread.sleep(100)
           pool.availables.size === 0
           pool.inUse.size === 1
           pool.queued.size === 3

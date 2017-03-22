@@ -291,7 +291,6 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
         case e: GenericDatabaseException =>
           e.errorMessage.fields(InformationMessage.Routine) === "auth_failed"
       }
-
     }
 
     "transaction and flatmap example" in {

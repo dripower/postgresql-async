@@ -72,7 +72,7 @@ class SingleThreadedAsyncObjectPool[T](
   private var closed = false
 
   private def logPoolStat() = {
-    log.info(s"[Mysql-Async-${id}] Waiting queue: ${queued.size}, inUse: ${inUse.size}, avaliable: ${availables.size}")
+    log.warn(s"[Mysql-Async-${id}] Waiting queue: ${queued.size}, inUse: ${inUse.size}, avaliable: ${availables.size}")
   }
 
   /**

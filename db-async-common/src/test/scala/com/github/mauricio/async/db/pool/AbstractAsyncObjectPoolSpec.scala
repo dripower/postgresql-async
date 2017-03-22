@@ -4,6 +4,7 @@ import com.github.mauricio.async.db.pool.AbstractAsyncObjectPoolSpec.Widget
 import org.mockito.Mockito.reset
 import org.specs2.mock.Mockito
 import org.specs2.mutable.Specification
+import org.specs2.specification._
 
 import scala.concurrent.{Await, Future}
 import scala.util.Failure
@@ -11,6 +12,7 @@ import scala.util.Failure
 import scala.reflect.runtime.universe.TypeTag
 import scala.util.Try
 import scala.concurrent.duration.{Duration, SECONDS}
+
 
 /**
   * This spec is designed abstract to allow testing of any implementation of AsyncObjectPool, against the common
@@ -23,6 +25,7 @@ abstract class AbstractAsyncObjectPoolSpec[T <: AsyncObjectPool[Widget]](implici
     with Mockito {
 
   import AbstractAsyncObjectPoolSpec._
+
 
   protected def pool(factory: ObjectFactory[Widget] = new TestWidgetFactory, conf: PoolConfiguration = PoolConfiguration.Default): T
 
@@ -210,9 +213,15 @@ object AbstractAsyncObjectPoolSpec {
 class SingleThreadedAsyncObjectPoolSpec extends AbstractAsyncObjectPoolSpec[SingleThreadedAsyncObjectPool[Widget]] {
 
   import AbstractAsyncObjectPoolSpec._
+  private val pools = collection.concurrent.TrieMap[SingleThreadedAsyncObjectPool[_], Boolean]()
 
-  override protected def pool(factory: ObjectFactory[Widget], conf: PoolConfiguration) =
-    new SingleThreadedAsyncObjectPool(factory, conf)
+  override protected def pool(factory: ObjectFactory[Widget], conf: PoolConfiguration) = {
+    val p = new SingleThreadedAsyncObjectPool(factory, conf)
+    pools.put(p, true)
+    p
+  }
+
+  override def map(fs: =>Fragments) =  fs ^ Step(pools.keySet.foreach(p => Await.ready(p.close, Duration.Inf)))
 
   "SingleThreadedAsyncObjectPool" should {
     "successfully record a closed state" in {
