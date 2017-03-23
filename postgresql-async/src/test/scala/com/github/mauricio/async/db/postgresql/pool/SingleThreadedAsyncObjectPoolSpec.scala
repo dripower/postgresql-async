@@ -64,6 +64,8 @@ class SingleThreadedAsyncObjectPoolSpec extends Specification with DatabaseTestH
               pool.giveBack(connection)
           }
 
+          Thread.sleep(100)
+
           pool.availables.size === 1
           pool.inUse.size === 0
           pool.queued.size === 0
