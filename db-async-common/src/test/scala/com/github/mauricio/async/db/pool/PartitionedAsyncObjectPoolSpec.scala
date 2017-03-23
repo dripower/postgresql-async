@@ -4,18 +4,17 @@ import java.util.concurrent.atomic.AtomicInteger
 
 import org.specs2.mutable.Specification
 import scala.util.Try
-                    import scala.concurrent.Await
+import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.concurrent.Future
 import org.specs2.mutable.SpecificationWithJUnit
-import org.specs2.specification.After
 import language.reflectiveCalls
 import com.github.mauricio.async.db.util.ExecutorServiceUtils
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 
 
-class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit with After {
+class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
   isolated
   sequential
 
