@@ -19,12 +19,6 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit with After {
   isolated
   sequential
 
-  def after: Unit = {
-    println("closing pool......................................")
-    await(pool.close)
-  }
-
-
     val config =
         PoolConfiguration(100, Long.MaxValue, 100, Int.MaxValue)
     private var current = new AtomicInteger
@@ -161,7 +155,7 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit with After {
                 "maxQueueSize takes queued" in {
                     for (_ <- 0 until maxQueueSize)
                         pool.take
-
+                    Thread.sleep(100)
                     pool.inUse.size mustEqual maxObjects
                     pool.queued.size mustEqual maxQueueSize
                     pool.availables.size mustEqual 0
