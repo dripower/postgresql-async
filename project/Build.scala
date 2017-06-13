@@ -51,7 +51,7 @@ object Configuration {
 
   val nettyVersion = "4.0.44.Final"
   val commonVersion = "0.2.2011-SNAPSHOT"
-  val projectScalaVersion = "2.11.8"
+  val projectScalaVersion = "2.11.11"
   val specs2Version = "2.4.17"
 
   val specs2Dependency = "org.specs2" %% "specs2-core" % specs2Version % "test"
@@ -86,10 +86,11 @@ object Configuration {
     scalaVersion := "2.11.8",
     scalacOptions :=
       Opts.compile.encoding("UTF8")
-        :+ Opts.compile.deprecation
-        :+ Opts.compile.unchecked
-        :+ "-feature"
-        :+ "-Ydelambdafy:method"
+      :+ Opts.compile.deprecation
+      :+ Opts.compile.unchecked
+      :+ "-feature"
+      :+ "-Ybackend:GenBCode"
+      :+ "-Ydelambdafy:method"
     ,
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
     javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
