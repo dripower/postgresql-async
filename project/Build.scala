@@ -50,7 +50,7 @@ object ProjectBuild extends Build {
 object Configuration {
 
   val nettyVersion = "4.0.44.Final"
-  val commonVersion = "0.2.2011-SNAPSHOT"
+  val commonVersion = "0.2.2012-SNAPSHOT"
   val projectScalaVersion = "2.11.11"
   val specs2Version = "2.4.17"
 
@@ -93,7 +93,7 @@ object Configuration {
     ,
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
     javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
-    organization := "com.github.mauricio",
+    organization := "com.dripower",
     version := commonVersion,
     parallelExecution := false,
     publishArtifact in Test := false,
