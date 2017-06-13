@@ -81,15 +81,14 @@ object Configuration {
   )
 
   val baseSettings = Defaults.defaultSettings ++ Seq(
-    crossScalaVersions := Seq("2.11.8", "2.12.1"),
+    crossScalaVersions := Seq("2.11.11", "2.12.1"),
     testOptions in Test += Tests.Argument("sequential"),
-    scalaVersion := "2.11.8",
+    scalaVersion := "2.11.11",
     scalacOptions :=
       Opts.compile.encoding("UTF8")
       :+ Opts.compile.deprecation
       :+ Opts.compile.unchecked
       :+ "-feature"
-      :+ "-Ybackend:GenBCode"
       :+ "-Ydelambdafy:method"
     ,
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
