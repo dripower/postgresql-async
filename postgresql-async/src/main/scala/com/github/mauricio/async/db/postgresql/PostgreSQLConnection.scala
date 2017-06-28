@@ -99,7 +99,7 @@ class PostgreSQLConnection
 
   def parameterStatuses: scala.collection.immutable.Map[String, String] = this.parameterStatus.toMap
 
-  override def sendQuery(query: String): Future[QueryResult] = {
+  override def sendQuery(query: String): Future[QueryResult] = Metrics.stat(query){
     validateQuery(query)
 
     val promise = Promise[QueryResult]()
@@ -110,7 +110,7 @@ class PostgreSQLConnection
     promise.future
   }
 
-  override def sendPreparedStatement(query: String, values: Seq[Any] = List()): Future[QueryResult] = {
+  override def sendPreparedStatement(query: String, values: Seq[Any] = List()): Future[QueryResult] = Metrics.stat(query){
     validateQuery(query)
 
     val promise = Promise[QueryResult]()
