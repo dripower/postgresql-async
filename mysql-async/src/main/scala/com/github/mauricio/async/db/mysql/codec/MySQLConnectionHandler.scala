@@ -19,7 +19,6 @@ package com.github.mauricio.async.db.mysql.codec
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
 import java.util.concurrent.TimeUnit
-
 import com.github.mauricio.async.db.Configuration
 import com.github.mauricio.async.db.exceptions.DatabaseException
 import com.github.mauricio.async.db.general.MutableResultSet
@@ -39,6 +38,22 @@ import scala.annotation.switch
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import scala.concurrent._
 import scala.concurrent.duration.Duration
+
+object Stmt {
+
+  val StmtPool: LoadingCache[String, String] =  CacheBuilder
+    .newBuilder()
+    .maximumSize(4096)
+    .build(
+      new CacheLoader[String, String] {
+        def load(k: String) = k
+      }
+    )
+
+  def pooled(stmt: String) = {
+    StmtPool.get(stmt)
+  }
+}
 
 class MySQLConnectionHandler(
                               configuration: Configuration,
@@ -324,7 +339,7 @@ class MySQLConnectionHandler(
     this.currentQuery = new MutableResultSet[ColumnDefinitionMessage](columns)
 
     if ( this.currentPreparedStatementHolder != null ) {
-      this.parsedStatements.put( this.currentPreparedStatementHolder.statement, this.currentPreparedStatementHolder )
+      this.parsedStatements.put( Stmt.pooled(this.currentPreparedStatementHolder.statement), this.currentPreparedStatementHolder )
       this.executePreparedStatement(
         this.currentPreparedStatementHolder.statementId,
         this.currentPreparedStatementHolder.columns.size,

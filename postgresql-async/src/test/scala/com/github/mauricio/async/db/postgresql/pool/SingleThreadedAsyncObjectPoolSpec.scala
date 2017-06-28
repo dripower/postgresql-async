@@ -55,15 +55,14 @@ class SingleThreadedAsyncObjectPoolSpec extends Specification with DatabaseTestH
 
           executeTest(connection)
 
-          pool.giveBack(connection)
+          Await.ready(pool.giveBack(connection), Duration.Inf)
 
           promises.foreach {
             promise =>
               val connection = Await.result(promise, Duration(5, TimeUnit.SECONDS))
               executeTest(connection)
-              pool.giveBack(connection)
+              Await.ready(pool.giveBack(connection), Duration.Inf)
           }
-
           pool.availables.size === 1
           pool.inUse.size === 0
           pool.queued.size === 0
