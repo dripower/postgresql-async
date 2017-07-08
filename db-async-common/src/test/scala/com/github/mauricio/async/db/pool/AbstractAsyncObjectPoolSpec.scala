@@ -11,7 +11,8 @@ import scala.util.Failure
 
 import scala.reflect.runtime.universe.TypeTag
 import scala.util.Try
-import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 
 /**

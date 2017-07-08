@@ -50,18 +50,19 @@ object ProjectBuild extends Build {
 object Configuration {
 
   val nettyVersion = "4.0.44.Final"
-  val commonVersion = "0.2.2012"
+  val commonVersion = "0.2.2013-SNAPSHOT"
   val projectScalaVersion = "2.11.11"
-  val specs2Version = "2.4.17"
+  val specs2Version = "3.8.6"
+
 
   val specs2Dependency = "org.specs2" %% "specs2-core" % specs2Version % "test"
   val specs2JunitDependency = "org.specs2" %% "specs2-junit" % specs2Version % "test"
   val specs2MockDependency = "org.specs2" %% "specs2-mock" % specs2Version % "test"
-  val logbackDependency = "ch.qos.logback" % "logback-classic" % "1.1.6" % "test"
+  val logbackDependency = "ch.qos.logback" % "logback-classic" % "1.1.8" % "test"
 
   val commonDependencies = Seq(
-    "org.slf4j" % "slf4j-api" % "1.7.18",
-    "joda-time" % "joda-time" % "2.9.2",
+    "org.slf4j" % "slf4j-api" % "1.7.22",
+    "joda-time" % "joda-time" % "2.9.7",
     "org.joda" % "joda-convert" % "1.8.1",
     "io.netty" % "netty-codec"                    % nettyVersion,
     "io.netty" % "netty-handler"                  % nettyVersion,
@@ -81,7 +82,7 @@ object Configuration {
   )
 
   val baseSettings = Defaults.defaultSettings ++ Seq(
-    crossScalaVersions := Seq("2.11.11", "2.12.1"),
+    crossScalaVersions := Seq("2.11.11", "2.12.2"),
     testOptions in Test += Tests.Argument("sequential"),
     scalaVersion := "2.11.11",
     scalacOptions :=
@@ -91,6 +92,7 @@ object Configuration {
       :+ "-feature"
       :+ "-Ydelambdafy:method"
     ,
+    testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
     javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
     organization := "com.dripower",

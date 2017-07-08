@@ -17,12 +17,12 @@
 package com.github.mauricio.async.db.pool
 
 import java.util.concurrent.RejectedExecutionException
-import java.util.concurrent.ConcurrentHashMap
-import com.github.mauricio.async.db.util.{Log, Worker, Stat}
+
+import com.github.mauricio.async.db.util.{Log, Worker}
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Timer, TimerTask}
 
-import scala.collection.mutable.{ArrayBuffer, Queue, Stack}
+import scala.collection.mutable.{ArrayBuffer, Queue}
 import scala.concurrent.{Future, Promise}
 import scala.util.{Failure, Success}
 
@@ -52,28 +52,19 @@ class SingleThreadedAsyncObjectPool[T](
   import SingleThreadedAsyncObjectPool.{Counter, log}
 
   private val mainPool = Worker()
-  private val id = Counter.incrementAndGet()
-  private var poolables = new Stack[PoolableHolder[T]]()
+  private var poolables = List.empty[PoolableHolder[T]]
   private val checkouts = new ArrayBuffer[T](configuration.maxObjects)
   private val waitQueue = new Queue[Promise[T]]()
-  private val timer = new Timer(s"async-object-pool-$id-timer", true)
-  private val waitQueueStat = Stat()
-  private val promiseMap = new ConcurrentHashMap[Promise[_], Long]
-
+  private val timer = new Timer("async-object-pool-timer-" + Counter.incrementAndGet(), true)
   timer.scheduleAtFixedRate(new TimerTask {
     def run() {
       mainPool.action {
-        logPoolStat()
         testObjects
       }
     }
   }, configuration.validationInterval, configuration.validationInterval)
 
   private var closed = false
-
-  private def logPoolStat() = {
-    log.warn(s"[Mysql-Async-${id}] Waiting queue: ${queued.size}, inUse: ${inUse.size}, avaliable: ${availables.size}")
-  }
 
   /**
    *
@@ -180,7 +171,7 @@ class SingleThreadedAsyncObjectPool[T](
    */
 
   private def addBack(item: T, promise: Promise[AsyncObjectPool[T]]) {
-    this.poolables.push(new PoolableHolder[T](item))
+    this.poolables ::= new PoolableHolder[T](item)
 
     if (this.waitQueue.nonEmpty) {
       this.checkout(this.waitQueue.dequeue())
@@ -203,7 +194,6 @@ class SingleThreadedAsyncObjectPool[T](
       exception.fillInStackTrace()
       promise.failure(exception)
     } else {
-      promiseMap.put(promise, System.currentTimeMillis)
       this.waitQueue += promise
     }
   }
@@ -236,21 +226,11 @@ class SingleThreadedAsyncObjectPool[T](
         case e: Exception => promise.failure(e)
       }
     } else {
-      val item = this.poolables.pop().item
+      val h :: t = this.poolables
+      this.poolables = t
+      val item = h.item
       this.checkouts += item
       promise.success(item)
-    }
-    if(promiseMap.get(promise) != null){
-      val t = promiseMap.get(promise)
-      waitQueueStat.add(System.currentTimeMillis - t)
-      logWaitQueueStat()
-    }
-  }
-
-  private def logWaitQueueStat(): Unit = {
-    val times = waitQueueStat.times.get()
-    if(times % 10 == 0 && times > 0) {
-      log.info(s"[MySQL-Async-$id] Waiting queue count: ${times}, max: ${waitQueueStat.max.get()}, min: ${waitQueueStat.min.get()}, avg: ${waitQueueStat.total.get / times}")
     }
   }
 
