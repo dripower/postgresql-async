@@ -31,6 +31,7 @@ object DatabaseTestHelper {
 
 trait DatabaseTestHelper {
 
+  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
 
   def databaseName = Some("netty_driver_test")
 
