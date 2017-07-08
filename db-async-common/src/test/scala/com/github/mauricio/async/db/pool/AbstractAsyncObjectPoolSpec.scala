@@ -11,7 +11,8 @@ import scala.util.Failure
 
 import scala.reflect.runtime.universe.TypeTag
 import scala.util.Try
-import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration._
 
 
 /**
@@ -210,7 +211,7 @@ object AbstractAsyncObjectPoolSpec {
 }
 
 
-class SingleThreadedAsyncObjectPoolSpec extends AbstractAsyncObjectPoolSpec[SingleThreadedAsyncObjectPool[Widget]] {
+class SingleThreadedAsyncObjectPoolSpec extends AbstractAsyncObjectPoolSpec[SingleThreadedAsyncObjectPool[Widget]] with AfterAll {
 
   import AbstractAsyncObjectPoolSpec._
   private val pools = collection.concurrent.TrieMap[SingleThreadedAsyncObjectPool[_], Boolean]()
@@ -221,7 +222,9 @@ class SingleThreadedAsyncObjectPoolSpec extends AbstractAsyncObjectPoolSpec[Sing
     p
   }
 
-  override def map(fs: =>Fragments) =  fs ^ Step(pools.keySet.foreach(p => Await.ready(p.close, Duration.Inf)))
+  def afterAll() = {
+    pools.keySet.foreach(p => Await.ready(p.close, Duration.Inf))
+  }
 
   "SingleThreadedAsyncObjectPool" should {
     "successfully record a closed state" in {
