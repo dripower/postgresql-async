@@ -49,8 +49,8 @@ object ProjectBuild extends Build {
 
 object Configuration {
 
-  val nettyVersion = "4.0.47.Final"
-  val commonVersion = "0.2.2014"
+  val nettyVersion = "4.0.50.Final"
+  val commonVersion = "0.2.2015-SNAPSHOT"
   val projectScalaVersion = "2.11.11"
   val specs2Version = "3.8.6"
 
@@ -82,7 +82,7 @@ object Configuration {
   )
 
   val baseSettings = Defaults.defaultSettings ++ Seq(
-    crossScalaVersions := Seq("2.11.11", "2.12.2"),
+    crossScalaVersions := Seq("2.11.11", "2.12.3"),
     testOptions in Test += Tests.Argument("sequential"),
     scalaVersion := "2.11.11",
     scalacOptions :=
