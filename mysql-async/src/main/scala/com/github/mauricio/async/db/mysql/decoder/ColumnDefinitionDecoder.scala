@@ -54,7 +54,7 @@ class ColumnDefinitionDecoder(charset: Charset, registry : DecoderRegistry) exte
     val decimals = buffer.readByte()
 
     buffer.readShort()
-    val key = s"$schema-($table|$originalTable)-($name|$originalName)"
+    val key = s"$schema|$table|$originalTable|$name|$originalName|$characterSet|$columnType|$columnLength|$flags|$decimals"
     ColumnDefinitionDecoder.cache.get(key, new Callable[ColumnDefinitionMessage] {
       def call() = new ColumnDefinitionMessage(
         catalog,
