@@ -33,7 +33,7 @@ object Metrics {
 
   val stats = CacheBuilder
     .newBuilder()
-    .maximumSize(10000)
+    .maximumSize(100000)
     .expireAfterWrite(1, TimeUnit.HOURS)
     .build(new CacheLoader[String, Stat] {
       def load(key: String) = {
@@ -68,7 +68,7 @@ object Metrics {
     val c = stat.times.get()
     val min = stat.min.get()
     val max = stat.max.get()
-    if(c % 100 == 0) {
+    if(c % 1000 == 0) {
       metricsLogger.info(s"[SQL-$key], count:$c, avg:${t/math.max(1, c)}ms, max:${max}, min:${min}")
     }
   }
