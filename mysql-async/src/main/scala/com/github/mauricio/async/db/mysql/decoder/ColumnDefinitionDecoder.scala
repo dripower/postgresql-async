@@ -72,9 +72,5 @@ class ColumnDefinitionDecoder(charset: Charset, registry : DecoderRegistry) exte
         registry.textDecoderFor(columnType,characterSet)
       )
     })
-
-
-
   }
-
 }

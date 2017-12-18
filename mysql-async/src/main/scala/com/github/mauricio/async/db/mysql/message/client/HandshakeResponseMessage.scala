@@ -26,4 +26,4 @@ case class HandshakeResponseMessage(
                                      password: Option[String] = None,
                                      database: Option[String] = None
                                      )
-  extends ClientMessage(ClientMessage.ClientProtocolVersion)
+    extends ClientMessage(ClientMessage.ClientProtocolVersion)
