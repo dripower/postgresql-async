@@ -20,4 +20,7 @@ script:
 sudo: required
 
 addons:
-  postgresql: "9.1"
+  postgresql: "9.5"
+
+before_install:
+  - psql --version
