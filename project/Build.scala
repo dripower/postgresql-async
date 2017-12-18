@@ -49,9 +49,9 @@ object ProjectBuild extends Build {
 
 object Configuration {
 
-  val nettyVersion = "4.0.50.Final"
-  val commonVersion = "0.2.2016"
-  val projectScalaVersion = "2.11.11"
+  val nettyVersion = "4.0.54.Final"
+  val commonVersion = "0.2.2017"
+  val projectScalaVersion = "2.11.12"
   val specs2Version = "3.8.6"
 
 
