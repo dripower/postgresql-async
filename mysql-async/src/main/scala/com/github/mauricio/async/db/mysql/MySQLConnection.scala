@@ -135,7 +135,9 @@ class MySQLConnection(
 
   private def setException( t : Throwable ) {
     this._lastException = t
-    this.connectionPromise.tryFailure(t)
+    if(this.connectionPromise.tryFailure(t)) {
+      closeChannel()
+    }
     this.failQueryPromise(t)
   }
 
