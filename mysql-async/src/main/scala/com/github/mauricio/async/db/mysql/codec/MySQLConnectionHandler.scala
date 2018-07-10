@@ -44,6 +44,7 @@ object Stmt {
   val StmtPool: LoadingCache[String, String] =  CacheBuilder
     .newBuilder()
     .maximumSize(4096)
+    .expireAfterAccess(60, TimeUnit.SECONDS)
     .build(
       new CacheLoader[String, String] {
         def load(k: String) = k
@@ -226,7 +227,7 @@ class MySQLConnectionHandler(
 
     this.currentPreparedStatement = preparedStatement
 
-    Option(this.parsedStatements.getIfPresent(preparedStatement.statement)) match {
+    Option(this.parsedStatements.getIfPresent(Stmt.pooled(preparedStatement.statement))) match {
       case Some( item ) => {
         this.executePreparedStatement(item.statementId, item.columns.size, preparedStatement.values, item.parameters)
       }
