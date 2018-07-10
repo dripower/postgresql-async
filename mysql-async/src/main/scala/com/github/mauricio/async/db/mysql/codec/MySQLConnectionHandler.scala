@@ -44,7 +44,7 @@ object Stmt {
   val StmtPool: LoadingCache[String, String] =  CacheBuilder
     .newBuilder()
     .maximumSize(4096)
-    .expireAfterAccess(10, TimeUnit.SECONDS)
+    .expireAfterAccess(60, TimeUnit.SECONDS)
     .build(
       new CacheLoader[String, String] {
         def load(k: String) = k
