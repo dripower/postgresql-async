@@ -121,7 +121,7 @@ class PostgreSQLConnection
     this.setQueryPromise(promise)
 
     val holder = this.parsedStatements.getOrElseUpdate(query,
-      new PreparedStatementHolder( query, preparedStatementsCounter.incrementAndGet ))
+      new PreparedStatementHolder( query, preparedStatementsCounter.incrementAndGet, positionalParamHolder ))
 
     if (holder.paramsCount != values.length) {
       this.clearQueryPromise

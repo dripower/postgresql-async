@@ -8,11 +8,15 @@ import scala.concurrent.duration.Duration
 
 class PositionalPreparedStatementSpec extends Specification with DatabaseTestHelper {
   private def run[A](f: PostgreSQLConnection => Future[A]): A = {
-    val conn = new PostgreSQLConnection(configuration = defaultConfiguration, positionalParamHolder = true)
+    val conn = new PostgreSQLConnection(
+      configuration = defaultConfiguration,
+      positionalParamHolder = true)
+      .connect
+      .map(_.asInstanceOf[PostgreSQLConnection])
     try {
-      Await.result(f(conn), Duration.Inf)
+      Await.result(conn.flatMap(f), Duration.Inf)
     } finally {
-      Await.ready(conn.disconnect, Duration.Inf)
+      Await.ready(conn.flatMap(_.disconnect), Duration.Inf)
     }
   }
 
@@ -20,13 +24,13 @@ class PositionalPreparedStatementSpec extends Specification with DatabaseTestHel
 
   "conn" should {
     "run postional prepared statement" in {
-      val foos = run { c =>
+      val r = run { c =>
         for {
           _ <- c.sendQuery(setup)
-          r <- c.sendPreparedStatement("SELECT * FROM FOO where i > $1 and i < $2", Seq(1, 10))
+          r <- c.sendPreparedStatement("SELECT * FROM foo where i > $1 and i < $2", Seq(1, 10))
         } yield r
       }
-      foos should be(empty)
+      r.rows.map(_.size) should ===(Some(0))
     }
   }
 }
