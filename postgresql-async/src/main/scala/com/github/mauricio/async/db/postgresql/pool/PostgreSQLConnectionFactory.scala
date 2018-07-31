@@ -43,16 +43,14 @@ object PostgreSQLConnectionFactory {
  */
 
 class PostgreSQLConnectionFactory( 
-    val configuration : Configuration, 
-    group : EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
+    val configuration : Configuration,
     executionContext : ExecutionContext = ExecutorServiceUtils.CachedExecutionContext ) extends ObjectFactory[PostgreSQLConnection] {
 
   import PostgreSQLConnectionFactory.log
 
   def create: PostgreSQLConnection = {
-    val connection = new PostgreSQLConnection(configuration, group = group, executionContext = executionContext)
+    val connection = new PostgreSQLConnection(configuration, executionContext = executionContext)
     Await.result(connection.connect, configuration.connectTimeout)
-
     connection
   }
 
