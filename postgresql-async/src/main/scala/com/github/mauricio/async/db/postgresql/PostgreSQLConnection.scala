@@ -48,7 +48,7 @@ class PostgreSQLConnection
   configuration: Configuration = URLParser.DEFAULT,
   encoderRegistry: ColumnEncoderRegistry = PostgreSQLColumnEncoderRegistry.Instance,
   decoderRegistry: ColumnDecoderRegistry = PostgreSQLColumnDecoderRegistry.Instance,
-  group : EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
+  positionalParamHolder: Boolean = false,
   implicit val executionContext : ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
   )
   extends PostgreSQLConnectionDelegate
@@ -56,6 +56,7 @@ class PostgreSQLConnection
   with  TimeoutScheduler {
 
   import PostgreSQLConnection._
+  private val group : EventLoopGroup = configuration.eventLoopGroup
 
   private final val connectionHandler = new PostgreSQLConnectionHandler(
     configuration,
@@ -120,7 +121,7 @@ class PostgreSQLConnection
     this.setQueryPromise(promise)
 
     val holder = this.parsedStatements.getOrElseUpdate(query,
-      new PreparedStatementHolder( query, preparedStatementsCounter.incrementAndGet ))
+      new PreparedStatementHolder( query, preparedStatementsCounter.incrementAndGet, positionalParamHolder ))
 
     if (holder.paramsCount != values.length) {
       this.clearQueryPromise

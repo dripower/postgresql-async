@@ -18,31 +18,37 @@ package com.github.mauricio.async.db.postgresql
 
 import com.github.mauricio.async.db.postgresql.messages.backend.PostgreSQLColumnData
 
-class PreparedStatementHolder(val query : String, val statementId : Int ) {
+class PreparedStatementHolder(val query : String, val statementId : Int, isPositional: Boolean = false ) {
+
+  val PostionalMarkPattern = "\\$\\d+".r
 
   val (realQuery, paramsCount) = {
-    val result = new StringBuilder(query.length+16)
-    var offset = 0
-    var params = 0
-    while (offset < query.length) {
-      val next = query.indexOf('?', offset)
-      if (next == -1) {
-        result ++= query.substring(offset)
-        offset = query.length
-      } else {
-        result ++= query.substring(offset, next)
-        offset = next + 1
-        if (offset < query.length && query(offset) == '?') {
-          result += '?'
-          offset += 1
+    if(!isPositional) {
+      val result = new StringBuilder(query.length+16)
+      var offset = 0
+      var params = 0
+      while (offset < query.length) {
+        val next = query.indexOf('?', offset)
+        if (next == -1) {
+          result ++= query.substring(offset)
+          offset = query.length
         } else {
-          result += '$'
-          params += 1
-          result ++= params.toString
+          result ++= query.substring(offset, next)
+          offset = next + 1
+          if (offset < query.length && query(offset) == '?') {
+            result += '?'
+            offset += 1
+          } else {
+            result += '$'
+            params += 1
+            result ++= params.toString
+          }
         }
       }
+      (result.toString, params)
+    } else {
+      (query, PostionalMarkPattern.findAllIn(query).size)
     }
-    (result.toString, params)
   }
 
   var prepared : Boolean = false
