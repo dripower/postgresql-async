@@ -10,9 +10,9 @@ bin/*
 **/.settings/*
 project/target/*
 project/project/*
-postgresql-async/target/*
-db-async-common/target/*
-mysql-async/target/*
+postgresql-async/target
+db-async-common/target
+mysql-async/target
 .rvmrc
 .ruby-version
 .ruby-gemset
