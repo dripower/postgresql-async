@@ -49,8 +49,8 @@ object ProjectBuild extends Build {
 
 object Configuration {
 
-  val nettyVersion = "4.0.56.Final"
-  val commonVersion = "0.2.2020"
+  val nettyVersion = "4.1.28.Final"
+  val commonVersion = "0.3.100"
   val projectScalaVersion = "2.11.12"
   val specs2Version = "3.8.6"
 
@@ -94,7 +94,7 @@ object Configuration {
     ,
     testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
-    javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
+    javacOptions := Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF8"),
     organization := "com.dripower",
     version := commonVersion,
     parallelExecution := false,
