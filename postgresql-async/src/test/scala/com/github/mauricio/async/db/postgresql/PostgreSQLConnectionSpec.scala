@@ -268,8 +268,8 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
       try {
         withHandler(configuration, {
           handler =>
-            val result = executeQuery(handler, "SELECT 0")
-            throw new IllegalStateException("should not have arrived")
+          val result = executeQuery(handler, "SELECT 0")
+          throw new IllegalStateException("should not have arrived")
         })
       } catch {
         case e: GenericDatabaseException =>
