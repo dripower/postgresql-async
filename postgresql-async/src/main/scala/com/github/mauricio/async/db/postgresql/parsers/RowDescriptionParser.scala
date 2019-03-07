@@ -65,7 +65,7 @@ class RowDescriptionParser(charset: Charset) extends MessageParser {
   override def parseMessage(b: ByteBuf): ServerMessage = {
 
     val columnsCount = b.readShort()
-    val columns = new ArrayBuffer[PostgreSQLColumnData]
+    val columns = new ArrayBuffer[PostgreSQLColumnData](columnsCount)
 
     0.until(columnsCount).foreach { index =>
       val cd = new PostgreSQLColumnData(
