@@ -17,6 +17,7 @@
 package com.github.mauricio.async.db.mysql.message.client
 
 import com.github.mauricio.async.db.mysql.message.server.ColumnDefinitionMessage
+import scala.collection.Seq
 
 case class PreparedStatementExecuteMessage (
                                              statementId : Array[Byte],

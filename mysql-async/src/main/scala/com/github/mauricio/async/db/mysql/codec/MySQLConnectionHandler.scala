@@ -26,7 +26,7 @@ import com.github.mauricio.async.db.mysql.binary.BinaryRowDecoder
 import com.github.mauricio.async.db.mysql.message.client._
 import com.github.mauricio.async.db.mysql.message.server._
 import com.github.mauricio.async.db.mysql.util.CharsetMapper
-import com.github.mauricio.async.db.util.ChannelFutureTransformer.toFuture
+import com.github.mauricio.async.db.util.ChannelFutureTransformer._
 import com.github.mauricio.async.db.util._
 import com.google.common.cache._
 import io.netty.bootstrap.Bootstrap
@@ -35,9 +35,11 @@ import io.netty.channel._
 import io.netty.handler.codec.CodecException
 
 import scala.annotation.switch
+import scala.collection.Seq
 import scala.collection.mutable.{ArrayBuffer, HashMap}
 import scala.concurrent._
 import scala.concurrent.duration.Duration
+import scala.util._
 
 object Stmt {
 
@@ -112,8 +114,9 @@ class MySQLConnectionHandler(
     this.bootstrap.option[java.lang.Boolean](ChannelOption.SO_KEEPALIVE, true)
     this.bootstrap.option[ByteBufAllocator](ChannelOption.ALLOCATOR, LittleEndianByteBufAllocator.INSTANCE)
 
-    this.bootstrap.connect(new InetSocketAddress(configuration.host, configuration.port)).onFailure {
-      case exception => this.connectionPromise.tryFailure(exception)
+    this.bootstrap.connect(new InetSocketAddress(configuration.host, configuration.port)).asScala.onComplete {
+      case Failure(exception) => this.connectionPromise.tryFailure(exception)
+      case _ =>
     }
 
     this.connectionPromise.future
@@ -171,7 +174,9 @@ class MySQLConnectionHandler(
           }
           case ServerMessage.BinaryRow => {
             val message = m.asInstanceOf[BinaryRowMessage]
-            this.currentQuery.addRow( this.binaryRowDecoder.decode(message.buffer, this.currentColumns ))
+            val decoded = this.binaryRowDecoder.decode(message.buffer, this.currentColumns )
+            message.buffer.release()
+            this.currentQuery.addRow(decoded)
           }
           case ServerMessage.ParamProcessingFinished => {
           }
@@ -229,11 +234,11 @@ class MySQLConnectionHandler(
 
     Option(this.parsedStatements.getIfPresent(Stmt.pooled(preparedStatement.statement))) match {
       case Some( item ) => {
-        this.executePreparedStatement(item.statementId, item.columns.size, preparedStatement.values, item.parameters)
+        this.executePreparedStatement(item.statementId, item.columns.size, preparedStatement.values, item.parameters.toSeq)
       }
       case None => {
         decoder.preparedStatementPrepareStarted()
-        writeAndHandleError( new PreparedStatementPrepareMessage(preparedStatement.statement) )
+        writeAndHandleError( new PreparedStatementPrepareMessage(preparedStatement.statement) ).asScala
       }
     }
   }
@@ -291,10 +296,10 @@ class MySQLConnectionHandler(
         }
       }
       channelFuture flatMap { _ =>
-        writeAndHandleError(new PreparedStatementExecuteMessage(statementId, values, nonLongIndices.toSet, parameters))
+        writeAndHandleError(new PreparedStatementExecuteMessage(statementId, values, nonLongIndices.toSet, parameters)).asScala
       }
     } else {
-      writeAndHandleError(new PreparedStatementExecuteMessage(statementId, values, nonLongIndices.toSet, parameters))
+      writeAndHandleError(new PreparedStatementExecuteMessage(statementId, values, nonLongIndices.toSet, parameters)).asScala
     }
   }
 
@@ -311,13 +316,13 @@ class MySQLConnectionHandler(
   private def sendLongParameter(statementId: Array[Byte], index: Int, longValue: Any): Future[ChannelFuture] = {
     longValue match {
       case v : Array[Byte] =>
-        sendBuffer(Unpooled.wrappedBuffer(v), statementId, index)
+        sendBuffer(Unpooled.wrappedBuffer(v), statementId, index).asScala
 
       case v : ByteBuffer =>
-        sendBuffer(Unpooled.wrappedBuffer(v), statementId, index)
+        sendBuffer(Unpooled.wrappedBuffer(v), statementId, index).asScala
 
       case v : ByteBuf =>
-        sendBuffer(v, statementId, index)
+        sendBuffer(v, statementId, index).asScala
     }
   }
 
@@ -356,8 +361,9 @@ class MySQLConnectionHandler(
     if ( this.currentContext.channel().isActive ) {
       val res = this.currentContext.writeAndFlush(message)
 
-      res.onFailure {
-        case e : Throwable => handleException(e)
+      res.asScala.onComplete {
+        case Failure(e) => handleException(e)
+        case _ =>
       }
 
       res

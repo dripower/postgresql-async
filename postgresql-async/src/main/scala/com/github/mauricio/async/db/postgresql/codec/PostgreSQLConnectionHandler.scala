@@ -22,7 +22,7 @@ import com.github.mauricio.async.db.column.{ColumnDecoderRegistry, ColumnEncoder
 import com.github.mauricio.async.db.postgresql.exceptions._
 import com.github.mauricio.async.db.postgresql.messages.backend._
 import com.github.mauricio.async.db.postgresql.messages.frontend._
-import com.github.mauricio.async.db.util.ChannelFutureTransformer.toFuture
+import com.github.mauricio.async.db.util.ChannelFutureTransformer._
 import com.github.mauricio.async.db.util._
 import java.net.InetSocketAddress
 import scala.annotation.switch
@@ -95,8 +95,9 @@ class PostgreSQLConnectionHandler
     this.bootstrap.option[java.lang.Boolean](ChannelOption.SO_KEEPALIVE, true)
     this.bootstrap.option(ChannelOption.ALLOCATOR, configuration.allocator)
 
-    this.bootstrap.connect(new InetSocketAddress(configuration.host, configuration.port)).onFailure {
-      case e => connectionFuture.tryFailure(e)
+    this.bootstrap.connect(new InetSocketAddress(configuration.host, configuration.port)).asScala.onComplete {
+      case Failure(e) => connectionFuture.tryFailure(e)
+      case _ =>
     }
 
     this.connectionFuture.future
@@ -105,8 +106,8 @@ class PostgreSQLConnectionHandler
   def disconnect: Future[PostgreSQLConnectionHandler] = {
 
     if ( this.isConnected ) {
-      this.currentContext.channel.writeAndFlush(CloseMessage).onComplete {
-        case Success(writeFuture) => writeFuture.channel.close().onComplete {
+      this.currentContext.channel.writeAndFlush(CloseMessage).asScala.onComplete {
+        case Success(writeFuture) => writeFuture.channel.close().asScala.onComplete {
           case Success(closeFuture) => this.disconnectionPromise.trySuccess(this)
           case Failure(e) => this.disconnectionPromise.tryFailure(e)
         }
@@ -264,8 +265,9 @@ class PostgreSQLConnectionHandler
   }
 
   def write( message : ClientMessage ) {
-    this.currentContext.writeAndFlush(message).onFailure {
-      case e : Throwable => connectionDelegate.onError(e)
+    this.currentContext.writeAndFlush(message).asScala.onComplete {
+      case Failure(e) => connectionDelegate.onError(e)
+      case _ =>
     }
   }
 

@@ -26,7 +26,7 @@ import com.github.mauricio.async.db.mysql.message.client._
 import com.github.mauricio.async.db.mysql.message.server._
 import com.github.mauricio.async.db.mysql.util.CharsetMapper
 import com.github.mauricio.async.db.pool.TimeoutScheduler
-import com.github.mauricio.async.db.util.ChannelFutureTransformer.toFuture
+import com.github.mauricio.async.db.util.ChannelFutureTransformer._
 import com.github.mauricio.async.db.util._
 import io.netty.channel.{ChannelHandlerContext, EventLoopGroup}
 
@@ -79,15 +79,16 @@ class MySQLConnection(
   override def eventLoopGroup : EventLoopGroup = configuration.eventLoopGroup
 
   def connect: Future[Connection] = {
-    this.connectionHandler.connect.onFailure {
-      case e => this.connectionPromise.tryFailure(e)
+    this.connectionHandler.connect.onComplete {
+      case Failure(e) => this.connectionPromise.tryFailure(e)
+      case _ =>
     }
 
     this.connectionPromise.future
   }
 
   private def closeChannel() = {
-    this.connectionHandler.disconnect.onComplete {
+    this.connectionHandler.disconnect.asScala.onComplete {
       case Success(closeFuture) => this.disconnectionPromise.trySuccess(this)
       case Failure(e) => this.disconnectionPromise.tryFailure(e)
     }
@@ -100,7 +101,7 @@ class MySQLConnection(
         exception.fillInStackTrace()
         this.failQueryPromise(exception)
         this.connectionHandler.clearQueryState
-        this.connectionHandler.write(QuitMessage.Instance).onComplete {
+        this.connectionHandler.write(QuitMessage.Instance).asScala.onComplete {
           case Success(channelFuture) => {
             closeChannel()
           }

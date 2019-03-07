@@ -59,7 +59,7 @@ class SingleThreadedAsyncObjectPool[T](
   private val timer = new Timer("async-object-pool-timer-" + Counter.incrementAndGet(), true)
   private val createSemaphore = new Semaphore(configuration.maxObjects)
   timer.scheduleAtFixedRate(new TimerTask {
-    def run() {
+    def run(): Unit = {
       mainPool.action {
         testObjects
       }
@@ -172,7 +172,7 @@ class SingleThreadedAsyncObjectPool[T](
    * @param promise
    */
 
-  private def addBack(item: T, promise: Promise[AsyncObjectPool[T]]) {
+  private def addBack(item: T, promise: Promise[AsyncObjectPool[T]]): Unit = {
     this.poolables ::= new PoolableHolder[T](item)
 
     if (this.waitQueue.nonEmpty) {
@@ -218,7 +218,7 @@ class SingleThreadedAsyncObjectPool[T](
    * @param promise
    */
 
-  private def createOrReturnItem(promise: Promise[T]) {
+  private def createOrReturnItem(promise: Promise[T]): Unit = {
     if (this.poolables.isEmpty && createSemaphore.tryAcquire) {
       try {
         val item = this.factory.create
@@ -238,7 +238,7 @@ class SingleThreadedAsyncObjectPool[T](
     }
   }
 
-  override def finalize() {
+  override def finalize(): Unit = {
     this.close
   }
 

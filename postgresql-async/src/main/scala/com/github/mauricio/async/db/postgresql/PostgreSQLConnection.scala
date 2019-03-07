@@ -36,6 +36,8 @@ import io.netty.channel.EventLoopGroup
 import java.util.concurrent.CopyOnWriteArrayList
 
 import com.github.mauricio.async.db.postgresql.util.URLParser
+import scala.util._
+import scala.collection.mutable.ArrayBuffer
 
 object PostgreSQLConnection {
   final val Counter = new AtomicLong()
@@ -89,8 +91,9 @@ class PostgreSQLConnection
   def isReadyForQuery: Boolean = this.queryPromise.isEmpty
 
   def connect: Future[Connection] = {
-    this.connectionHandler.connect.onFailure {
-      case e => this.connectionFuture.tryFailure(e)
+    this.connectionHandler.connect.onComplete {
+      case Failure(e) => this.connectionFuture.tryFailure(e)
+      case _ => 
     }
 
     this.connectionFuture.future
@@ -217,7 +220,7 @@ class PostgreSQLConnection
     this.setColumnDatas(m.columnDatas)
   }
 
-  private def setColumnDatas( columnDatas : Array[PostgreSQLColumnData] ) {
+  private def setColumnDatas( columnDatas : ArrayBuffer[PostgreSQLColumnData] ) {
     this.currentPreparedStatement.foreach { holder =>
       holder.columnDatas = columnDatas
     }

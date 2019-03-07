@@ -47,7 +47,7 @@ trait ObjectFactory[T] {
    * @param item
    */
 
-  def destroy( item : T )
+  def destroy( item : T ): Unit
 
   /**
    *

@@ -22,8 +22,8 @@ import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator}
 import io.netty.channel.EventLoopGroup
 import io.netty.util.CharsetUtil
 import io.netty.channel.socket.SocketChannel
-
 import scala.concurrent.duration._
+import scala.language.existentials
 
 object Configuration {
   val DefaultCharset = CharsetUtil.UTF_8

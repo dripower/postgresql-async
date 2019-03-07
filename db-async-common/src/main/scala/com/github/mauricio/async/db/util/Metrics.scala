@@ -45,7 +45,7 @@ object Metrics {
   def stat[T](key: String)(f: => Future[T]) = {
     val start = System.currentTimeMillis()
     val fut = f
-    fut.onSuccess {
+    fut.onComplete {
       case _ =>
         val end = System.currentTimeMillis()
         val time = end - start

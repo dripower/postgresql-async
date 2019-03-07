@@ -23,7 +23,7 @@ trait TimeoutScheduler {
    * Implementors should decide here what they want to do when a timeout occur
    */
 
-  def onTimeout    // implementors should decide here what they want to do when a timeout occur
+  def onTimeout: Unit    // implementors should decide here what they want to do when a timeout occur
 
   /**
    *

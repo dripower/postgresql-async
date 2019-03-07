@@ -4,7 +4,7 @@ val mysqlName = "mysql-async"
 val nettyVersion = "4.1.32.Final"
 val commonVersion = "0.3.101"
 val projectScalaVersion = "2.11.12"
-val specs2Version = "3.8.6"
+val specs2Version = "4.4.1"
 val specs2Dependency = "org.specs2" %% "specs2-core" % specs2Version % "test"
 val specs2JunitDependency = "org.specs2" %% "specs2-junit" % specs2Version % "test"
 val specs2MockDependency = "org.specs2" %% "specs2-mock" % specs2Version % "test"
@@ -71,9 +71,9 @@ val implementationDependencies = Seq(
 )
 
 val baseSettings = Seq(
-  crossScalaVersions := Seq("2.11.12", "2.12.6"),
+  crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0-M5"),
   testOptions in Test += Tests.Argument("sequential"),
-  scalaVersion := "2.11.11",
+  scalaVersion := "2.11.12",
   scalacOptions :=
     Opts.compile.encoding("UTF8")
     :+ Opts.compile.deprecation

@@ -22,7 +22,7 @@ import io.netty.buffer.ByteBuf
 
 class ResultSetRowMessage
   extends ServerMessage( ServerMessage.Row )
-  with mutable.Buffer[ByteBuf]
+  with mutable.Seq[ByteBuf]
 {
 
   private val buffer = new ArrayBuffer[ByteBuf]()

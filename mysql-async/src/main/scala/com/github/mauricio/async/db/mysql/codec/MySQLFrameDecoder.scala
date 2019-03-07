@@ -223,7 +223,8 @@ class MySQLFrameDecoder(charset: Charset, connectionId: String) extends ByteToMe
 
     if (this.totalColumns == this.processedColumns) {
       if (this.isPreparedStatementExecute) {
-        val row = slice.readBytes(slice.readableBytes())
+        val row = slice.retainedSlice()
+        slice.readerIndex(slice.readerIndex() + slice.readableBytes())
         row.readByte() // reads initial 00 at message
         new BinaryRowMessage(row)
       } else {

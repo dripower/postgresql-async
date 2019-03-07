@@ -16,4 +16,6 @@
 
 package com.github.mauricio.async.db.mysql.codec
 
+import scala.collection.Seq
+
 case class PreparedStatement ( statement : String, values : Seq[Any])

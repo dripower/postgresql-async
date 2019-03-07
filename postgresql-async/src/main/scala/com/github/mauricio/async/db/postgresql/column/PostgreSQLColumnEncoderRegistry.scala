@@ -22,7 +22,7 @@ import com.github.mauricio.async.db.column._
 import io.netty.buffer.ByteBuf
 import org.joda.time._
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object PostgreSQLColumnEncoderRegistry {
   val Instance = new PostgreSQLColumnEncoderRegistry()
@@ -107,7 +107,7 @@ class PostgreSQLColumnEncoderRegistry extends ColumnEncoderRegistry {
       encoder.get._1.encode(value)
     } else {
       value match {
-        case i: java.lang.Iterable[_] => encodeArray(i.toIterable)
+        case i: java.lang.Iterable[_] => encodeArray(i.asScala.toIterable)
         case i: Traversable[_] => encodeArray(i)
         case i: Array[_] => encodeArray(i.toIterable)
         case p: Product => encodeComposite(p)

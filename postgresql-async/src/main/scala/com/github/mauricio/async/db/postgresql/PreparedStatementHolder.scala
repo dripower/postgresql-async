@@ -17,6 +17,7 @@
 package com.github.mauricio.async.db.postgresql
 
 import com.github.mauricio.async.db.postgresql.messages.backend.PostgreSQLColumnData
+import scala.collection.mutable.ArrayBuffer
 
 class PreparedStatementHolder(val query : String, val statementId : Int, isPositional: Boolean = false ) {
 
@@ -52,6 +53,6 @@ class PreparedStatementHolder(val query : String, val statementId : Int, isPosit
   }
 
   var prepared : Boolean = false
-  var columnDatas : Array[PostgreSQLColumnData] = Array.empty
+  var columnDatas : ArrayBuffer[PostgreSQLColumnData] = ArrayBuffer.empty
 
 }

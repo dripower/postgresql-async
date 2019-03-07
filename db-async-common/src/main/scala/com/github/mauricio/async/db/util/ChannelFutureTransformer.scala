@@ -23,28 +23,28 @@ import scala.language.implicitConversions
 
 object ChannelFutureTransformer {
 
-  implicit def toFuture(channelFuture: ChannelFuture): Future[ChannelFuture] = {
-    val promise = Promise[ChannelFuture]
-
-    channelFuture.addListener(new ChannelFutureListener {
-      def operationComplete(future: ChannelFuture) {
-        if ( future.isSuccess ) {
-          promise.success(future)
-        } else {
-          val exception = if ( future.cause == null ) {
-            new CanceledChannelFutureException(future)
-              .fillInStackTrace()
+  implicit class ChannelFutureSyntax(channelFuture: ChannelFuture) {
+    def asScala = {
+      val promise = Promise[ChannelFuture]
+      channelFuture.addListener(new ChannelFutureListener {
+        def operationComplete(future: ChannelFuture) {
+          if ( future.isSuccess ) {
+            promise.success(future)
           } else {
-            future.cause
+            val exception = if ( future.cause == null ) {
+              new CanceledChannelFutureException(future)
+                .fillInStackTrace()
+            } else {
+              future.cause
+            }
+
+            promise.failure(exception)
+
           }
-
-          promise.failure(exception)
-
         }
-      }
-    })
+      })
+      promise.future
+    }
 
-    promise.future
   }
-
 }

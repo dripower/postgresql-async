@@ -21,6 +21,7 @@ import com.github.mauricio.async.db.postgresql.messages.backend.PostgreSQLColumn
 import org.specs2.mutable.Specification
 import io.netty.util.CharsetUtil
 import io.netty.buffer.{Unpooled, ByteBuf}
+import scala.collection.mutable.ArrayBuffer
 
 class MutableResultSetSpec extends Specification {
 
@@ -41,7 +42,7 @@ class MutableResultSetSpec extends Specification {
 
     "correctly map column data to fields" in {
 
-      val columns = Array(
+      val columns = ArrayBuffer(
         create(
           name = "id",
           dataType = ColumnTypes.Integer,
@@ -78,7 +79,7 @@ class MutableResultSetSpec extends Specification {
 
     "should return the same order as the one given by columns" in {
 
-      val columns = Array(
+      val columns = ArrayBuffer(
         create("id", ColumnTypes.Integer),
         create("name", ColumnTypes.Varchar),
         create("birthday", ColumnTypes.Date),
