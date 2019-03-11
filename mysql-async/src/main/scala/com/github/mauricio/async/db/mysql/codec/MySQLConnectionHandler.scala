@@ -165,7 +165,12 @@ class MySQLConnectionHandler(
                 null
               } else {
                 val columnDescription = this.currentQuery.columnTypes(x)
-                columnDescription.textDecoder.decode(columnDescription, message(x), configuration.charset)
+                val buf = message(x)
+                try {
+                  columnDescription.textDecoder.decode(columnDescription, buf , configuration.charset)
+                } finally {
+                  buf.release()
+                }
               }
               x += 1
             }

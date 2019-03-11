@@ -206,7 +206,7 @@ class PostgreSQLConnection
           val columnType = this.currentQuery.get.columnTypes(x)
           this.decoderRegistry.decode(columnType, buf, configuration.charset)
         } finally {
-          buf.release()
+          //buf.release()
         }
       }
       x += 1

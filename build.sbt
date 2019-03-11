@@ -84,6 +84,7 @@ val baseSettings = Seq(
   testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
   scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
   javacOptions := Seq("-source", "1.8", "-target", "1.8", "-encoding", "UTF8"),
+  (javaOptions in Test) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
   organization := "com.dripower",
   version := commonVersion,
   parallelExecution := false,
