@@ -75,12 +75,9 @@ class MessageDecoder(sslEnabled: Boolean, charset: Charset, maximumMessageSize :
             parser.parse(code, b.readSlice(length))
           }
         }
-
         out.add(result)
-
       } else {
         b.resetReaderIndex()
-        return
       }
 
     }
