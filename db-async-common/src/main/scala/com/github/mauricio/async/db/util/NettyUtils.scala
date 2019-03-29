@@ -34,12 +34,7 @@ object NettyUtils {
   }
 
    private def isNativeEpollSupport() = {
-     val osName = sys.props.get("os.name")
-    val archName = sys.props.get("os.arch")
-       (osName, archName) match {
-       case (Some(o), Some(a)) =>
-         normalize(o).startsWith("linux") && normalize(a).matches("^(x8664|amd64|ia32e|em64t|x64)$")       case _ => false
-     }
+     Epoll.isAvailable()
    }
 
    lazy val SocketChannelClass =  {
@@ -49,10 +44,4 @@ object NettyUtils {
        classOf[NioSocketChannel]
      }
    }
-
-   private def normalize(os: String) = {
-     os.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "")
-   }
-
-
 }
