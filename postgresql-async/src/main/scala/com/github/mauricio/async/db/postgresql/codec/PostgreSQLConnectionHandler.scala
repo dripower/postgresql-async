@@ -191,7 +191,7 @@ class PostgreSQLConnectionHandler
           case ServerMessage.BindComplete => {
           }
           case ServerMessage.Authentication => {
-            log.debug("Authentication response received {}", m)
+            log.debug("Authentication response received {}", m: Any)
             connectionDelegate.onAuthenticationResponse(m.asInstanceOf[AuthenticationMessage])
           }
           case ServerMessage.CommandComplete => {
@@ -213,7 +213,7 @@ class PostgreSQLConnectionHandler
           case ServerMessage.NoData => {
           }
           case ServerMessage.Notice => {
-            log.info("Received notice {}", m)
+            log.info("Received notice {}", m: Any)
           }
           case ServerMessage.NotificationResponse => {
             connectionDelegate.onNotificationResponse(m.asInstanceOf[NotificationResponse])
@@ -238,7 +238,7 @@ class PostgreSQLConnectionHandler
 
       }
       case _ => {
-        log.error("Unknown message type - {}", msg)
+        log.error("Unknown message type - {}", msg: Any)
         val exception = new IllegalArgumentException("Unknown message type - %s".format(msg))
         exception.fillInStackTrace()
         connectionDelegate.onError(exception)
@@ -257,7 +257,7 @@ class PostgreSQLConnectionHandler
   }
 
   override def channelInactive(ctx: ChannelHandlerContext): Unit = {
-    log.info("Connection disconnected - {}", ctx.channel.remoteAddress)
+    log.info("Connection disconnected - {}", ctx.channel.remoteAddress: Any)
   }
 
   override def handlerAdded(ctx: ChannelHandlerContext) {
