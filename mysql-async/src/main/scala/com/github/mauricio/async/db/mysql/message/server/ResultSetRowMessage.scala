@@ -49,7 +49,7 @@ class ResultSetRowMessage
     this
   }
 
-  def insertAll(n: Int, elems: Traversable[ByteBuf]) {
+  def insertAll(n: Int, elems: Iterable[ByteBuf]) {
     this.buffer.insertAll(n, elems)
   }
 

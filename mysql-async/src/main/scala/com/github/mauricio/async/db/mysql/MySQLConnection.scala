@@ -118,7 +118,7 @@ class MySQLConnection(
   }
 
   override def connected(ctx: ChannelHandlerContext) {
-    log.debug("Connected to {}", ctx.channel.remoteAddress)
+    log.debug("Connected to {}", ctx.channel.remoteAddress: Any)
     this.connected = true
   }
 
@@ -128,7 +128,7 @@ class MySQLConnection(
   }
 
   override def onError(message: ErrorMessage) {
-    log.error("Received an error message -> {}", message)
+    log.error("Received an error message -> {}", message: Any)
     val exception = new MySQLException(message)
     exception.fillInStackTrace()
     this.setException(exception)

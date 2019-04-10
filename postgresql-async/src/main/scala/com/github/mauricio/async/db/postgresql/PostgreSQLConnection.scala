@@ -173,7 +173,7 @@ class PostgreSQLConnection
   }
 
   override def onError(m: ErrorMessage) {
-    log.error("Error with message -> {}", m)
+    log.error("Error with message -> {}", m: Any)
 
     val error = new GenericDatabaseException(m)
     error.fillInStackTrace()
@@ -311,7 +311,7 @@ class PostgreSQLConnection
 
   private def failQueryPromise(t: Throwable) {
     this.clearQueryPromise.foreach { promise =>
-      log.error("Setting error on future {}", promise)
+      log.error("Setting error on future {}", promise: Any)
       promise.failure(t)
     }
   }

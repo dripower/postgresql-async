@@ -21,6 +21,7 @@ import org.joda.time._
 import org.specs2.mutable.Specification
 import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
+import scala.collection.IndexedSeq
 import io.netty.util.CharsetUtil
 import com.github.mauricio.async.db.exceptions.InsufficientParametersException
 import org.specs2.matcher.MatchResult

@@ -296,7 +296,7 @@ class PreparedStatementSpec extends Specification with DatabaseTestHelper {
 
           handler.sendPreparedStatement(
             "SELECT * FROM messages WHERE content = ? AND moment = ?",
-            Array("some content")) must throwAn[InsufficientParametersException]
+            List[String]("some content")) must throwAn[InsufficientParametersException]
       }
     }
 
