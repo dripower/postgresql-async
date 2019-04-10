@@ -22,7 +22,6 @@ import com.github.mauricio.async.db.util.Log
 import com.github.mauricio.async.db.exceptions.InsufficientParametersException
 import java.util.UUID
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException
-import scala.collection.immutable.ArraySeq
 
 class PreparedStatementSpec extends Specification with DatabaseTestHelper {
 
@@ -297,7 +296,7 @@ class PreparedStatementSpec extends Specification with DatabaseTestHelper {
 
           handler.sendPreparedStatement(
             "SELECT * FROM messages WHERE content = ? AND moment = ?",
-            ArraySeq[String]("some content")) must throwAn[InsufficientParametersException]
+            List[String]("some content")) must throwAn[InsufficientParametersException]
       }
     }
 
