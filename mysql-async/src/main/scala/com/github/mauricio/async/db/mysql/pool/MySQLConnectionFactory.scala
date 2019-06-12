@@ -22,7 +22,11 @@ import com.github.mauricio.async.db.mysql.MySQLConnection
 import scala.util.Try
 import scala.concurrent.Await
 import com.github.mauricio.async.db.util.Log
-import com.github.mauricio.async.db.exceptions.{ConnectionTimeoutedException, ConnectionStillRunningQueryException, ConnectionNotConnectedException}
+import com.github.mauricio.async.db.exceptions.{
+  ConnectionTimeoutedException,
+  ConnectionStillRunningQueryException,
+  ConnectionNotConnectedException
+}
 
 object MySQLConnectionFactory {
   final val log = Log.get[MySQLConnectionFactory]
@@ -35,8 +39,8 @@ object MySQLConnectionFactory {
  * @param configuration a valid configuration to connect to a MySQL server.
  *
  */
-
-class MySQLConnectionFactory( configuration : Configuration ) extends ObjectFactory[MySQLConnection] {
+class MySQLConnectionFactory(configuration: Configuration)
+    extends ObjectFactory[MySQLConnection] {
 
   import MySQLConnectionFactory.log
 
@@ -49,7 +53,7 @@ class MySQLConnectionFactory( configuration : Configuration ) extends ObjectFact
    */
   def create: MySQLConnection = {
     val connection = new MySQLConnection(configuration)
-    Await.result(connection.connect, configuration.connectTimeout )
+    Await.result(connection.connect, configuration.connectTimeout)
 
     connection
   }
@@ -62,11 +66,11 @@ class MySQLConnectionFactory( configuration : Configuration ) extends ObjectFact
    *
    * @param item
    */
-  def destroy(item: MySQLConnection) {
+  def destroy(item: MySQLConnection): Unit = {
     try {
       item.disconnect
     } catch {
-      case e : Exception => {
+      case e: Exception => {
         log.error("Failed to close the connection", e)
       }
     }
@@ -88,11 +92,11 @@ class MySQLConnectionFactory( configuration : Configuration ) extends ObjectFact
    * @return
    */
   def validate(item: MySQLConnection): Try[MySQLConnection] = {
-    Try{
-      if ( item.isTimeouted ) {
+    Try {
+      if (item.isTimeouted) {
         throw new ConnectionTimeoutedException(item)
       }
-      if ( !item.isConnected ) {
+      if (!item.isConnected) {
         throw new ConnectionNotConnectedException(item)
       }
 
@@ -100,7 +104,7 @@ class MySQLConnectionFactory( configuration : Configuration ) extends ObjectFact
         throw item.lastException
       }
 
-      if ( item.isQuerying ) {
+      if (item.isQuerying) {
         throw new ConnectionStillRunningQueryException(item.count, false)
       }
 

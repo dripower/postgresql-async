@@ -28,7 +28,10 @@ import scala.language.existentials
 object Configuration {
   val DefaultCharset = CharsetUtil.UTF_8
 
-  @deprecated("Use com.github.mauricio.async.db.postgresql.util.URLParser.DEFAULT or com.github.mauricio.async.db.mysql.util.URLParser.DEFAULT.", since = "0.2.20")
+  @deprecated(
+    "Use com.github.mauricio.async.db.postgresql.util.URLParser.DEFAULT or com.github.mauricio.async.db.mysql.util.URLParser.DEFAULT.",
+    since = "0.2.20"
+  )
   val Default = new Configuration("postgres")
 }
 
@@ -54,8 +57,8 @@ object Configuration {
  * @param queryTimeout the optional query timeout
  *
  */
-
-case class Configuration(username: String,
+case class Configuration(
+  username: String,
   host: String = "localhost",
   port: Int = 5432,
   password: Option[String] = None,
@@ -70,4 +73,5 @@ case class Configuration(username: String,
   preparedStatementExpireTime: Duration = 60.seconds,
   eventLoopGroup: EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
   channelClass: Class[_ <: SocketChannel] = NettyUtils.SocketChannelClass,
-  queryTimeout: Option[Duration] = None)
+  queryTimeout: Option[Duration] = None
+)

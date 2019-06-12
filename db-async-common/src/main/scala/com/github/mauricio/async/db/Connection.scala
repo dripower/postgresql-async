@@ -41,7 +41,6 @@ import concurrent.Future
  * }}}
  *
  */
-
 trait Connection {
 
   /**
@@ -51,7 +50,6 @@ trait Connection {
    *
    * @return
    */
-
   def disconnect: Future[Connection]
 
   /**
@@ -61,7 +59,6 @@ trait Connection {
    *
    * @return
    */
-
   def connect: Future[Connection]
 
   /**
@@ -70,7 +67,6 @@ trait Connection {
    *
    * @return
    */
-
   def isConnected: Boolean
 
   /**
@@ -81,7 +77,6 @@ trait Connection {
    * @param query
    * @return
    */
-
   def sendQuery(query: String): Future[QueryResult]
 
   /**
@@ -112,8 +107,10 @@ trait Connection {
    * @param values
    * @return
    */
-
-  def sendPreparedStatement(query: String, values: Seq[Any] = List()): Future[QueryResult]
+  def sendPreparedStatement(
+    query: String,
+    values: Seq[Any] = List()
+  ): Future[QueryResult]
 
   /**
    *
@@ -123,14 +120,15 @@ trait Connection {
    * @param f operation to execute on this connection
    * @return result of f, conditional on transaction operations succeeding
    */
-
-  def inTransaction[A](f : Connection => Future[A])(implicit executionContext : scala.concurrent.ExecutionContext) : Future[A] = {
+  def inTransaction[A](
+    f: Connection => Future[A]
+  )(implicit executionContext: scala.concurrent.ExecutionContext): Future[A] = {
     this.sendQuery("BEGIN").flatMap { _ =>
       val p = scala.concurrent.Promise[A]()
       f(this).onComplete { r =>
         this.sendQuery(if (r.isFailure) "ROLLBACK" else "COMMIT").onComplete {
           case scala.util.Failure(e) if r.isSuccess => p.failure(e)
-          case _ => p.complete(r)
+          case _                                    => p.complete(r)
         }
       }
       p.future

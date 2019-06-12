@@ -22,31 +22,32 @@ import com.github.mauricio.async.db.util.ChannelWrapper.bufferToWrapper
 import com.github.mauricio.async.db.util.Log
 import com.google.common.cache._
 import java.nio.charset.Charset
-import java.util.concurrent.{ Callable, TimeUnit }
+import java.util.concurrent.{Callable, TimeUnit}
 import com.github.mauricio.async.db.mysql.codec.DecoderRegistry
 
 object ColumnDefinitionDecoder {
   final val log = Log.get[ColumnDefinitionDecoder]
 }
 
-class ColumnDefinitionDecoder(charset: Charset, registry : DecoderRegistry) extends MessageDecoder {
+class ColumnDefinitionDecoder(charset: Charset, registry: DecoderRegistry)
+    extends MessageDecoder {
 
   override def decode(buffer: ByteBuf): ColumnDefinitionMessage = {
 
-    val catalog = buffer.readLengthEncodedString(charset)
-    val schema = buffer.readLengthEncodedString(charset)
-    val table = buffer.readLengthEncodedString(charset)
+    val catalog       = buffer.readLengthEncodedString(charset)
+    val schema        = buffer.readLengthEncodedString(charset)
+    val table         = buffer.readLengthEncodedString(charset)
     val originalTable = buffer.readLengthEncodedString(charset)
-    val name = buffer.readLengthEncodedString(charset)
-    val originalName = buffer.readLengthEncodedString(charset)
+    val name          = buffer.readLengthEncodedString(charset)
+    val originalName  = buffer.readLengthEncodedString(charset)
 
     buffer.readBinaryLength
 
     val characterSet = buffer.readUnsignedShort()
     val columnLength = buffer.readUnsignedInt()
-    val columnType = buffer.readUnsignedByte()
-    val flags = buffer.readShort()
-    val decimals = buffer.readByte()
+    val columnType   = buffer.readUnsignedByte()
+    val flags        = buffer.readShort()
+    val decimals     = buffer.readByte()
 
     buffer.readShort()
     new ColumnDefinitionMessage(
@@ -62,7 +63,7 @@ class ColumnDefinitionDecoder(charset: Charset, registry : DecoderRegistry) exte
       flags,
       decimals,
       registry.binaryDecoderFor(columnType, characterSet),
-      registry.textDecoderFor(columnType,characterSet)
+      registry.textDecoderFor(columnType, characterSet)
     )
 
   }

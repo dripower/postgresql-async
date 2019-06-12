@@ -16,11 +16,16 @@
 
 package com.github.mauricio.async.db.postgresql.parsers
 
-import com.github.mauricio.async.db.postgresql.messages.backend.{RowDescriptionMessage, PostgreSQLColumnData, ServerMessage}
+import com.github.mauricio.async.db.postgresql.messages.backend.{
+  RowDescriptionMessage,
+  PostgreSQLColumnData,
+  ServerMessage
+}
 import com.github.mauricio.async.db.util.ByteBufferUtils
 import java.nio.charset.Charset
 import io.netty.buffer.ByteBuf
 import scala.collection.mutable.ArrayBuffer
+
 /**
 
 RowDescription (B)
@@ -55,17 +60,14 @@ The type modifier (see pg_attribute.atttypmod). The meaning of the modifier is t
 
 Int16
 The format code being used for the field. Currently will be zero (text) or one (binary). In a RowDescription returned from the statement variant of Describe, the format code is not yet known and will always be zero.
-  *
+ *
  */
-
-
-
 class RowDescriptionParser(charset: Charset) extends MessageParser {
 
   override def parseMessage(b: ByteBuf): ServerMessage = {
 
     val columnsCount = b.readShort()
-    val columns = new ArrayBuffer[PostgreSQLColumnData](columnsCount)
+    val columns      = new ArrayBuffer[PostgreSQLColumnData](columnsCount)
 
     0.until(columnsCount).foreach { index =>
       val cd = new PostgreSQLColumnData(

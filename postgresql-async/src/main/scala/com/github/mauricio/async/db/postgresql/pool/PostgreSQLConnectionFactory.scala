@@ -41,20 +41,24 @@ object PostgreSQLConnectionFactory {
  *
  * @param configuration
  */
-
-class PostgreSQLConnectionFactory( 
-    val configuration : Configuration,
-    executionContext : ExecutionContext = ExecutorServiceUtils.CachedExecutionContext ) extends ObjectFactory[PostgreSQLConnection] {
+class PostgreSQLConnectionFactory(
+  val configuration: Configuration,
+  executionContext: ExecutionContext =
+    ExecutorServiceUtils.CachedExecutionContext
+) extends ObjectFactory[PostgreSQLConnection] {
 
   import PostgreSQLConnectionFactory.log
 
   def create: PostgreSQLConnection = {
-    val connection = new PostgreSQLConnection(configuration, executionContext = executionContext)
+    val connection = new PostgreSQLConnection(
+      configuration,
+      executionContext = executionContext
+    )
     Await.result(connection.connect, configuration.connectTimeout)
     connection
   }
 
-  def destroy(item: PostgreSQLConnection) {
+  def destroy(item: PostgreSQLConnection): Unit = {
     item.disconnect
   }
 
@@ -65,16 +69,17 @@ class PostgreSQLConnectionFactory(
    * @param item an object produced by this pool
    * @return
    */
-
-  def validate( item : PostgreSQLConnection ) : Try[PostgreSQLConnection] = {
+  def validate(item: PostgreSQLConnection): Try[PostgreSQLConnection] = {
     Try {
-      if ( item.isTimeouted ) {
+      if (item.isTimeouted) {
         throw new ConnectionTimeoutedException(item)
       }
-      if ( !item.isConnected || item.hasRecentError ) {
+      if (!item.isConnected || item.hasRecentError) {
         throw new ClosedChannelException()
-      } 
-      item.validateIfItIsReadyForQuery("Trying to give back a connection that is not ready for query")
+      }
+      item.validateIfItIsReadyForQuery(
+        "Trying to give back a connection that is not ready for query"
+      )
       item
     }
   }
@@ -86,21 +91,20 @@ class PostgreSQLConnectionFactory(
    * @param item an object produced by this pool
    * @return
    */
-
   override def test(item: PostgreSQLConnection): Try[PostgreSQLConnection] = {
-    val result : Try[PostgreSQLConnection] = Try({
-      Await.result( item.sendQuery("SELECT 0"), configuration.testTimeout )
+    val result: Try[PostgreSQLConnection] = Try({
+      Await.result(item.sendQuery("SELECT 0"), configuration.testTimeout)
       item
     })
 
     result match {
       case Failure(e) => {
         try {
-          if ( item.isConnected ) {
+          if (item.isConnected) {
             item.disconnect
           }
         } catch {
-          case e : Exception => log.error("Failed disconnecting object", e)
+          case e: Exception => log.error("Failed disconnecting object", e)
         }
         result
       }

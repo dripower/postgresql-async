@@ -82,7 +82,9 @@ object Execution {
           val runnables = arrayDeque.asInstanceOf[util.ArrayDeque[Runnable]]
           runnables.addLast(runnable)
         case illegal =>
-          throw new IllegalStateException(s"Unsupported trampoline ThreadLocal value: $illegal")
+          throw new IllegalStateException(
+            s"Unsupported trampoline ThreadLocal value: $illegal"
+          )
       }
     }
 
@@ -113,7 +115,9 @@ object Execution {
             runnable.run()
           }
         case illegal =>
-          throw new IllegalStateException(s"Unsupported trampoline ThreadLocal value: $illegal")
+          throw new IllegalStateException(
+            s"Unsupported trampoline ThreadLocal value: $illegal"
+          )
       }
     }
 

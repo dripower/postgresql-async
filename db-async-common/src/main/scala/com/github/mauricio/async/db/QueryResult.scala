@@ -24,11 +24,17 @@ package com.github.mauricio.async.db
  * @param statusMessage
  * @param rows
  */
-
-class QueryResult(val rowsAffected: Long, val statusMessage: String, val rows: Option[ResultSet] = None) {
+class QueryResult(
+  val rowsAffected: Long,
+  val statusMessage: String,
+  val rows: Option[ResultSet] = None
+) {
 
   override def toString: String = {
-    "QueryResult{rows -> %s,status -> %s}".format(this.rowsAffected, this.statusMessage)
+    "QueryResult{rows -> %s,status -> %s}".format(
+      this.rowsAffected,
+      this.statusMessage
+    )
   }
 
 }

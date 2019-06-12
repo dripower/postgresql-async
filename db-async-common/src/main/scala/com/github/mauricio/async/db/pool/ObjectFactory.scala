@@ -25,7 +25,6 @@ import scala.util.Try
  *
  * @tparam T the kind of object this factory produces.
  */
-
 trait ObjectFactory[T] {
 
   /**
@@ -35,8 +34,7 @@ trait ObjectFactory[T] {
    *
    * @return
    */
-
-  def create : T
+  def create: T
 
   /**
    *
@@ -46,8 +44,7 @@ trait ObjectFactory[T] {
    *
    * @param item
    */
-
-  def destroy( item : T ): Unit
+  def destroy(item: T): Unit
 
   /**
    *
@@ -64,8 +61,7 @@ trait ObjectFactory[T] {
    * @param item an object produced by this pool
    * @return
    */
-
-  def validate( item : T ) : Try[T]
+  def validate(item: T): Try[T]
 
   /**
    *
@@ -79,8 +75,6 @@ trait ObjectFactory[T] {
    * @param item an object produced by this pool
    * @return
    */
-
-  def test( item : T ) : Try[T] = validate(item)
-
+  def test(item: T): Try[T] = validate(item)
 
 }

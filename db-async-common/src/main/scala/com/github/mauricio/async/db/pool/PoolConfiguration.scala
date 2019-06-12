@@ -30,10 +30,9 @@ object PoolConfiguration {
  *                     are objects available, this is the maximum number of enqueued requests
  * @param validationInterval pools will use this value as the timer period to validate idle objects.
  */
-
 case class PoolConfiguration(
-                              maxObjects: Int,
-                              maxIdle: Long,
-                              maxQueueSize: Int,
-                              validationInterval: Long = 5000
-                              )
+  maxObjects: Int,
+  maxIdle: Long,
+  maxQueueSize: Int,
+  validationInterval: Long = 5000
+)

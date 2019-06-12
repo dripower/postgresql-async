@@ -26,7 +26,6 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
  *
  * @tparam T
  */
-
 trait AsyncObjectPool[T] {
 
   /**
@@ -37,7 +36,6 @@ trait AsyncObjectPool[T] {
    *
    * @return future that will eventually return a usable pool object.
    */
-
   def take: Future[T]
 
   /**
@@ -49,8 +47,7 @@ trait AsyncObjectPool[T] {
    * @param item
    * @return
    */
-
-  def giveBack( item : T ) : Future[AsyncObjectPool[T]]
+  def giveBack(item: T): Future[AsyncObjectPool[T]]
 
   /**
    *
@@ -59,8 +56,7 @@ trait AsyncObjectPool[T] {
    *
    * @return
    */
-
-  def close : Future[AsyncObjectPool[T]]
+  def close: Future[AsyncObjectPool[T]]
 
   /**
    *
@@ -69,8 +65,9 @@ trait AsyncObjectPool[T] {
    * @param f function that uses the object
    * @return f wrapped with take and giveBack
    */
-
-  def use[A](f: (T) => Future[A])(implicit executionContext: ExecutionContext): Future[A] =
+  def use[A](
+    f: (T) => Future[A]
+  )(implicit executionContext: ExecutionContext): Future[A] =
     take.flatMap { item =>
       val p = Promise[A]()
       try {

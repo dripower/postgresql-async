@@ -22,5 +22,5 @@ package com.github.mauricio.async.db.pool
  *
  * @param message
  */
-
-class PoolExhaustedException( message : String ) extends IllegalStateException( message )
+class PoolExhaustedException(message: String)
+    extends IllegalStateException(message)

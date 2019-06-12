@@ -35,14 +35,13 @@ import scala.concurrent.{ExecutionContext, Future}
  * @param factory
  * @param configuration
  */
-
 class ConnectionPool[T <: Connection](
-                      factory: ObjectFactory[T],
-                      configuration: PoolConfiguration,
-                      executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
-                      )
-  extends SingleThreadedAsyncObjectPool[T](factory, configuration)
-  with Connection {
+  factory: ObjectFactory[T],
+  configuration: PoolConfiguration,
+  executionContext: ExecutionContext =
+    ExecutorServiceUtils.CachedExecutionContext
+) extends SingleThreadedAsyncObjectPool[T](factory, configuration)
+    with Connection {
 
   /**
    *
@@ -50,12 +49,12 @@ class ConnectionPool[T <: Connection](
    *
    * @return
    */
-
-  def disconnect: Future[Connection] = if ( this.isConnected ) {
-    this.close.map(item => this)(executionContext)
-  } else {
-    Future.successful(this)
-  }
+  def disconnect: Future[Connection] =
+    if (this.isConnected) {
+      this.close.map(item => this)(executionContext)
+    } else {
+      Future.successful(this)
+    }
 
   /**
    *
@@ -63,7 +62,6 @@ class ConnectionPool[T <: Connection](
    *
    * @return
    */
-
   def connect: Future[Connection] = Future.successful(this)
 
   def isConnected: Boolean = !this.isClosed
@@ -77,7 +75,6 @@ class ConnectionPool[T <: Connection](
    * @param query
    * @return
    */
-
   def sendQuery(query: String): Future[QueryResult] =
     this.use(_.sendQuery(query))(executionContext)
 
@@ -91,8 +88,10 @@ class ConnectionPool[T <: Connection](
    * @param values
    * @return
    */
-
-  def sendPreparedStatement(query: String, values: Seq[Any] = List()): Future[QueryResult] =
+  def sendPreparedStatement(
+    query: String,
+    values: Seq[Any] = List()
+  ): Future[QueryResult] =
     this.use(_.sendPreparedStatement(query, values))(executionContext)
 
   /**
@@ -104,8 +103,9 @@ class ConnectionPool[T <: Connection](
    * @param f operation to execute on a connection
    * @return result of f, conditional on transaction operations succeeding
    */
-
-  override def inTransaction[A](f : Connection => Future[A])(implicit context : ExecutionContext = executionContext) : Future[A] =
+  override def inTransaction[A](
+    f: Connection => Future[A]
+  )(implicit context: ExecutionContext = executionContext): Future[A] =
     this.use(_.inTransaction[A](f)(context))(executionContext)
 
 }

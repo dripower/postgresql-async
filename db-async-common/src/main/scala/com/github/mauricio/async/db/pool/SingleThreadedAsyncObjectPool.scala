@@ -29,7 +29,7 @@ import scala.util.{Failure, Success}
 
 object SingleThreadedAsyncObjectPool {
   val Counter = new AtomicLong()
-  val log = Log.get[SingleThreadedAsyncObjectPool[Nothing]]
+  val log     = Log.get[SingleThreadedAsyncObjectPool[Nothing]]
 }
 
 /**
@@ -44,19 +44,19 @@ object SingleThreadedAsyncObjectPool {
  * @param configuration
  * @tparam T type of the object this pool holds
  */
-
 class SingleThreadedAsyncObjectPool[T](
-                                        factory: ObjectFactory[T],
-                                        configuration: PoolConfiguration
-                                        ) extends AsyncObjectPool[T] {
+  factory: ObjectFactory[T],
+  configuration: PoolConfiguration
+) extends AsyncObjectPool[T] {
 
   import SingleThreadedAsyncObjectPool.{Counter, log}
 
-  private val mainPool = Worker()
+  private val mainPool  = Worker()
   private var poolables = List.empty[PoolableHolder[T]]
   private val checkouts = new ArrayBuffer[T](configuration.maxObjects)
   private val waitQueue = new Queue[Promise[T]]()
-  private val timer = new Timer("async-object-pool-timer-" + Counter.incrementAndGet(), true)
+  private val timer =
+    new Timer("async-object-pool-timer-" + Counter.incrementAndGet(), true)
   private val createSemaphore = new Semaphore(configuration.maxObjects)
   timer.scheduleAtFixedRate(new TimerTask {
     def run(): Unit = {
@@ -74,7 +74,6 @@ class SingleThreadedAsyncObjectPool[T](
    *
    * @return
    */
-
   def take: Future[T] = {
 
     if (this.closed) {
@@ -94,13 +93,12 @@ class SingleThreadedAsyncObjectPool[T](
    * @param item
    * @return
    */
-
   def giveBack(item: T): Future[AsyncObjectPool[T]] = {
     val promise = Promise[AsyncObjectPool[T]]()
     this.mainPool.action {
       // Ensure it came from this pool
       val idx = this.checkouts.indexOf(item)
-      if(idx >= 0) {
+      if (idx >= 0) {
         this.checkouts.remove(idx)
         this.factory.validate(item) match {
           case Success(item) => {
@@ -114,14 +112,21 @@ class SingleThreadedAsyncObjectPool[T](
       } else {
         // It's already a failure but lets doublecheck why
         val isFromOurPool = (item match {
-          case x: AnyRef => this.poolables.find(holder => x eq holder.item.asInstanceOf[AnyRef])
+          case x: AnyRef =>
+            this.poolables.find(holder => x eq holder.item.asInstanceOf[AnyRef])
           case _ => this.poolables.find(holder => item == holder.item)
         }).isDefined
 
-        if(isFromOurPool) {
-          promise.failure(new IllegalStateException("This item has already been returned"))
+        if (isFromOurPool) {
+          promise.failure(
+            new IllegalStateException("This item has already been returned")
+          )
         } else {
-          promise.failure(new IllegalArgumentException("The returned item did not come from this pool."))
+          promise.failure(
+            new IllegalArgumentException(
+              "The returned item did not come from this pool."
+            )
+          )
         }
       }
     }
@@ -129,7 +134,8 @@ class SingleThreadedAsyncObjectPool[T](
     promise.future
   }
 
-  def isFull: Boolean = this.poolables.isEmpty && this.checkouts.size == configuration.maxObjects
+  def isFull: Boolean =
+    this.poolables.isEmpty && this.checkouts.size == configuration.maxObjects
 
   def close: Future[AsyncObjectPool[T]] = {
     try {
@@ -140,7 +146,8 @@ class SingleThreadedAsyncObjectPool[T](
             this.timer.cancel()
             this.mainPool.shutdown
             this.closed = true
-            (this.poolables.map(i => i.item) ++ this.checkouts).foreach(item => destroy(item))
+            (this.poolables.map(i => i.item) ++ this.checkouts)
+              .foreach(item => destroy(item))
             promise.success(this)
           } catch {
             case e: Exception => promise.failure(e)
@@ -156,11 +163,11 @@ class SingleThreadedAsyncObjectPool[T](
     }
   }
 
-  def availables: Traversable[T] = this.poolables.map(item => item.item)
+  def availables: Iterable[T] = this.poolables.map(item => item.item)
 
-  def inUse: Traversable[T] = this.checkouts
+  def inUse: Iterable[T] = this.checkouts
 
-  def queued: Traversable[Promise[T]] = this.waitQueue
+  def queued: Iterable[Promise[T]] = this.waitQueue
 
   def isClosed: Boolean = this.closed
 
@@ -171,7 +178,6 @@ class SingleThreadedAsyncObjectPool[T](
    * @param item
    * @param promise
    */
-
   private def addBack(item: T, promise: Promise[AsyncObjectPool[T]]): Unit = {
     this.poolables ::= new PoolableHolder[T](item)
 
@@ -189,10 +195,11 @@ class SingleThreadedAsyncObjectPool[T](
    *
    * @param promise
    */
-
-  private def enqueuePromise(promise: Promise[T]) {
+  private def enqueuePromise(promise: Promise[T]): Unit = {
     if (this.waitQueue.size >= configuration.maxQueueSize) {
-      val exception = new PoolExhaustedException("There are no objects available and the waitQueue is full")
+      val exception = new PoolExhaustedException(
+        "There are no objects available and the waitQueue is full"
+      )
       exception.fillInStackTrace()
       promise.failure(exception)
     } else {
@@ -200,7 +207,7 @@ class SingleThreadedAsyncObjectPool[T](
     }
   }
 
-  private def checkout(promise: Promise[T]) {
+  private def checkout(promise: Promise[T]): Unit = {
     this.mainPool.action {
       if (this.isFull) {
         this.enqueuePromise(promise)
@@ -217,7 +224,6 @@ class SingleThreadedAsyncObjectPool[T](
    *
    * @param promise
    */
-
   private def createOrReturnItem(promise: Promise[T]): Unit = {
     if (this.poolables.isEmpty && createSemaphore.tryAcquire) {
       try {
@@ -249,25 +255,27 @@ class SingleThreadedAsyncObjectPool[T](
    * to keep the connection alive.
    *
    */
-
-  private def testObjects {
+  private def testObjects: Unit = {
     val removals = new ArrayBuffer[PoolableHolder[T]]()
-    this.poolables.foreach {
-      poolable =>
-        this.factory.test(poolable.item) match {
-          case Success(item) => {
-            if (poolable.timeElapsed > configuration.maxIdle) {
-              log.debug("Connection was idle for {}, maxIdle is {}, removing it", poolable.timeElapsed, configuration.maxIdle)
-              removals += poolable
-              destroy(poolable.item)
-            }
-          }
-          case Failure(e) => {
-            log.error("Failed to validate object", e)
+    this.poolables.foreach { poolable =>
+      this.factory.test(poolable.item) match {
+        case Success(item) => {
+          if (poolable.timeElapsed > configuration.maxIdle) {
+            log.debug(
+              "Connection was idle for {}, maxIdle is {}, removing it",
+              poolable.timeElapsed,
+              configuration.maxIdle
+            )
             removals += poolable
             destroy(poolable.item)
           }
         }
+        case Failure(e) => {
+          log.error("Failed to validate object", e)
+          removals += poolable
+          destroy(poolable.item)
+        }
+      }
     }
     this.poolables = this.poolables.diff(removals)
   }

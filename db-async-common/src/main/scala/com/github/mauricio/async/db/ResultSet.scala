@@ -24,7 +24,6 @@ import scala.collection.IndexedSeq
  * a collection of Array[Any]. Mutating fields in this array will not affect the database in any way
  *
  */
-
 trait ResultSet extends IndexedSeq[RowData] {
 
   /**
@@ -33,7 +32,6 @@ trait ResultSet extends IndexedSeq[RowData] {
    *
    * @return
    */
-
-  def columnNames : IndexedSeq[String]
+  def columnNames: IndexedSeq[String]
 
 }
