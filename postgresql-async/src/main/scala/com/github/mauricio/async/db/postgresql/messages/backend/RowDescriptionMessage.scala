@@ -17,5 +17,6 @@
 package com.github.mauricio.async.db.postgresql.messages.backend
 import scala.collection.mutable.ArrayBuffer
 
-case class RowDescriptionMessage(val columnDatas: ArrayBuffer[PostgreSQLColumnData])
-  extends ServerMessage(ServerMessage.RowDescription)
+case class RowDescriptionMessage(
+  val columnDatas: ArrayBuffer[PostgreSQLColumnData]
+) extends ServerMessage(ServerMessage.RowDescription)

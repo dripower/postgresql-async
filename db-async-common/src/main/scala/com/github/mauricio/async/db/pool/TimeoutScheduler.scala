@@ -16,14 +16,13 @@ trait TimeoutScheduler {
    *
    * @return
    */
-
-  def eventLoopGroup : EventLoopGroup
+  def eventLoopGroup: EventLoopGroup
 
   /**
    * Implementors should decide here what they want to do when a timeout occur
    */
-
-  def onTimeout: Unit    // implementors should decide here what they want to do when a timeout occur
+  def onTimeout
+    : Unit // implementors should decide here what they want to do when a timeout occur
 
   /**
    *
@@ -32,31 +31,30 @@ trait TimeoutScheduler {
    *
    * @return
    */
-
-  def isTimeouted : Boolean =
+  def isTimeouted: Boolean =
     isTimeoutedBool.get
 
-  def addTimeout[A](
-                     promise: Promise[A],
-                     durationOption: Option[Duration])
-                   (implicit executionContext : ExecutionContext) : Option[ScheduledFuture[_]] = {
-    durationOption.map {
-      duration =>
-        val scheduledFuture = schedule(
-        {
-          if (promise.tryFailure(new TimeoutException(s"Operation is timeouted after it took too long to return (${duration})"))) {
-            isTimeoutedBool.set(true)
-            onTimeout
-          }
-        },
-        duration)
-        promise.future.onComplete(x => scheduledFuture.cancel(false))
+  def addTimeout[A](promise: Promise[A], durationOption: Option[Duration])(
+    implicit executionContext: ExecutionContext
+  ): Option[ScheduledFuture[_]] = {
+    durationOption.map { duration =>
+      val scheduledFuture = schedule({
+        if (promise.tryFailure(
+              new TimeoutException(
+                s"Operation is timeouted after it took too long to return (${duration})"
+              )
+            )) {
+          isTimeoutedBool.set(true)
+          onTimeout
+        }
+      }, duration)
+      promise.future.onComplete(x => scheduledFuture.cancel(false))
 
-        scheduledFuture
+      scheduledFuture
     }
   }
 
-  def schedule(block: => Unit, duration: Duration) : ScheduledFuture[_] =
+  def schedule(block: => Unit, duration: Duration): ScheduledFuture[_] =
     eventLoopGroup.schedule(new Runnable {
       override def run(): Unit = block
     }, duration.toMillis, TimeUnit.MILLISECONDS)

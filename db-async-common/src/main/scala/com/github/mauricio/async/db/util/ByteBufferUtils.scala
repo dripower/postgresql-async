@@ -22,7 +22,7 @@ import io.netty.buffer.{Unpooled, ByteBuf}
 
 object ByteBufferUtils {
 
-  def writeLength(buffer: ByteBuf) {
+  def writeLength(buffer: ByteBuf): Unit = {
 
     val length = buffer.writerIndex() - 1
     buffer.markWriterIndex()
@@ -38,7 +38,7 @@ object ByteBufferUtils {
     b.writeByte(0)
   }
 
-  def writeSizedString( content : String, b : ByteBuf, charset : Charset ) {
+  def writeSizedString(content: String, b: ByteBuf, charset: Charset): Unit = {
     val bytes = content.getBytes(charset)
     b.writeByte(bytes.length)
     b.writeBytes(bytes)
@@ -48,7 +48,7 @@ object ByteBufferUtils {
     b.markReaderIndex()
 
     var byte: Byte = 0
-    var count = 0
+    var count      = 0
 
     do {
       byte = b.readByte()
@@ -64,19 +64,19 @@ object ByteBufferUtils {
     result
   }
 
-  def readUntilEOF( b : ByteBuf, charset : Charset ) : String = {
-    if ( b.readableBytes() == 0 ) {
+  def readUntilEOF(b: ByteBuf, charset: Charset): String = {
+    if (b.readableBytes() == 0) {
       return ""
     }
 
     b.markReaderIndex()
 
     var byte: Byte = -1
-    var count = 0
-    var offset = 1
+    var count      = 0
+    var offset     = 1
 
     while (byte != 0) {
-      if ( b.readableBytes() > 0 ) {
+      if (b.readableBytes() > 0) {
         byte = b.readByte()
         count += 1
       } else {
@@ -94,28 +94,29 @@ object ByteBufferUtils {
     result
   }
 
-  def read3BytesInt( b : ByteBuf ) : Int = {
-    (b.readByte() & 0xff) | ((b.readByte() & 0xff) << 8) | ((b.readByte() & 0xff) << 16)
+  def read3BytesInt(b: ByteBuf): Int = {
+    (b.readByte() & 0xff) | ((b.readByte() & 0xff) << 8) | ((b
+      .readByte() & 0xff) << 16)
   }
 
-  def write3BytesInt( b : ByteBuf, value : Int ) {
-    b.writeByte( value & 0xff )
-    b.writeByte( value >>> 8 )
-    b.writeByte( value >>> 16 )
+  def write3BytesInt(b: ByteBuf, value: Int): Unit = {
+    b.writeByte(value & 0xff)
+    b.writeByte(value >>> 8)
+    b.writeByte(value >>> 16)
   }
 
-  def writePacketLength(buffer: ByteBuf, sequence : Int = 1) {
+  def writePacketLength(buffer: ByteBuf, sequence: Int = 1): Unit = {
     val length = buffer.writerIndex() - 4
     buffer.markWriterIndex()
     buffer.writerIndex(0)
 
-    write3BytesInt( buffer, length )
+    write3BytesInt(buffer, length)
     buffer.writeByte(sequence)
 
     buffer.resetWriterIndex()
   }
 
-  def packetBuffer( estimate : Int = 1024  ) : ByteBuf = {
+  def packetBuffer(estimate: Int = 1024): ByteBuf = {
     val buffer = mysqlBuffer(estimate)
 
     buffer.writeInt(0)
@@ -123,7 +124,7 @@ object ByteBufferUtils {
     buffer
   }
 
-  def mysqlBuffer( estimate : Int = 1024 ) : ByteBuf = {
+  def mysqlBuffer(estimate: Int = 1024): ByteBuf = {
     Unpooled.buffer(estimate).order(ByteOrder.LITTLE_ENDIAN)
   }
 

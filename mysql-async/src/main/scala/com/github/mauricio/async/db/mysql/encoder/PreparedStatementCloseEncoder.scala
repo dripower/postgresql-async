@@ -24,7 +24,7 @@ import java.nio.charset.Charset
 class PreparedStatementCloseEncoder extends MessageEncoder {
 
   def encode(message: ClientMessage): ByteBuf = {
-    val m = message.asInstanceOf[PreparedStatementCloseMessage]
+    val m      = message.asInstanceOf[PreparedStatementCloseMessage]
     val buffer = ByteBufferUtils.packetBuffer()
     buffer.writeByte(m.kind)
     buffer.writeBytes(m.statementId)

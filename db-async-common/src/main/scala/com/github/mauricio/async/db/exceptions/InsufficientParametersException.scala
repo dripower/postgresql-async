@@ -25,8 +25,8 @@ package com.github.mauricio.async.db.exceptions
  * @param expected the expected count of parameters
  * @param given the collection given
  */
-class InsufficientParametersException( expected : Int, given : Seq[Any] )
-  extends DatabaseException(
-    "The query contains %s parameters but you gave it %s (%s)".format(expected, given.length, given.mkString(",")
+class InsufficientParametersException(expected: Int, given: Seq[Any])
+    extends DatabaseException(
+      "The query contains %s parameters but you gave it %s (%s)"
+        .format(expected, given.length, given.mkString(","))
     )
-  )

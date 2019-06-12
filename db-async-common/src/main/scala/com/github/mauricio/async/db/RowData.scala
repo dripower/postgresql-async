@@ -21,7 +21,6 @@ package com.github.mauricio.async.db
  * Represents a row from a database, allows clients to access rows by column number or column name.
  *
  */
-
 trait RowData extends IndexedSeq[Any] {
 
   /**
@@ -31,8 +30,7 @@ trait RowData extends IndexedSeq[Any] {
    * @param columnNumber
    * @return
    */
-
-  def apply( columnNumber : Int ) : Any
+  def apply(columnNumber: Int): Any
 
   /**
    *
@@ -41,8 +39,7 @@ trait RowData extends IndexedSeq[Any] {
    * @param columnName
    * @return
    */
-
-  def apply( columnName : String ) : Any
+  def apply(columnName: String): Any
 
   /**
    *
@@ -50,7 +47,6 @@ trait RowData extends IndexedSeq[Any] {
    *
    * @return
    */
-
-  def rowNumber : Int
+  def rowNumber: Int
 
 }

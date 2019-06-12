@@ -4,7 +4,10 @@ import java.util.Locale
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.epoll._
-import io.netty.util.internal.logging.{InternalLoggerFactory, Slf4JLoggerFactory}
+import io.netty.util.internal.logging.{
+  InternalLoggerFactory,
+  Slf4JLoggerFactory
+}
 
 /*
  * Copyright 2013 Maurício Linhares
@@ -26,22 +29,22 @@ object NettyUtils {
   InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE)
 
   lazy val DefaultEventLoopGroup = {
-     if(isNativeEpollSupport) {
-       new EpollEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
-     } else {
-       new NioEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
-     }
+    if (isNativeEpollSupport) {
+      new EpollEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
+    } else {
+      new NioEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
+    }
   }
 
-   private def isNativeEpollSupport() = {
-     Epoll.isAvailable()
-   }
+  private def isNativeEpollSupport() = {
+    Epoll.isAvailable()
+  }
 
-   lazy val SocketChannelClass =  {
-     if(isNativeEpollSupport) {
-       classOf[EpollSocketChannel]
-     } else {
-       classOf[NioSocketChannel]
-     }
-   }
+  lazy val SocketChannelClass = {
+    if (isNativeEpollSupport) {
+      classOf[EpollSocketChannel]
+    } else {
+      classOf[NioSocketChannel]
+    }
+  }
 }

@@ -18,8 +18,11 @@ package com.github.mauricio.async.db.general
 
 import com.github.mauricio.async.db.RowData
 
-class ArrayRowData(row : Int, val mapping : Map[String, Int], val columns : Array[Any]) extends RowData
-{
+class ArrayRowData(
+  row: Int,
+  val mapping: Map[String, Int],
+  val columns: Array[Any]
+) extends RowData {
 
   /**
    *
@@ -37,7 +40,7 @@ class ArrayRowData(row : Int, val mapping : Map[String, Int], val columns : Arra
    * @param columnName
    * @return
    */
-  def apply(columnName: String): Any = columns( mapping(columnName) )
+  def apply(columnName: String): Any = columns(mapping(columnName))
 
   /**
    *

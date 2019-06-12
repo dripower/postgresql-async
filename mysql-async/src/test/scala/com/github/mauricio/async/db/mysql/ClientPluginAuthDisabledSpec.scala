@@ -10,5 +10,4 @@ import org.specs2.mutable.Specification
  * Make sure the bootstrap.sh script is run, if it isn't, manually run it yourself.
  *
  */
-
 class ClientPluginAuthDisabledSpec extends Specification with ConnectionHelper
