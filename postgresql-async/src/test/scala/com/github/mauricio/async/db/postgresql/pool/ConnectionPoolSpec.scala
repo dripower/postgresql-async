@@ -20,13 +20,14 @@ import java.util.UUID
 
 import com.github.mauricio.async.db.pool.{ConnectionPool, PoolConfiguration}
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException
-import com.github.mauricio.async.db.postgresql.{PostgreSQLConnection, DatabaseTestHelper}
+import com.github.mauricio.async.db.postgresql.{
+  PostgreSQLConnection,
+  DatabaseTestHelper
+}
 import org.specs2.mutable.Specification
 
 object ConnectionPoolSpec {
   val Insert = "insert into transaction_test (id) values (?)"
 }
 
-class ConnectionPoolSpec extends Specification with DatabaseTestHelper {
-
-}
+class ConnectionPoolSpec extends Specification with DatabaseTestHelper {}

@@ -16,8 +16,16 @@
 
 package com.github.mauricio.async.db.postgresql.pool
 
-import com.github.mauricio.async.db.pool.{AsyncObjectPool, PoolConfiguration, PoolExhaustedException, SingleThreadedAsyncObjectPool}
-import com.github.mauricio.async.db.postgresql.{DatabaseTestHelper, PostgreSQLConnection}
+import com.github.mauricio.async.db.pool.{
+  AsyncObjectPool,
+  PoolConfiguration,
+  PoolExhaustedException,
+  SingleThreadedAsyncObjectPool
+}
+import com.github.mauricio.async.db.postgresql.{
+  DatabaseTestHelper,
+  PostgreSQLConnection
+}
 import java.nio.channels.ClosedChannelException
 import java.util.concurrent.TimeUnit
 
@@ -28,5 +36,6 @@ import scala.concurrent.duration._
 import scala.language.postfixOps
 import com.github.mauricio.async.db.exceptions.ConnectionStillRunningQueryException
 
-class SingleThreadedAsyncObjectPoolSpec extends Specification with DatabaseTestHelper {
-}
+class SingleThreadedAsyncObjectPoolSpec
+    extends Specification
+    with DatabaseTestHelper {}

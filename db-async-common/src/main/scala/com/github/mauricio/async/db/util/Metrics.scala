@@ -5,6 +5,7 @@ import Execution.Implicits.trampoline
 import java.util.concurrent.atomic._
 import java.util.concurrent.TimeUnit
 import org.slf4j._
+import org.slf4j.MDC
 import scala.util._
 import scala.concurrent.Future
 
@@ -58,6 +59,8 @@ object Metrics {
 
   @inline private def logSlow(sql: String, time: Long) = {
     if (time > 50) {
+      MDC.put("sql", sql)
+      MDC.put("cost", time.toString)
       slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms")
     }
   }
@@ -69,6 +72,9 @@ object Metrics {
     val min  = stat.min.get()
     val max  = stat.max.get()
     if (c % 1000 == 0) {
+      MDC.put("sql", key)
+      MDC.put("total", t.toString)
+      MDC.put("times", c.toString)
       metricsLogger.info(
         s"[SQL-$key], count:$c, avg:${t / math.max(1, c)}ms, max:${max}, min:${min}"
       )
