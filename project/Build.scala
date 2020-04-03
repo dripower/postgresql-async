@@ -99,39 +99,6 @@ object Configuration {
     version := commonVersion,
     parallelExecution := false,
     publishArtifact in Test := false,
-    publishMavenStyle := true,
-    pomIncludeRepository := {
-      _ => false
-    },
-    publishTo <<= version {
-      v: String =>
-        val nexus = "https://oss.sonatype.org/"
-        if (v.trim.endsWith("SNAPSHOT"))
-          Some("snapshots" at nexus + "content/repositories/snapshots")
-        else
-          Some("releases" at nexus + "service/local/staging/deploy/maven2")
-    },
-    pomExtra := (
-      <url>https://github.com/mauricio/postgresql-async</url>
-        <licenses>
-          <license>
-            <name>APACHE-2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
-            <distribution>repo</distribution>
-          </license>
-        </licenses>
-        <scm>
-          <url>git@github.com:mauricio/postgresql-netty.git</url>
-          <connection>scm:git:git@github.com:mauricio/postgresql-netty.git</connection>
-        </scm>
-        <developers>
-          <developer>
-            <id>mauricio</id>
-            <name>Maurício Linhares</name>
-            <url>https://github.com/mauricio</url>
-          </developer>
-        </developers>
-      )
   )
 
 }
