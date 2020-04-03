@@ -58,8 +58,14 @@ object Metrics {
 
   @inline private def logSlow(sql: String, time: Long) = {
     if(time > 50) {
-      slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms")
+      slowLogger.info(s"SQL:[${shortKey(sql)},TIME:[${time}]ms")
     }
+  }
+
+  @inline def shortKey(k: String) = {
+    if(k.size > 256) {
+      k.take(256) + "..."
+    } else k
   }
 
   @inline private def logMetrics(key: String) = {
@@ -69,7 +75,7 @@ object Metrics {
     val min = stat.min.get()
     val max = stat.max.get()
     if(c % 1000 == 0) {
-      metricsLogger.info(s"[SQL-$key], count:$c, avg:${t/math.max(1, c)}ms, max:${max}, min:${min}")
+      metricsLogger.info(s"[SQL-${shortKey(key)}], count:$c, avg:${t/math.max(1, c)}ms, max:${max}, min:${min}")
     }
   }
 }
