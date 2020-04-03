@@ -98,7 +98,7 @@ object Configuration {
     organization := "com.dripower",
     version := commonVersion,
     parallelExecution := false,
-    publishArtifact in Test := false,
+    publishArtifact in Test := false
   )
 
 }
