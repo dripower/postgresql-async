@@ -97,6 +97,7 @@ class MySQLConnection(
     if ( this.isConnected ) {
       val hasRunningQuery = this.queryPromise.isDefined
       if (!this.disconnectionPromise.isCompleted && !hasRunningQuery) {
+        log.info(s"[MySQLConnection-close] No query running, close gracefully.")
         val exception = new DatabaseException("Connection is being closed")
         exception.fillInStackTrace()
         this.failQueryPromise(exception)
@@ -110,6 +111,7 @@ class MySQLConnection(
             closeChannel()
         }
       } else if(!this.disconnectionPromise.isCompleted) {
+        log.info(s"[MySQLConnection-close] Found running query, force close channel.")
         val exception = new DatabaseException("Connection is being closed")
         this.failQueryPromise(exception)
         this.connectionHandler.clearQueryState
