@@ -95,7 +95,8 @@ class MySQLConnection(
 
   def close: Future[Connection] = {
     if ( this.isConnected ) {
-      if (!this.disconnectionPromise.isCompleted) {
+      val hasRunningQuery = this.queryPromise.isDefined
+      if (!this.disconnectionPromise.isCompleted && !hasRunningQuery) {
         val exception = new DatabaseException("Connection is being closed")
         exception.fillInStackTrace()
         this.failQueryPromise(exception)
@@ -108,6 +109,8 @@ class MySQLConnection(
             this.disconnectionPromise.tryFailure(exception)
             closeChannel()
         }
+      } else if(!this.disconnectionPromise.isCompleted) {
+        closeChannel()
       }
     } else {
       closeChannel()
