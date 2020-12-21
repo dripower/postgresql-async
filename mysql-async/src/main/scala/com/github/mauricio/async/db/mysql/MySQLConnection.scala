@@ -110,6 +110,9 @@ class MySQLConnection(
             closeChannel()
         }
       } else if(!this.disconnectionPromise.isCompleted) {
+        val exception = new DatabaseException("Connection is being closed")
+        this.failQueryPromise(exception)
+        this.connectionHandler.clearQueryState
         closeChannel()
       }
     } else {
