@@ -30,7 +30,7 @@ class ParserSSpec extends Specification {
 
     "correctly parse a config pair" in {
 
-      val key = "application-name"
+      val key   = "application-name"
       val value = "my-cool-application"
 
       val buffer = Unpooled.buffer()
@@ -40,7 +40,8 @@ class ParserSSpec extends Specification {
       buffer.writeBytes(value.getBytes(Charset.forName("UTF-8")))
       buffer.writeByte(0)
 
-      val content = this.parser.parseMessage(buffer).asInstanceOf[ParameterStatusMessage]
+      val content =
+        this.parser.parseMessage(buffer).asInstanceOf[ParameterStatusMessage]
 
       content.key === key
       content.value === value

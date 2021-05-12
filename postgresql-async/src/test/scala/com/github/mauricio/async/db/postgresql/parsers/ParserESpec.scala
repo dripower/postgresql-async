@@ -28,13 +28,15 @@ class ParserESpec extends Specification {
     "correctly parse an error message" in {
 
       val content = "this is my error message"
-      val error = content.getBytes(CharsetUtil.UTF_8)
-      val buffer = Unpooled.buffer()
+      val error   = content.getBytes(CharsetUtil.UTF_8)
+      val buffer  = Unpooled.buffer()
       buffer.writeByte('M')
       buffer.writeBytes(error)
       buffer.writeByte(0)
 
-      val message = new ErrorParser(CharsetUtil.UTF_8).parseMessage(buffer).asInstanceOf[ErrorMessage]
+      val message = new ErrorParser(CharsetUtil.UTF_8)
+        .parseMessage(buffer)
+        .asInstanceOf[ErrorMessage]
 
       message.message === content
       message.kind === ServerMessage.Error

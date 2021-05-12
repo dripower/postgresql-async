@@ -29,6 +29,45 @@ case class Stat(
 
 object Metrics {
 
+  private final val FieldsRegex =
+    "(?i)SELECT\\s*((\\S+\\.)?(\\S+)\\s*\\,\\s*(\\S+\\.)?(\\S+))\\s*FROM".r
+
+  private def digestRowNames(sql: String): String = {
+    FieldsRegex.replaceAllIn(
+      sql,
+      { m =>
+        val g     = m.group(1)
+        val count = g.count(_ == ',')
+        if (count < 3) {
+          g
+        } else {
+          val first = g.takeWhile(_ != ',')
+          s"SELECT ${first}(...${count}) FROM"
+        }
+      }
+    )
+  }
+
+  private final val InsertValuesPart =
+    "(?im)VALUES\\s*\\([^\\)]+\\)\\s*(\\,\\s*\\([^\\)]+\\)\\s*)*".r
+
+  private def digestInsert(sql: String) = {
+    InsertValuesPart.replaceAllIn(
+      sql,
+      { m =>
+        s"VALUES [${m.groupCount} rows of data]"
+      }
+    )
+  }
+
+  private def normalize(sql: String) = {
+    if (sql.contains("SELECT") || sql.contains("select")) {
+      digestRowNames(sql)
+    } else if (sql.trim.startsWith("INSERT") || sql.trim.startsWith("insert")) {
+      digestInsert(sql)
+    } else sql
+  }
+
   private val metricsLogger = LoggerFactory.getLogger("async.metrics")
   private val slowLogger    = LoggerFactory.getLogger("async.slow")
 
@@ -42,7 +81,8 @@ object Metrics {
       }
     })
 
-  def stat[T](key: String)(f: => Future[T]) = {
+  def stat[T](sql: String)(f: => Future[T]) = {
+    val key   = normalize(sql)
     val start = System.currentTimeMillis()
     val fut   = f
     fut.onComplete {

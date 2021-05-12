@@ -28,7 +28,12 @@ class MutableResultSetSpec extends Specification {
   val charset = CharsetUtil.UTF_8
   val decoder = new PostgreSQLColumnDecoderRegistry
 
-  def create(name: String, dataType: Int, columnNumber: Int = 0, dataTypeSize: Int = -1) = new PostgreSQLColumnData(
+  def create(
+    name: String,
+    dataType: Int,
+    columnNumber: Int = 0,
+    dataTypeSize: Int = -1
+  ) = new PostgreSQLColumnData(
     name = name,
     tableObjectId = 0,
     columnNumber = columnNumber,
@@ -55,7 +60,7 @@ class MutableResultSetSpec extends Specification {
         )
       )
 
-      val text = "some data"
+      val text      = "some data"
       val otherText = "some other data"
 
       val resultSet = new MutableResultSet(columns)
@@ -88,7 +93,9 @@ class MutableResultSetSpec extends Specification {
       )
       val resultSet = new MutableResultSet(columns)
 
-      resultSet.columnNames must contain(allOf("id", "name", "birthday", "created_at", "updated_at")).inOrder
+      resultSet.columnNames must contain(
+        allOf("id", "name", "birthday", "created_at", "updated_at")
+      ).inOrder
     }
 
   }

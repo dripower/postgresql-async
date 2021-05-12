@@ -134,9 +134,9 @@ abstract class AbstractURIParser {
         val builder = Map.newBuilder[String, String]
         builder ++= userInfo._1.map(USERNAME -> _)
         builder ++= userInfo._2.map(PASSWORD -> _)
-        builder ++= port.map(PORT            -> _.toString)
-        builder ++= db.map(DBNAME            -> _)
-        builder ++= host.map(HOST            -> unwrapIpv6address(_))
+        builder ++= port.map(PORT -> _.toString)
+        builder ++= db.map(DBNAME -> _)
+        builder ++= host.map(HOST -> unwrapIpv6address(_))
 
         // Parse query string parameters and just append them, overriding anything previously set
         builder ++= (for {

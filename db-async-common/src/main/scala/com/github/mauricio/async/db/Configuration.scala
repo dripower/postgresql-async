@@ -36,7 +36,6 @@ object Configuration {
 }
 
 /**
- *
  * Contains the configuration necessary to connect to a database.
  *
  * @param username database username
@@ -55,7 +54,6 @@ object Configuration {
  * @param connectTimeout the timeout for connecting to servers
  * @param testTimeout the timeout for connection tests performed by pools
  * @param queryTimeout the optional query timeout
- *
  */
 case class Configuration(
   username: String,

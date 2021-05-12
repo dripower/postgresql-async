@@ -25,7 +25,6 @@ class ArrayRowData(
 ) extends RowData {
 
   /**
-   *
    * Returns a column value by it's position in the originating query.
    *
    * @param columnNumber
@@ -34,7 +33,6 @@ class ArrayRowData(
   def apply(columnNumber: Int): Any = columns(columnNumber)
 
   /**
-   *
    * Returns a column value by it's name in the originating query.
    *
    * @param columnName
@@ -43,7 +41,6 @@ class ArrayRowData(
   def apply(columnName: String): Any = columns(mapping(columnName))
 
   /**
-   *
    * Number of this row in the query results. Counts start at 0.
    *
    * @return

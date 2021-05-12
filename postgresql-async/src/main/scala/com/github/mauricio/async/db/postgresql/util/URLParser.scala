@@ -1,5 +1,4 @@
 /**
- *
  */
 package com.github.mauricio.async.db.postgresql.util
 

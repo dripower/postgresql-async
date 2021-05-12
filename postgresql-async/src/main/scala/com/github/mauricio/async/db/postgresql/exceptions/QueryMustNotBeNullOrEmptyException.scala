@@ -19,7 +19,6 @@ package com.github.mauricio.async.db.postgresql.exceptions
 import com.github.mauricio.async.db.exceptions.DatabaseException
 
 /**
- *
  * Raised if the query string is null or empty.
  *
  * @param query the problematic query

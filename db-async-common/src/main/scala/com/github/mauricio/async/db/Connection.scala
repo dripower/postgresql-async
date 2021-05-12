@@ -19,7 +19,6 @@ package com.github.mauricio.async.db
 import concurrent.Future
 
 /**
- *
  * Base interface for all objects that behave like a connection. This trait will usually be implemented by the
  * objects that connect to a database, either over the filesystem or sockets. {@link Connection} are not supposed
  * to be thread-safe and clients should assume implementations **are not** thread safe and shouldn't try to perform
@@ -39,12 +38,10 @@ import concurrent.Future
  *
  *   val queryResult: QueryResult = Await.result(result, Duration(5, SECONDS))
  * }}}
- *
  */
 trait Connection {
 
   /**
-   *
    * Disconnects this object. You should discard this object after calling this method. No more queries
    * will be accepted.
    *
@@ -53,7 +50,6 @@ trait Connection {
   def disconnect: Future[Connection]
 
   /**
-   *
    * Connects this object to the database. Connection objects are not necessarily created with a connection to the
    * database so you might have to call this method to be able to run queries against it.
    *
@@ -62,7 +58,6 @@ trait Connection {
   def connect: Future[Connection]
 
   /**
-   *
    * Checks whether we are still connected to the database.
    *
    * @return
@@ -70,7 +65,6 @@ trait Connection {
   def isConnected: Boolean
 
   /**
-   *
    * Sends a statement to the database. The statement can be anything your database can execute. Not all statements
    * will return a collection of rows, so check the returned object if there are rows available.
    *
@@ -80,7 +74,6 @@ trait Connection {
   def sendQuery(query: String): Future[QueryResult]
 
   /**
-   *
    * Sends a prepared statement to the database. Prepared statements are special statements that are pre-compiled
    * by the database to run faster, they also allow you to avoid SQL injection attacks by not having to concatenate
    * strings from possibly unsafe sources (like users) and sending them directy to the database.
@@ -113,7 +106,6 @@ trait Connection {
   ): Future[QueryResult]
 
   /**
-   *
    * Executes an (asynchronous) function within a transaction block.
    * If the function completes successfully, the transaction is committed, otherwise it is aborted.
    *

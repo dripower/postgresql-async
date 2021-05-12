@@ -37,7 +37,6 @@ object HexCodec {
   }
 
   /**
-   *
    * Turns a HEX based char sequence into a Byte array
    *
    * @param value
@@ -73,7 +72,6 @@ object HexCodec {
   }
 
   /**
-   *
    * Encodes a byte array into a String encoded with Hex values.
    *
    * @param bytes
@@ -97,9 +95,9 @@ object HexCodec {
     var i          = 0
 
     while (i < dataLength) {
-      chars(j) = Digits((0xF0 & bytes(i)) >>> 4)
+      chars(j) = Digits((0xf0 & bytes(i)) >>> 4)
       j += 1
-      chars(j) = Digits(0x0F & bytes(i))
+      chars(j) = Digits(0x0f & bytes(i))
       j += 1
       i += 1
     }

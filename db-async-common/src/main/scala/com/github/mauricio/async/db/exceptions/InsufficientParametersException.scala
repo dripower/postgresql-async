@@ -17,7 +17,6 @@
 package com.github.mauricio.async.db.exceptions
 
 /**
- *
  * Raised when the user gives more or less parameters than the query takes. Each parameter is a ?
  * (question mark) in the query string. The count of ? should be the same as the count of items in the provided
  * sequence of parameters.

@@ -21,7 +21,6 @@ import com.github.mauricio.async.db.{QueryResult, Connection}
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- *
  * Pool specialized in database connections that also simplifies connection handling by
  * implementing the [[com.github.mauricio.async.db.Connection]] trait and saving clients from having to implement
  * the "give back" part of pool management. This lets you do your job without having to worry
@@ -44,7 +43,6 @@ class ConnectionPool[T <: Connection](
     with Connection {
 
   /**
-   *
    * Closes the pool, you should discard the object.
    *
    * @return
@@ -57,7 +55,6 @@ class ConnectionPool[T <: Connection](
     }
 
   /**
-   *
    * Always returns an empty map.
    *
    * @return
@@ -67,7 +64,6 @@ class ConnectionPool[T <: Connection](
   def isConnected: Boolean = !this.isClosed
 
   /**
-   *
    * Picks one connection and runs this query against it. The query should be stateless, it should not
    * start transactions and should not leave anything to be cleaned up in the future. The behavior of this
    * object is undefined if you start a transaction from this method.
@@ -79,7 +75,6 @@ class ConnectionPool[T <: Connection](
     this.use(_.sendQuery(query))(executionContext)
 
   /**
-   *
    * Picks one connection and runs this query against it. The query should be stateless, it should not
    * start transactions and should not leave anything to be cleaned up in the future. The behavior of this
    * object is undefined if you start a transaction from this method.
@@ -95,7 +90,6 @@ class ConnectionPool[T <: Connection](
     this.use(_.sendPreparedStatement(query, values))(executionContext)
 
   /**
-   *
    * Picks one connection and executes an (asynchronous) function on it within a transaction block.
    * If the function completes successfully, the transaction is committed, otherwise it is aborted.
    * Either way, the connection is returned to the pool on completion.

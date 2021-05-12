@@ -157,7 +157,9 @@ class MySQLConnectionHandler(
           case ServerMessage.ColumnDefinition => {
             val message = m.asInstanceOf[ColumnDefinitionMessage]
 
-            if (currentPreparedStatementHolder != null && this.currentPreparedStatementHolder.needsAny) {
+            if (
+              currentPreparedStatementHolder != null && this.currentPreparedStatementHolder.needsAny
+            ) {
               this.currentPreparedStatementHolder.add(message)
             }
 
@@ -473,9 +475,13 @@ class MySQLConnectionHandler(
     this.currentContext
       .channel()
       .eventLoop()
-      .schedule(new Runnable {
-        override def run(): Unit = block
-      }, duration.toMillis, TimeUnit.MILLISECONDS)
+      .schedule(
+        new Runnable {
+          override def run(): Unit = block
+        },
+        duration.toMillis,
+        TimeUnit.MILLISECONDS
+      )
   }
 
 }

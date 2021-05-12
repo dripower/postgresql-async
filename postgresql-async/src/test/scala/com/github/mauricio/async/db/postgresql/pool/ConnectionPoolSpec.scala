@@ -27,6 +27,4 @@ object ConnectionPoolSpec {
   val Insert = "insert into transaction_test (id) values (?)"
 }
 
-class ConnectionPoolSpec extends Specification with DatabaseTestHelper {
-
-}
+class ConnectionPoolSpec extends Specification with DatabaseTestHelper {}

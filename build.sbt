@@ -5,10 +5,10 @@ val nettyVersion          = "4.1.34.Final"
 val commonVersion         = "0.3.109"
 val projectScalaVersion   = "2.11.12"
 val specs2Version         = "4.5.1"
-val specs2Dependency      = "org.specs2" %% "specs2-core" % specs2Version % "test"
-val specs2JunitDependency = "org.specs2" %% "specs2-junit" % specs2Version % "test"
-val specs2MockDependency  = "org.specs2" %% "specs2-mock" % specs2Version % "test"
-val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8" % "test"
+val specs2Dependency      = "org.specs2"    %% "specs2-core"     % specs2Version % "test"
+val specs2JunitDependency = "org.specs2"    %% "specs2-junit"    % specs2Version % "test"
+val specs2MockDependency  = "org.specs2"    %% "specs2-mock"     % specs2Version % "test"
+val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8"       % "test"
 
 lazy val root = (project in file("."))
   .settings(baseSettings: _*)

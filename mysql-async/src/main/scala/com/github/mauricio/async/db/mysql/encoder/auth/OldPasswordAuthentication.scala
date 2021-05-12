@@ -30,7 +30,7 @@ object OldPasswordAuthentication extends AuthenticationMethod {
 
     val pw    = newHash(seed)
     val msg   = newHash(password)
-    val max   = 0X3FFFFFFFL
+    val max   = 0x3fffffffL
     var seed1 = (pw._1 ^ msg._1) % max
     var seed2 = (pw._2 ^ msg._2) % max
     val chars = new Array[Char](seed.length)
@@ -65,7 +65,7 @@ object OldPasswordAuthentication extends AuthenticationMethod {
   private def newHash(password: String): (Long, Long) = {
     var nr  = 1345345333L
     var add = 7L
-    var nr2 = 0X12345671L
+    var nr2 = 0x12345671L
     var tmp = 0L
 
     password.foreach { c =>
@@ -77,7 +77,7 @@ object OldPasswordAuthentication extends AuthenticationMethod {
       }
     }
 
-    (nr & 0X7FFFFFFFL, nr2 & 0X7FFFFFFFL)
+    (nr & 0x7fffffffL, nr2 & 0x7fffffffL)
   }
 
 }

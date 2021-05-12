@@ -36,7 +36,6 @@ object PostgreSQLConnectionFactory {
 }
 
 /**
- *
  * Object responsible for creating new connection instances.
  *
  * @param configuration
@@ -63,7 +62,6 @@ class PostgreSQLConnectionFactory(
   }
 
   /**
-   *
    * Validates by checking if the connection is still connected to the database or not.
    *
    * @param item an object produced by this pool
@@ -85,7 +83,6 @@ class PostgreSQLConnectionFactory(
   }
 
   /**
-   *
    * Tests whether we can still send a **SELECT 0** statement to the database.
    *
    * @param item an object produced by this pool

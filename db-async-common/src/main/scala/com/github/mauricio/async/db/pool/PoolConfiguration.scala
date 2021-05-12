@@ -21,7 +21,6 @@ object PoolConfiguration {
 }
 
 /**
- *
  * Defines specific pieces of a pool's behavior.
  *
  * @param maxObjects how many objects this pool will hold
