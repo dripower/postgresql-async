@@ -29,8 +29,10 @@ case class Stat(
 
 object Metrics {
 
-  private final val FieldsRegex =
-    "(?i)SELECT\\s*((\\S+\\.)?(\\S+)\\s*\\,\\s*(\\S+\\.)?(\\S+))\\s*FROM".r
+  private final val FieldsRegex = {
+    val ident = "([\\S^\\,]+\\.)?[\\S^\\,]+"
+    s"(?i)SELECT\\s*(${ident}(\\s*\\,\\s*${ident})*)\\s+FROM".r
+  }
 
   private def digestRowNames(sql: String): String = {
     FieldsRegex.replaceAllIn(
@@ -42,20 +44,22 @@ object Metrics {
           g
         } else {
           val first = g.takeWhile(_ != ',')
-          s"SELECT ${first}(...${count}) FROM"
+          s"SELECT ${first},... FROM"
         }
       }
     )
   }
 
-  private final val InsertValuesPart =
-    "(?im)VALUES\\s*\\([^\\)]+\\)\\s*(\\,\\s*\\([^\\)]+\\)\\s*)*".r
+  private final val InsertValuesPart = {
+    val rowExpr = "\\s*\\([^\\)]+\\)\\s*"
+    s"(?im)VALUES(${rowExpr}(\\,${rowExpr})*)".r
+  }
 
   private def digestInsert(sql: String) = {
     InsertValuesPart.replaceAllIn(
       sql,
       { m =>
-        s"VALUES [${m.groupCount} rows of data]"
+        "VALUES (...) "
       }
     )
   }
@@ -68,8 +72,8 @@ object Metrics {
     } else sql
   }
 
-  private val metricsLogger = LoggerFactory.getLogger("async.metrics")
-  private val slowLogger    = LoggerFactory.getLogger("async.slow")
+  private val metricsLogger = LoggerFactory.getLogger("async.sql.log.metrics")
+  private val slowLogger    = LoggerFactory.getLogger("async.sql.log.slow")
 
   val stats = CacheBuilder
     .newBuilder()
