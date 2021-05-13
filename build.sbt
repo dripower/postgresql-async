@@ -2,8 +2,8 @@ val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
 val nettyVersion          = "4.1.63.Final"
-val commonVersion         = "0.3.110"
-val projectScalaVersion   = "2.11.12"
+val commonVersion         = "0.3.111"
+val projectScalaVersion   = "2.12.13"
 val specs2Version         = "4.5.1"
 val specs2Dependency      = "org.specs2"    %% "specs2-core"     % specs2Version % "test"
 val specs2JunitDependency = "org.specs2"    %% "specs2-junit"    % specs2Version % "test"
@@ -65,7 +65,7 @@ val implementationDependencies = Seq(
 )
 
 val baseSettings = Seq(
-  crossScalaVersions := Seq("2.11.12", "2.12.8", "2.13.0"),
+  crossScalaVersions := Seq("2.12.13", "2.13.5"),
   testOptions in Test += Tests.Argument("sequential"),
   scalaVersion := "2.13.0",
   scalacOptions :=

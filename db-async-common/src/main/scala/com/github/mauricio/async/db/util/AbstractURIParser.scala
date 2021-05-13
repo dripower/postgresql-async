@@ -149,7 +149,7 @@ abstract class AbstractURIParser {
           "UTF-8"
         ))
 
-        builder.result
+        builder.result()
       case "jdbc" =>
         handleJDBC(uri)
       case _ =>
