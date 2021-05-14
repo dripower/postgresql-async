@@ -17,8 +17,10 @@
 package com.github.mauricio.async.db.postgresql.messages.backend
 
 import com.github.mauricio.async.db.general.ColumnData
+import com.google.common.cache._
+import java.util.concurrent.TimeUnit
 
-case class PostgreSQLColumnData(
+case class PostgreSQLColumnData private (
   name: String,
   tableObjectId: Int,
   columnNumber: Int,
@@ -27,3 +29,36 @@ case class PostgreSQLColumnData(
   dataTypeModifier: Int,
   fieldFormat: Int
 ) extends ColumnData
+
+object PostgreSQLColumnData {
+  private val colNameCache: LoadingCache[String, String] = CacheBuilder
+    .newBuilder()
+    .maximumSize(10000)
+    .expireAfterAccess(60, TimeUnit.SECONDS)
+    .build(
+      new CacheLoader[String, String] {
+        def load(k: String) = k
+      }
+    )
+
+  def apply(
+    name: String,
+    tableObjectId: Int,
+    columnNumber: Int,
+    dataType: Int,
+    dataTypeSize: Long,
+    dataTypeModifier: Int,
+    fieldFormat: Int
+  ): PostgreSQLColumnData = {
+    val cachedName = colNameCache.get(name)
+    new PostgreSQLColumnData(
+      cachedName,
+      tableObjectId,
+      columnNumber,
+      dataType,
+      dataTypeSize,
+      dataTypeModifier,
+      fieldFormat
+    )
+  }
+}

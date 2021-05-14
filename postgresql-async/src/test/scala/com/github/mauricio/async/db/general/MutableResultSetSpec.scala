@@ -33,7 +33,7 @@ class MutableResultSetSpec extends Specification {
     dataType: Int,
     columnNumber: Int = 0,
     dataTypeSize: Int = -1
-  ) = new PostgreSQLColumnData(
+  ) = PostgreSQLColumnData(
     name = name,
     tableObjectId = 0,
     columnNumber = columnNumber,
