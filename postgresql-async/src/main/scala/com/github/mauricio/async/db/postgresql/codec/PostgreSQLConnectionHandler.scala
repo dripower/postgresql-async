@@ -18,10 +18,7 @@ package com.github.mauricio.async.db.postgresql.codec
 
 import com.github.mauricio.async.db.Configuration
 import com.github.mauricio.async.db.SSLConfiguration.Mode
-import com.github.mauricio.async.db.column.{
-  ColumnDecoderRegistry,
-  ColumnEncoderRegistry
-}
+import com.github.mauricio.async.db.column.{ColumnDecoderRegistry, ColumnEncoderRegistry}
 import com.github.mauricio.async.db.postgresql.exceptions._
 import com.github.mauricio.async.db.postgresql.messages.backend._
 import com.github.mauricio.async.db.postgresql.messages.frontend._

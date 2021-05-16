@@ -8,8 +8,7 @@ class PartitionedConnectionPool[T <: Connection](
   factory: ObjectFactory[T],
   configuration: PoolConfiguration,
   numberOfPartitions: Int,
-  executionContext: ExecutionContext =
-    ExecutorServiceUtils.CachedExecutionContext
+  executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
 ) extends PartitionedAsyncObjectPool[T](
       factory,
       configuration,

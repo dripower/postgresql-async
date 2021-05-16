@@ -31,8 +31,7 @@ object MessageEncoder {
   val log = Log.get[MessageEncoder]
 }
 
-class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry)
-    extends MessageToMessageEncoder[Object] {
+class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) extends MessageToMessageEncoder[Object] {
 
   import MessageEncoder.log
 

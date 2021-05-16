@@ -16,5 +16,4 @@
 
 package com.github.mauricio.async.db.postgresql.messages.backend
 
-class ErrorMessage(fields: Map[Char, String])
-    extends InformationMessage(ServerMessage.Error, fields)
+class ErrorMessage(fields: Map[Char, String]) extends InformationMessage(ServerMessage.Error, fields)

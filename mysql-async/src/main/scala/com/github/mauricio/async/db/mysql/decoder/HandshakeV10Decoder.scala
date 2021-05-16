@@ -19,10 +19,7 @@ package com.github.mauricio.async.db.mysql.decoder
 import java.nio.charset.Charset
 
 import com.github.mauricio.async.db.mysql.encoder.auth.AuthenticationMethod
-import com.github.mauricio.async.db.mysql.message.server.{
-  HandshakeMessage,
-  ServerMessage
-}
+import com.github.mauricio.async.db.mysql.message.server.{HandshakeMessage, ServerMessage}
 import com.github.mauricio.async.db.util.ChannelWrapper.bufferToWrapper
 import com.github.mauricio.async.db.util.Log
 import io.netty.buffer.ByteBuf

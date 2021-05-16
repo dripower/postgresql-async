@@ -25,5 +25,4 @@ object ByteArrayFormatNotSupportedException {
 
 }
 
-class ByteArrayFormatNotSupportedException
-    extends DatabaseException(ByteArrayFormatNotSupportedException.Message)
+class ByteArrayFormatNotSupportedException extends DatabaseException(ByteArrayFormatNotSupportedException.Message)

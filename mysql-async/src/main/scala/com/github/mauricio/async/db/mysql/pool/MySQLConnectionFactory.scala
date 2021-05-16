@@ -37,8 +37,7 @@ object MySQLConnectionFactory {
  *
  * @param configuration a valid configuration to connect to a MySQL server.
  */
-class MySQLConnectionFactory(configuration: Configuration)
-    extends ObjectFactory[MySQLConnection] {
+class MySQLConnectionFactory(configuration: Configuration) extends ObjectFactory[MySQLConnection] {
 
   import MySQLConnectionFactory.log
 

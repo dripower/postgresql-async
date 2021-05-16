@@ -25,9 +25,7 @@ import com.github.mauricio.async.db.column._
 import com.github.mauricio.async.db.column.{ByteDecoder => TextByteDecoder}
 import com.github.mauricio.async.db.mysql.binary.decoder.ByteDecoder
 import com.github.mauricio.async.db.mysql.binary.decoder.TimeDecoder
-import com.github.mauricio.async.db.mysql.column.{
-  TimeDecoder => TextTimeDecoder
-}
+import com.github.mauricio.async.db.mysql.column.{TimeDecoder => TextTimeDecoder}
 
 class DecoderRegistry(charset: Charset) {
 
@@ -39,10 +37,8 @@ class DecoderRegistry(charset: Charset) {
     (columnType: @switch) match {
       case ColumnTypes.FIELD_TYPE_VARCHAR | ColumnTypes.FIELD_TYPE_ENUM =>
         this.stringDecoder
-      case ColumnTypes.FIELD_TYPE_BLOB | ColumnTypes.FIELD_TYPE_LONG_BLOB |
-          ColumnTypes.FIELD_TYPE_MEDIUM_BLOB |
-          ColumnTypes.FIELD_TYPE_TINY_BLOB | ColumnTypes.FIELD_TYPE_VAR_STRING |
-          ColumnTypes.FIELD_TYPE_STRING => {
+      case ColumnTypes.FIELD_TYPE_BLOB | ColumnTypes.FIELD_TYPE_LONG_BLOB | ColumnTypes.FIELD_TYPE_MEDIUM_BLOB |
+          ColumnTypes.FIELD_TYPE_TINY_BLOB | ColumnTypes.FIELD_TYPE_VAR_STRING | ColumnTypes.FIELD_TYPE_STRING => {
         if (charsetCode == CharsetMapper.Binary) {
           ByteArrayDecoder
         } else {
@@ -58,8 +54,7 @@ class DecoderRegistry(charset: Charset) {
       case ColumnTypes.FIELD_TYPE_TINY   => ByteDecoder
       case ColumnTypes.FIELD_TYPE_DOUBLE => DoubleDecoder
       case ColumnTypes.FIELD_TYPE_FLOAT  => FloatDecoder
-      case ColumnTypes.FIELD_TYPE_NUMERIC | ColumnTypes.FIELD_TYPE_DECIMAL |
-          ColumnTypes.FIELD_TYPE_NEW_DECIMAL =>
+      case ColumnTypes.FIELD_TYPE_NUMERIC | ColumnTypes.FIELD_TYPE_DECIMAL | ColumnTypes.FIELD_TYPE_NEW_DECIMAL =>
         this.bigDecimalDecoder
       case ColumnTypes.FIELD_TYPE_DATETIME | ColumnTypes.FIELD_TYPE_TIMESTAMP =>
         TimestampDecoder
@@ -74,8 +69,7 @@ class DecoderRegistry(charset: Charset) {
       case ColumnTypes.FIELD_TYPE_DATE => DateEncoderDecoder
       case ColumnTypes.FIELD_TYPE_DATETIME | ColumnTypes.FIELD_TYPE_TIMESTAMP =>
         LocalDateTimeEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_DECIMAL | ColumnTypes.FIELD_TYPE_NEW_DECIMAL |
-          ColumnTypes.FIELD_TYPE_NUMERIC =>
+      case ColumnTypes.FIELD_TYPE_DECIMAL | ColumnTypes.FIELD_TYPE_NEW_DECIMAL | ColumnTypes.FIELD_TYPE_NUMERIC =>
         BigDecimalEncoderDecoder
       case ColumnTypes.FIELD_TYPE_DOUBLE   => DoubleEncoderDecoder
       case ColumnTypes.FIELD_TYPE_FLOAT    => FloatEncoderDecoder
@@ -90,8 +84,7 @@ class DecoderRegistry(charset: Charset) {
         StringEncoderDecoder
       case ColumnTypes.FIELD_TYPE_YEAR => ShortEncoderDecoder
       case ColumnTypes.FIELD_TYPE_BIT  => ByteArrayColumnDecoder
-      case ColumnTypes.FIELD_TYPE_BLOB | ColumnTypes.FIELD_TYPE_VAR_STRING |
-          ColumnTypes.FIELD_TYPE_STRING => {
+      case ColumnTypes.FIELD_TYPE_BLOB | ColumnTypes.FIELD_TYPE_VAR_STRING | ColumnTypes.FIELD_TYPE_STRING => {
         if (charsetCode == CharsetMapper.Binary) {
           ByteArrayColumnDecoder
         } else {

@@ -157,9 +157,7 @@ class MySQLConnectionHandler(
           case ServerMessage.ColumnDefinition => {
             val message = m.asInstanceOf[ColumnDefinitionMessage]
 
-            if (
-              currentPreparedStatementHolder != null && this.currentPreparedStatementHolder.needsAny
-            ) {
+            if (currentPreparedStatementHolder != null && this.currentPreparedStatementHolder.needsAny) {
               this.currentPreparedStatementHolder.add(message)
             }
 

@@ -18,5 +18,4 @@ package com.github.mauricio.async.db.postgresql.messages.backend
 
 import io.netty.buffer.ByteBuf
 
-case class DataRowMessage(val values: Array[ByteBuf])
-    extends ServerMessage(ServerMessage.DataRow)
+case class DataRowMessage(val values: Array[ByteBuf]) extends ServerMessage(ServerMessage.DataRow)

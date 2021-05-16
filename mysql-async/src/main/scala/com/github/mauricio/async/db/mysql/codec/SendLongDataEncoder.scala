@@ -1,9 +1,6 @@
 package com.github.mauricio.async.db.mysql.codec
 
-import com.github.mauricio.async.db.mysql.message.client.{
-  ClientMessage,
-  SendLongDataMessage
-}
+import com.github.mauricio.async.db.mysql.message.client.{ClientMessage, SendLongDataMessage}
 import com.github.mauricio.async.db.util.{ByteBufferUtils, Log}
 import io.netty.buffer.Unpooled
 import io.netty.channel.ChannelHandlerContext

@@ -42,8 +42,7 @@ object PostgreSQLConnectionFactory {
  */
 class PostgreSQLConnectionFactory(
   val configuration: Configuration,
-  executionContext: ExecutionContext =
-    ExecutorServiceUtils.CachedExecutionContext
+  executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
 ) extends ObjectFactory[PostgreSQLConnection] {
 
   import PostgreSQLConnectionFactory.log

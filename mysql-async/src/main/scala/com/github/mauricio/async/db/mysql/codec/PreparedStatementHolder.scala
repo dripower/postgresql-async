@@ -16,10 +16,7 @@
 
 package com.github.mauricio.async.db.mysql.codec
 
-import com.github.mauricio.async.db.mysql.message.server.{
-  ColumnDefinitionMessage,
-  PreparedStatementPrepareResponse
-}
+import com.github.mauricio.async.db.mysql.message.server.{ColumnDefinitionMessage, PreparedStatementPrepareResponse}
 import scala.collection.mutable.ArrayBuffer
 
 class PreparedStatementHolder(

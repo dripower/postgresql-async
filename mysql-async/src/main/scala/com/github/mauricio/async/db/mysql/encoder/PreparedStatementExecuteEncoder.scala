@@ -19,15 +19,11 @@ package com.github.mauricio.async.db.mysql.encoder
 import io.netty.buffer.{ByteBuf, Unpooled}
 import com.github.mauricio.async.db.mysql.column.ColumnTypes
 import com.github.mauricio.async.db.mysql.binary.BinaryRowEncoder
-import com.github.mauricio.async.db.mysql.message.client.{
-  PreparedStatementExecuteMessage,
-  ClientMessage
-}
+import com.github.mauricio.async.db.mysql.message.client.{PreparedStatementExecuteMessage, ClientMessage}
 import com.github.mauricio.async.db.util.ByteBufferUtils
 import scala.collection.Seq
 
-class PreparedStatementExecuteEncoder(rowEncoder: BinaryRowEncoder)
-    extends MessageEncoder {
+class PreparedStatementExecuteEncoder(rowEncoder: BinaryRowEncoder) extends MessageEncoder {
 
   def encode(message: ClientMessage): ByteBuf = {
     val m = message.asInstanceOf[PreparedStatementExecuteMessage]
@@ -61,8 +57,7 @@ class PreparedStatementExecuteEncoder(rowEncoder: BinaryRowEncoder)
     while (index < values.length) {
       val value = values(index)
       if (value == null || value == None) {
-        nullBits(index / 8) =
-          (nullBits(index / 8) | (1 << (index & 7))).asInstanceOf[Byte]
+        nullBits(index / 8) = (nullBits(index / 8) | (1 << (index & 7))).asInstanceOf[Byte]
         parameterTypesBuffer.writeShort(ColumnTypes.FIELD_TYPE_NULL)
       } else {
         value match {

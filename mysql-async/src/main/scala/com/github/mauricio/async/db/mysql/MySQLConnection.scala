@@ -20,10 +20,7 @@ import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
 
 import com.github.mauricio.async.db._
 import com.github.mauricio.async.db.exceptions._
-import com.github.mauricio.async.db.mysql.codec.{
-  MySQLConnectionHandler,
-  MySQLHandlerDelegate
-}
+import com.github.mauricio.async.db.mysql.codec.{MySQLConnectionHandler, MySQLHandlerDelegate}
 import com.github.mauricio.async.db.mysql.exceptions.MySQLException
 import com.github.mauricio.async.db.mysql.message.client._
 import com.github.mauricio.async.db.mysql.message.server._
@@ -45,8 +42,7 @@ object MySQLConnection {
 class MySQLConnection(
   configuration: Configuration,
   charsetMapper: CharsetMapper = CharsetMapper.Instance,
-  implicit val executionContext: ExecutionContext =
-    ExecutorServiceUtils.CachedExecutionContext
+  implicit val executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
 ) extends MySQLHandlerDelegate
     with Connection
     with TimeoutScheduler {

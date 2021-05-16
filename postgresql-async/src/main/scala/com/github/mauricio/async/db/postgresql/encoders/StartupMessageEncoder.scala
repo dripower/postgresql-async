@@ -16,10 +16,7 @@
 
 package com.github.mauricio.async.db.postgresql.encoders
 
-import com.github.mauricio.async.db.postgresql.messages.frontend.{
-  ClientMessage,
-  StartupMessage
-}
+import com.github.mauricio.async.db.postgresql.messages.frontend.{ClientMessage, StartupMessage}
 import com.github.mauricio.async.db.util.ByteBufferUtils
 import java.nio.charset.Charset
 import io.netty.buffer.{Unpooled, ByteBuf}

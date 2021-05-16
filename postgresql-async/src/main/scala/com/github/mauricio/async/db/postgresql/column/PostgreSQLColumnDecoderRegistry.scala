@@ -28,8 +28,7 @@ object PostgreSQLColumnDecoderRegistry {
   val Instance = new PostgreSQLColumnDecoderRegistry()
 }
 
-class PostgreSQLColumnDecoderRegistry(charset: Charset = CharsetUtil.UTF_8)
-    extends ColumnDecoderRegistry {
+class PostgreSQLColumnDecoderRegistry(charset: Charset = CharsetUtil.UTF_8) extends ColumnDecoderRegistry {
 
   private final val stringArrayDecoder = new ArrayDecoder(StringEncoderDecoder)
   private final val booleanArrayDecoder = new ArrayDecoder(

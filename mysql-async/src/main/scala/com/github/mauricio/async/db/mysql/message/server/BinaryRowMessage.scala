@@ -18,5 +18,4 @@ package com.github.mauricio.async.db.mysql.message.server
 
 import io.netty.buffer.ByteBuf
 
-case class BinaryRowMessage(buffer: ByteBuf)
-    extends ServerMessage(ServerMessage.BinaryRow)
+case class BinaryRowMessage(buffer: ByteBuf) extends ServerMessage(ServerMessage.BinaryRow)

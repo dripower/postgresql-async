@@ -16,17 +16,9 @@
 
 package com.github.mauricio.async.db.postgresql.codec
 
-import com.github.mauricio.async.db.postgresql.exceptions.{
-  MessageTooLongException
-}
-import com.github.mauricio.async.db.postgresql.messages.backend.{
-  ServerMessage,
-  SSLResponseMessage
-}
-import com.github.mauricio.async.db.postgresql.parsers.{
-  AuthenticationStartupParser,
-  MessageParsersRegistry
-}
+import com.github.mauricio.async.db.postgresql.exceptions.{MessageTooLongException}
+import com.github.mauricio.async.db.postgresql.messages.backend.{ServerMessage, SSLResponseMessage}
+import com.github.mauricio.async.db.postgresql.parsers.{AuthenticationStartupParser, MessageParsersRegistry}
 import com.github.mauricio.async.db.util.{BufferDumper, Log}
 import java.nio.charset.Charset
 import com.github.mauricio.async.db.exceptions.NegativeMessageSizeException

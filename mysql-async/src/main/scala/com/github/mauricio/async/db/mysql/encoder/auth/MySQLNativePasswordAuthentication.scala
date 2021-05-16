@@ -59,8 +59,7 @@ object MySQLNativePasswordAuthentication extends AuthenticationMethod {
     var counter = 0
 
     while (counter < result.length) {
-      result(counter) =
-        (result(counter) ^ initialDigest(counter)).asInstanceOf[Byte]
+      result(counter) = (result(counter) ^ initialDigest(counter)).asInstanceOf[Byte]
       counter += 1
     }
 

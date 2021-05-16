@@ -16,10 +16,7 @@
 
 package com.github.mauricio.async.db.mysql.decoder
 
-import com.github.mauricio.async.db.mysql.message.server.{
-  PreparedStatementPrepareResponse,
-  ServerMessage
-}
+import com.github.mauricio.async.db.mysql.message.server.{PreparedStatementPrepareResponse, ServerMessage}
 import com.github.mauricio.async.db.util.{BufferDumper, Log}
 import io.netty.buffer.ByteBuf
 

@@ -39,8 +39,7 @@ object Version {
 
 }
 
-case class Version(major: Int, minor: Int, maintenance: Int)
-    extends Ordered[Version] {
+case class Version(major: Int, minor: Int, maintenance: Int) extends Ordered[Version] {
   override def compare(y: Version): Int = {
 
     if (this == y) {

@@ -21,8 +21,7 @@ import java.security.MessageDigest
 
 object PasswordHelper {
 
-  private final val Lookup = Array[Byte]('0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
+  private final val Lookup = Array[Byte]('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f')
 
   private def bytesToHex(bytes: Array[Byte], hex: Array[Byte], offset: Int) = {
 

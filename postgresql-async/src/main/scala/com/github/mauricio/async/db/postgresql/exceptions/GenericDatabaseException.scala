@@ -19,5 +19,4 @@ package com.github.mauricio.async.db.postgresql.exceptions
 import com.github.mauricio.async.db.exceptions.DatabaseException
 import com.github.mauricio.async.db.postgresql.messages.backend.ErrorMessage
 
-class GenericDatabaseException(val errorMessage: ErrorMessage)
-    extends DatabaseException(errorMessage.toString)
+class GenericDatabaseException(val errorMessage: ErrorMessage) extends DatabaseException(errorMessage.toString)

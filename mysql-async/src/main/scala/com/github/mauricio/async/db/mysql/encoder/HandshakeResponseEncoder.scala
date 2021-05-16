@@ -20,10 +20,7 @@ import java.nio.charset.Charset
 
 import com.github.mauricio.async.db.exceptions.UnsupportedAuthenticationMethodException
 import com.github.mauricio.async.db.mysql.encoder.auth.AuthenticationMethod
-import com.github.mauricio.async.db.mysql.message.client.{
-  ClientMessage,
-  HandshakeResponseMessage
-}
+import com.github.mauricio.async.db.mysql.message.client.{ClientMessage, HandshakeResponseMessage}
 import com.github.mauricio.async.db.mysql.util.CharsetMapper
 import com.github.mauricio.async.db.util.{ByteBufferUtils, Log}
 import io.netty.buffer.ByteBuf
@@ -41,8 +38,7 @@ object HandshakeResponseEncoder {
 
 }
 
-class HandshakeResponseEncoder(charset: Charset, charsetMapper: CharsetMapper)
-    extends MessageEncoder {
+class HandshakeResponseEncoder(charset: Charset, charsetMapper: CharsetMapper) extends MessageEncoder {
 
   import com.github.mauricio.async.db.mysql.encoder.HandshakeResponseEncoder._
   import com.github.mauricio.async.db.mysql.util.MySQLIO._

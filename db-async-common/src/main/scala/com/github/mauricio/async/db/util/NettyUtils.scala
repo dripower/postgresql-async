@@ -4,10 +4,7 @@ import java.util.Locale
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.epoll._
-import io.netty.util.internal.logging.{
-  InternalLoggerFactory,
-  Slf4JLoggerFactory
-}
+import io.netty.util.internal.logging.{InternalLoggerFactory, Slf4JLoggerFactory}
 
 /*
  * Copyright 2013 Maurício Linhares

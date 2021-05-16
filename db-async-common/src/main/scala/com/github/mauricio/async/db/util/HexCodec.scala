@@ -21,8 +21,7 @@ package com.github.mauricio.async.db.util
  */
 object HexCodec {
 
-  private final val Digits = Array[Char]('0', '1', '2', '3', '4', '5', '6', '7',
-    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
+  private final val Digits = Array[Char]('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F')
 
   private def toDigit(ch: Char, index: Int): Int = {
     val digit = Character.digit(ch, 16)

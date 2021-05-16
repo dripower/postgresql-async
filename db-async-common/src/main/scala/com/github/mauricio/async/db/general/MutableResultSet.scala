@@ -25,8 +25,7 @@ object MutableResultSet {
   val log = Log.get[MutableResultSet[Nothing]]
 }
 
-class MutableResultSet[T <: ColumnData](val columnTypes: ArrayBuffer[T])
-    extends ResultSet {
+class MutableResultSet[T <: ColumnData](val columnTypes: ArrayBuffer[T]) extends ResultSet {
 
   private val rows = new ArrayBuffer[RowData]()
   private val columnMapping: Map[String, Int] = this.columnTypes.indices

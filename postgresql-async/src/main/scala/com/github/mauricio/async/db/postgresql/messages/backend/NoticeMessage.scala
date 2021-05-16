@@ -16,5 +16,4 @@
 
 package com.github.mauricio.async.db.postgresql.messages.backend
 
-class NoticeMessage(fields: Map[Char, String])
-    extends InformationMessage(ServerMessage.Notice, fields)
+class NoticeMessage(fields: Map[Char, String]) extends InformationMessage(ServerMessage.Notice, fields)

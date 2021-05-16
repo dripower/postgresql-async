@@ -29,8 +29,7 @@ object ColumnDefinitionDecoder {
   final val log = Log.get[ColumnDefinitionDecoder]
 }
 
-class ColumnDefinitionDecoder(charset: Charset, registry: DecoderRegistry)
-    extends MessageDecoder {
+class ColumnDefinitionDecoder(charset: Charset, registry: DecoderRegistry) extends MessageDecoder {
 
   override def decode(buffer: ByteBuf): ColumnDefinitionMessage = {
 

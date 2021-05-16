@@ -20,8 +20,7 @@ trait TimeoutScheduler {
   /**
    * Implementors should decide here what they want to do when a timeout occur
    */
-  def onTimeout
-    : Unit // implementors should decide here what they want to do when a timeout occur
+  def onTimeout: Unit // implementors should decide here what they want to do when a timeout occur
 
   /**
    * We need this property as isClosed takes time to complete and
@@ -32,8 +31,8 @@ trait TimeoutScheduler {
   def isTimeouted: Boolean =
     isTimeoutedBool.get
 
-  def addTimeout[A](promise: Promise[A], durationOption: Option[Duration])(
-    implicit executionContext: ExecutionContext
+  def addTimeout[A](promise: Promise[A], durationOption: Option[Duration])(implicit
+    executionContext: ExecutionContext
   ): Option[ScheduledFuture[_]] = {
     durationOption.map { duration =>
       val scheduledFuture = schedule(

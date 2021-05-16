@@ -17,10 +17,7 @@
 package com.github.mauricio.async.db.mysql.encoder
 
 import io.netty.buffer.ByteBuf
-import com.github.mauricio.async.db.mysql.message.client.{
-  QueryMessage,
-  ClientMessage
-}
+import com.github.mauricio.async.db.mysql.message.client.{QueryMessage, ClientMessage}
 import com.github.mauricio.async.db.util.ByteBufferUtils
 import java.nio.charset.Charset
 

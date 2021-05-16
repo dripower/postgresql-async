@@ -15,12 +15,7 @@
  */
 package com.github.mauricio.async.db.mysql.codec
 
-import io.netty.buffer.{
-  CompositeByteBuf,
-  PooledByteBufAllocator,
-  ByteBuf,
-  ByteBufAllocator
-}
+import io.netty.buffer.{CompositeByteBuf, PooledByteBufAllocator, ByteBuf, ByteBufAllocator}
 import java.nio.ByteOrder
 
 object LittleEndianByteBufAllocator {

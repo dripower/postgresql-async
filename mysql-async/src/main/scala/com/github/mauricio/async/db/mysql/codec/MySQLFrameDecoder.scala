@@ -29,8 +29,7 @@ import java.nio.ByteOrder
 import java.nio.charset.Charset
 import java.util.concurrent.atomic.AtomicInteger
 
-class MySQLFrameDecoder(charset: Charset, connectionId: String)
-    extends ByteToMessageDecoder {
+class MySQLFrameDecoder(charset: Charset, connectionId: String) extends ByteToMessageDecoder {
 
   private final val log              = Log.getByName(s"[frame-decoder]${connectionId}")
   private final val messagesCount    = new AtomicInteger()
@@ -197,12 +196,10 @@ class MySQLFrameDecoder(charset: Charset, connectionId: String)
         case m: ParamAndColumnProcessingFinishedMessage => {
           this.clear
         }
-        case m: ColumnProcessingFinishedMessage
-            if this.isPreparedStatementPrepare => {
+        case m: ColumnProcessingFinishedMessage if this.isPreparedStatementPrepare => {
           this.clear
         }
-        case m: ColumnProcessingFinishedMessage
-            if this.isPreparedStatementExecute => {
+        case m: ColumnProcessingFinishedMessage if this.isPreparedStatementExecute => {
           this.isPreparedStatementExecuteRows = true
         }
         case _ =>

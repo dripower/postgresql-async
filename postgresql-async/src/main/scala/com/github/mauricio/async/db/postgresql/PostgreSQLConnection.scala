@@ -17,24 +17,12 @@
 package com.github.mauricio.async.db.postgresql
 
 import com.github.mauricio.async.db.QueryResult
-import com.github.mauricio.async.db.column.{
-  ColumnDecoderRegistry,
-  ColumnEncoderRegistry
-}
-import com.github.mauricio.async.db.exceptions.{
-  ConnectionStillRunningQueryException,
-  InsufficientParametersException
-}
+import com.github.mauricio.async.db.column.{ColumnDecoderRegistry, ColumnEncoderRegistry}
+import com.github.mauricio.async.db.exceptions.{ConnectionStillRunningQueryException, InsufficientParametersException}
 import com.github.mauricio.async.db.general.MutableResultSet
 import com.github.mauricio.async.db.pool.TimeoutScheduler
-import com.github.mauricio.async.db.postgresql.codec.{
-  PostgreSQLConnectionDelegate,
-  PostgreSQLConnectionHandler
-}
-import com.github.mauricio.async.db.postgresql.column.{
-  PostgreSQLColumnDecoderRegistry,
-  PostgreSQLColumnEncoderRegistry
-}
+import com.github.mauricio.async.db.postgresql.codec.{PostgreSQLConnectionDelegate, PostgreSQLConnectionHandler}
+import com.github.mauricio.async.db.postgresql.column.{PostgreSQLColumnDecoderRegistry, PostgreSQLColumnEncoderRegistry}
 import com.github.mauricio.async.db.postgresql.exceptions._
 import com.github.mauricio.async.db.util._
 import com.github.mauricio.async.db.{Configuration, Connection}
@@ -59,13 +47,10 @@ object PostgreSQLConnection {
 
 class PostgreSQLConnection(
   configuration: Configuration = URLParser.DEFAULT,
-  encoderRegistry: ColumnEncoderRegistry =
-    PostgreSQLColumnEncoderRegistry.Instance,
-  decoderRegistry: ColumnDecoderRegistry =
-    PostgreSQLColumnDecoderRegistry.Instance,
+  encoderRegistry: ColumnEncoderRegistry = PostgreSQLColumnEncoderRegistry.Instance,
+  decoderRegistry: ColumnDecoderRegistry = PostgreSQLColumnDecoderRegistry.Instance,
   positionalParamHolder: Boolean = false,
-  implicit val executionContext: ExecutionContext =
-    ExecutorServiceUtils.CachedExecutionContext
+  implicit val executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
 ) extends PostgreSQLConnectionDelegate
     with Connection
     with TimeoutScheduler {
