@@ -41,7 +41,7 @@ object Metrics {
         val g     = m.group(1)
         val count = g.count(_ == ',')
         if (count < 3) {
-          g
+          s"SELECT ${g} FROM"
         } else {
           val first = g.takeWhile(_ != ',')
           s"SELECT ${first},... FROM"
