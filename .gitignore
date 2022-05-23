@@ -24,3 +24,4 @@ vendor/*
 .bloop/
 .metals/
 .bsp/
+.DS_Store
