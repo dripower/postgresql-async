@@ -94,7 +94,7 @@ object Configuration {
     ,
     testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
     scalacOptions in doc := Seq("-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"),
-    javacOptions := Seq("-source", "1.6", "-target", "1.6", "-encoding", "UTF8"),
+    javacOptions := Seq("-source", "8", "-target", "8", "-encoding", "UTF8"),
     organization := "com.dripower",
     version := commonVersion,
     parallelExecution := false,

@@ -22,3 +22,5 @@ mysql-async/target/*
 .vagrant/*
 vendor/*
 .bloop/
+.DS_Store
+.bsp/
