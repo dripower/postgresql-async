@@ -36,10 +36,11 @@ import scala.concurrent.{ExecutionContext, Future}
  */
 class ConnectionPool[T <: Connection](
   factory: ObjectFactory[T],
-  configuration: PoolConfiguration,
-  executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
+  configuration: PoolConfiguration
 ) extends SingleThreadedAsyncObjectPool[T](factory, configuration)
     with Connection {
+
+  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
 
   /**
    * Closes the pool, you should discard the object.

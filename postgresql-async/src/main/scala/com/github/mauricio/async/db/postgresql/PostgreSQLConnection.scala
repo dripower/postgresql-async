@@ -49,11 +49,12 @@ class PostgreSQLConnection(
   configuration: Configuration = URLParser.DEFAULT,
   encoderRegistry: ColumnEncoderRegistry = PostgreSQLColumnEncoderRegistry.Instance,
   decoderRegistry: ColumnDecoderRegistry = PostgreSQLColumnDecoderRegistry.Instance,
-  positionalParamHolder: Boolean = false,
-  implicit val executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
+  positionalParamHolder: Boolean = false
 ) extends PostgreSQLConnectionDelegate
     with Connection
     with TimeoutScheduler {
+
+  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
 
   import PostgreSQLConnection._
   private val group: EventLoopGroup = configuration.eventLoopGroup
@@ -63,8 +64,7 @@ class PostgreSQLConnection(
     encoderRegistry,
     decoderRegistry,
     this,
-    group,
-    executionContext
+    group
   )
 
   private final val currentCount              = Counter.incrementAndGet()

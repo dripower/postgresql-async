@@ -7,8 +7,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class PartitionedConnectionPool[T <: Connection](
   factory: ObjectFactory[T],
   configuration: PoolConfiguration,
-  numberOfPartitions: Int,
-  executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
+  numberOfPartitions: Int
 ) extends PartitionedAsyncObjectPool[T](
       factory,
       configuration,
@@ -16,9 +15,11 @@ class PartitionedConnectionPool[T <: Connection](
     )
     with Connection {
 
+  private implicit final val _executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+
   def disconnect: Future[Connection] =
     if (this.isConnected) {
-      this.close.map(item => this)(executionContext)
+      this.close.map(item => this)
     } else {
       Future.successful(this)
     }
@@ -28,16 +29,16 @@ class PartitionedConnectionPool[T <: Connection](
   def isConnected: Boolean = !this.isClosed
 
   def sendQuery(query: String): Future[QueryResult] =
-    this.use(_.sendQuery(query))(executionContext)
+    this.use(_.sendQuery(query))
 
   def sendPreparedStatement(
     query: String,
     values: Seq[Any] = List()
   ): Future[QueryResult] =
-    this.use(_.sendPreparedStatement(query, values))(executionContext)
+    this.use(_.sendPreparedStatement(query, values))
 
   override def inTransaction[A](
     f: Connection => Future[A]
-  )(implicit context: ExecutionContext = executionContext): Future[A] =
-    this.use(_.inTransaction[A](f)(context))(executionContext)
+  )(implicit context: ExecutionContext): Future[A] =
+    this.use(_.inTransaction[A](f)(context))(_executionContext)
 }

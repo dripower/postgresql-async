@@ -41,17 +41,15 @@ object PostgreSQLConnectionFactory {
  * @param configuration
  */
 class PostgreSQLConnectionFactory(
-  val configuration: Configuration,
-  executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
+  val configuration: Configuration
 ) extends ObjectFactory[PostgreSQLConnection] {
+
+  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
 
   import PostgreSQLConnectionFactory.log
 
   def create: PostgreSQLConnection = {
-    val connection = new PostgreSQLConnection(
-      configuration,
-      executionContext = executionContext
-    )
+    val connection = new PostgreSQLConnection(configuration)
     Await.result(connection.connect, configuration.connectTimeout)
     connection
   }
