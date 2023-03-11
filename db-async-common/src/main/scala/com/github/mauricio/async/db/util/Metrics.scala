@@ -1,12 +1,11 @@
 package com.github.mauricio.async.db.util
 
 import com.google.common.cache._
-import Execution.Implicits.trampoline
 import java.util.concurrent.atomic._
 import java.util.concurrent.TimeUnit
 import org.slf4j._
 import scala.util._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 
 case class Stat(
   min: AtomicLong = new AtomicLong(Long.MaxValue),
@@ -28,6 +27,8 @@ case class Stat(
 }
 
 object Metrics {
+
+  private implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
 
   private final val FieldsRegex = {
     val ident = "([\\S^\\,]+\\.)?[\\S^\\,]+"

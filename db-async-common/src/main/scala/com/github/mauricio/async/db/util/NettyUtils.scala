@@ -26,7 +26,7 @@ object NettyUtils {
   InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE)
 
   lazy val DefaultEventLoopGroup = {
-    if (isNativeEpollSupport) {
+    if (isNativeEpollSupport()) {
       new EpollEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
     } else {
       new NioEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
@@ -38,7 +38,7 @@ object NettyUtils {
   }
 
   lazy val SocketChannelClass = {
-    if (isNativeEpollSupport) {
+    if (isNativeEpollSupport()) {
       classOf[EpollSocketChannel]
     } else {
       classOf[NioSocketChannel]

@@ -41,11 +41,12 @@ object MySQLConnection {
 
 class MySQLConnection(
   configuration: Configuration,
-  charsetMapper: CharsetMapper = CharsetMapper.Instance,
-  implicit val executionContext: ExecutionContext = ExecutorServiceUtils.CachedExecutionContext
+  charsetMapper: CharsetMapper = CharsetMapper.Instance
 ) extends MySQLHandlerDelegate
     with Connection
     with TimeoutScheduler {
+
+  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
 
   import MySQLConnection.log
 
@@ -59,7 +60,6 @@ class MySQLConnection(
     configuration,
     charsetMapper,
     this,
-    executionContext,
     connectionId
   )
 
