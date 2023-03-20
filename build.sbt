@@ -2,7 +2,6 @@ val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
 val nettyVersion          = "4.1.89.Final"
-val commonVersion         = "0.3.113"
 val projectScalaVersion   = "2.13.10"
 val specs2Version         = "4.19.2"
 val slf4jVersion          = "2.0.6"
@@ -78,7 +77,6 @@ val baseSettings = Seq(
   javacOptions := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
   (javaOptions in Test) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
   organization            := "com.dripower",
-  version                 := commonVersion,
   parallelExecution       := false,
   publishArtifact in Test := false
 )
