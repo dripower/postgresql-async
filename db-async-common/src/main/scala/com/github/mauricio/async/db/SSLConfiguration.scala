@@ -7,8 +7,10 @@ import SSLConfiguration.Mode
 /**
  * Contains the SSL configuration necessary to connect to a database.
  *
- * @param mode whether and with what priority a SSL connection will be negotiated, default disabled
- * @param rootCert path to PEM encoded trusted root certificates, None to use internal JDK cacerts, defaults to None
+ * @param mode
+ *   whether and with what priority a SSL connection will be negotiated, default disabled
+ * @param rootCert
+ *   path to PEM encoded trusted root certificates, None to use internal JDK cacerts, defaults to None
  */
 case class SSLConfiguration(
   mode: Mode.Value = Mode.Disable,

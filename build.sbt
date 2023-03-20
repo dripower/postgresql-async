@@ -5,6 +5,7 @@ val nettyVersion          = "4.1.89.Final"
 val commonVersion         = "0.3.113"
 val projectScalaVersion   = "2.13.10"
 val specs2Version         = "4.19.2"
+val slf4jVersion          = "2.0.6"
 val specs2Dependency      = "org.specs2" %% "specs2-core"  % specs2Version % "test"
 val specs2JunitDependency = "org.specs2" %% "specs2-junit" % specs2Version % "test"
 // val specs2MockDependency  = "org.specs2"    %% "specs2-mock"     % specs2Version % "test"
@@ -13,9 +14,9 @@ val logbackDependency = "ch.qos.logback" % "logback-classic" % "1.1.8" % "test"
 lazy val root = (project in file("."))
   .settings(baseSettings: _*)
   .settings(
-    name := "db-async-base",
-    publish := {},
-    publishLocal := {},
+    name            := "db-async-base",
+    publish         := {},
+    publishLocal    := {},
     publishArtifact := false
   )
   .aggregate(common, postgresql, mysql)
@@ -44,15 +45,12 @@ lazy val mysql = (project in file("mysql-async"))
   .dependsOn(common)
 
 val commonDependencies = Seq(
-  "org.slf4j"                % "slf4j-api"                    % "1.7.22",
-  "joda-time"                % "joda-time"                    % "2.9.7",
-  "org.joda"                 % "joda-convert"                 % "1.8.1",
-  "io.netty"                 % "netty-codec"                  % nettyVersion,
-  "io.netty"                 % "netty-handler"                % nettyVersion,
-  "io.netty"                 % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
-  "org.javassist"            % "javassist"                    % "3.21.0-GA",
-  "com.google.guava"         % "guava"                        % "27.0.1-jre",
-  "com.google.code.findbugs" % "jsr305"                       % "3.0.1" % "provided",
+  "org.slf4j"        % "slf4j-api"                    % slf4jVersion,
+  "io.netty"         % "netty-codec"                  % nettyVersion,
+  "io.netty"         % "netty-handler"                % nettyVersion,
+  "io.netty"         % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
+  "joda-time"        % "joda-time"                    % "2.12.2",
+  "com.google.guava" % "guava"                        % "27.0.1-jre",
   specs2Dependency,
   specs2JunitDependency,
   logbackDependency
@@ -79,9 +77,9 @@ val baseSettings = Seq(
   ),
   javacOptions := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
   (javaOptions in Test) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
-  organization := "com.dripower",
-  version := commonVersion,
-  parallelExecution := false,
+  organization            := "com.dripower",
+  version                 := commonVersion,
+  parallelExecution       := false,
   publishArtifact in Test := false
 )
 (scalafmtOnCompile in ThisBuild) := true

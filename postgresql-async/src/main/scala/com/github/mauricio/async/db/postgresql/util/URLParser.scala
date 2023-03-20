@@ -74,11 +74,13 @@ object URLParser extends AbstractURIParser {
     }
 
   /**
-   * Assembles a configuration out of the provided property map.  This is the generic form, subclasses may override to
+   * Assembles a configuration out of the provided property map. This is the generic form, subclasses may override to
    * handle additional properties.
    *
-   * @param properties the extracted properties from the URL.
-   * @param charset    the charset passed in to parse or parseOrDie.
+   * @param properties
+   *   the extracted properties from the URL.
+   * @param charset
+   *   the charset passed in to parse or parseOrDie.
    * @return
    */
   override protected def assembleConfiguration(

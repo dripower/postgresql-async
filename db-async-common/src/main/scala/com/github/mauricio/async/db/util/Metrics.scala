@@ -30,25 +30,40 @@ object Metrics {
 
   private implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
 
-  private final val FieldsRegex = {
-    val ident = "([\\S^\\,]+\\.)?[\\S^\\,]+"
-    s"(?i)SELECT\\s*(${ident}(\\s*\\,\\s*${ident})*)\\s+FROM".r
+  private def ommitNames(fields: String, max: Int) = {
+
+    @annotation.tailrec
+    def go(start: Int, sb: StringBuilder, count: Int): StringBuilder = {
+      if (count >= max) {
+        if (fields.length > start) {
+          sb.append(", ...")
+          sb
+        } else {
+          sb
+        }
+      } else {
+        val sepIndex = fields.indexOf(',', start)
+        if (sepIndex != -1) {
+          if (count > 0) {
+            sb.append(",")
+          }
+          sb.append(fields.slice(start, sepIndex))
+          go(sepIndex + 1, sb, count + 1)
+        } else sb
+      }
+    }
+    go(0, new StringBuilder, 0).toString
   }
 
   private def digestRowNames(sql: String): String = {
-    FieldsRegex.replaceAllIn(
-      sql,
-      { m =>
-        val g     = m.group(1)
-        val count = g.count(_ == ',')
-        if (count < 3) {
-          s"SELECT ${g} FROM"
-        } else {
-          val first = g.takeWhile(_ != ',')
-          s"SELECT ${first},... FROM"
-        }
-      }
-    )
+    val fromIndex = sql.indexOf("FROM")
+    if (sql.startsWith("SELECT ") || sql.startsWith("select ") && fromIndex != -1) {
+      val fields = sql.slice(7, fromIndex)
+      sql.slice(0, 7) + ommitNames(fields, 2) + " " + sql.slice(fromIndex, sql.length)
+    } else {
+      sql
+    }
+
   }
 
   private final val InsertValuesPart = {
@@ -87,7 +102,8 @@ object Metrics {
     })
 
   def stat[T](sql: String)(f: => Future[T]) = {
-    val key   = normalize(sql)
+    val key = normalize(sql)
+    println(s"sql->${key}")
     val start = System.currentTimeMillis()
     val fut   = f
     fut.onComplete {

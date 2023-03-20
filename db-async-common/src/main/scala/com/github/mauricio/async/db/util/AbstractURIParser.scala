@@ -35,8 +35,10 @@ abstract class AbstractURIParser {
   /**
    * Parses out userInfo into a tuple of optional username and password
    *
-   * @param userInfo the optional user info string
-   * @return a tuple of optional username and password
+   * @param userInfo
+   *   the optional user info string
+   * @return
+   *   a tuple of optional username and password
    */
   final protected def parseUserInfo(
     userInfo: Option[String]
@@ -48,8 +50,7 @@ abstract class AbstractURIParser {
     }
 
   /**
-   * A Regex that will match the base name of the driver scheme, minus jdbc:.
-   * Eg: postgres(?:ul)?
+   * A Regex that will match the base name of the driver scheme, minus jdbc:. Eg: postgres(?:ul)?
    */
   protected val SCHEME: Regex
 
@@ -59,10 +60,13 @@ abstract class AbstractURIParser {
   val DEFAULT: Configuration
 
   /**
-   * Parses the provided url and returns a Configuration based upon it.  On an error,
-   * @param url the URL to parse.
-   * @param charset the charset to use.
-   * @return a Configuration.
+   * Parses the provided url and returns a Configuration based upon it. On an error,
+   * @param url
+   *   the URL to parse.
+   * @param charset
+   *   the charset to use.
+   * @return
+   *   a Configuration.
    */
   @throws[UnableToParseURLException](
     "if the URL does not match the expected type, or cannot be parsed for any reason"
@@ -82,11 +86,14 @@ abstract class AbstractURIParser {
   }
 
   /**
-   * Parses the provided url and returns a Configuration based upon it.  On an error,
-   * a default configuration is returned.
-   * @param url the URL to parse.
-   * @param charset the charset to use.
-   * @return a Configuration.
+   * Parses the provided url and returns a Configuration based upon it. On an error, a default configuration is
+   * returned.
+   * @param url
+   *   the URL to parse.
+   * @param charset
+   *   the charset to use.
+   * @return
+   *   a Configuration.
    */
   def parse(url: String, charset: Charset = DEFAULT.charset): Configuration = {
     try {
@@ -100,10 +107,12 @@ abstract class AbstractURIParser {
   }
 
   /**
-   * Assembles a configuration out of the provided property map.  This is the generic form, subclasses may override to
+   * Assembles a configuration out of the provided property map. This is the generic form, subclasses may override to
    * handle additional properties.
-   * @param properties the extracted properties from the URL.
-   * @param charset the charset passed in to parse or parseOrDie.
+   * @param properties
+   *   the extracted properties from the URL.
+   * @param charset
+   *   the charset passed in to parse or parseOrDie.
    * @return
    */
   protected def assembleConfiguration(
@@ -158,8 +167,8 @@ abstract class AbstractURIParser {
   }
 
   /**
-   * This method breaks out handling of the jdbc: prefixed uri's, allowing them to be handled differently
-   * without reimplementing all of parse.
+   * This method breaks out handling of the jdbc: prefixed uri's, allowing them to be handled differently without
+   * reimplementing all of parse.
    */
   protected def handleJDBC(uri: URI): Map[String, String] =
     parse(new URI(uri.getSchemeSpecificPart))

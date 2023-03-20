@@ -24,7 +24,7 @@ import io.netty.channel.EventLoopGroup
  * Implementation of TimeoutScheduler used for testing
  */
 class DummyTimeoutScheduler extends TimeoutScheduler {
-  implicit val internalPool          = ExecutorServiceUtils.CachedExecutionContext
+  implicit val internalPool          = scala.concurrent.ExecutionContext.global
   private val timeOuts               = new AtomicInteger
   override def onTimeout             = timeOuts.incrementAndGet
   def timeoutCount                   = timeOuts.get()

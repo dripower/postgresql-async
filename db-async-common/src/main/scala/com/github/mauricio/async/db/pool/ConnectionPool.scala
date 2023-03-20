@@ -21,15 +21,14 @@ import com.github.mauricio.async.db.{QueryResult, Connection}
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
- * Pool specialized in database connections that also simplifies connection handling by
- * implementing the [[com.github.mauricio.async.db.Connection]] trait and saving clients from having to implement
- * the "give back" part of pool management. This lets you do your job without having to worry
- * about managing and giving back connection objects to the pool.
+ * Pool specialized in database connections that also simplifies connection handling by implementing the
+ * [[com.github.mauricio.async.db.Connection]] trait and saving clients from having to implement the "give back" part of
+ * pool management. This lets you do your job without having to worry about managing and giving back connection objects
+ * to the pool.
  *
- * The downside of this is that you should not start transactions or any kind of long running process
- * in this object as the object will be sent back to the pool right after executing a query. If you
- * need to start transactions you will have to take an object from the pool, do it and then give it
- * back manually.
+ * The downside of this is that you should not start transactions or any kind of long running process in this object as
+ * the object will be sent back to the pool right after executing a query. If you need to start transactions you will
+ * have to take an object from the pool, do it and then give it back manually.
  *
  * @param factory
  * @param configuration
@@ -64,9 +63,9 @@ class ConnectionPool[T <: Connection](
   def isConnected: Boolean = !this.isClosed
 
   /**
-   * Picks one connection and runs this query against it. The query should be stateless, it should not
-   * start transactions and should not leave anything to be cleaned up in the future. The behavior of this
-   * object is undefined if you start a transaction from this method.
+   * Picks one connection and runs this query against it. The query should be stateless, it should not start
+   * transactions and should not leave anything to be cleaned up in the future. The behavior of this object is undefined
+   * if you start a transaction from this method.
    *
    * @param query
    * @return
@@ -75,9 +74,9 @@ class ConnectionPool[T <: Connection](
     this.use(_.sendQuery(query))(executionContext)
 
   /**
-   * Picks one connection and runs this query against it. The query should be stateless, it should not
-   * start transactions and should not leave anything to be cleaned up in the future. The behavior of this
-   * object is undefined if you start a transaction from this method.
+   * Picks one connection and runs this query against it. The query should be stateless, it should not start
+   * transactions and should not leave anything to be cleaned up in the future. The behavior of this object is undefined
+   * if you start a transaction from this method.
    *
    * @param query
    * @param values
@@ -90,12 +89,14 @@ class ConnectionPool[T <: Connection](
     this.use(_.sendPreparedStatement(query, values))(executionContext)
 
   /**
-   * Picks one connection and executes an (asynchronous) function on it within a transaction block.
-   * If the function completes successfully, the transaction is committed, otherwise it is aborted.
-   * Either way, the connection is returned to the pool on completion.
+   * Picks one connection and executes an (asynchronous) function on it within a transaction block. If the function
+   * completes successfully, the transaction is committed, otherwise it is aborted. Either way, the connection is
+   * returned to the pool on completion.
    *
-   * @param f operation to execute on a connection
-   * @return result of f, conditional on transaction operations succeeding
+   * @param f
+   *   operation to execute on a connection
+   * @return
+   *   result of f, conditional on transaction operations succeeding
    */
   override def inTransaction[A](
     f: Connection => Future[A]

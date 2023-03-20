@@ -14,7 +14,7 @@ class MetricsSpec extends Specification {
         Future(Thread.sleep(100))
       }
       Thread.sleep(102)
-      Metrics.stats.getIfPresent("SELECT x.f1,... FROM foo") !== null
+      Metrics.stats.getIfPresent("SELECT x.f1, x.f2, ... FROM foo") !== null
     }
 
     "normalize update" in {

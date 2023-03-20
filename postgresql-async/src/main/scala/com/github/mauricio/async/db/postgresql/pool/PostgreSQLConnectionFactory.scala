@@ -61,7 +61,8 @@ class PostgreSQLConnectionFactory(
   /**
    * Validates by checking if the connection is still connected to the database or not.
    *
-   * @param item an object produced by this pool
+   * @param item
+   *   an object produced by this pool
    * @return
    */
   def validate(item: PostgreSQLConnection): Try[PostgreSQLConnection] = {
@@ -82,7 +83,8 @@ class PostgreSQLConnectionFactory(
   /**
    * Tests whether we can still send a **SELECT 0** statement to the database.
    *
-   * @param item an object produced by this pool
+   * @param item
+   *   an object produced by this pool
    * @return
    */
   override def test(item: PostgreSQLConnection): Try[PostgreSQLConnection] = {

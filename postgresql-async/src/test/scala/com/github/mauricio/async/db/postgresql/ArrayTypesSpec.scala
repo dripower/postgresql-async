@@ -36,7 +36,7 @@ class ArrayTypesSpec extends Specification with DatabaseTestHelper {
                                          timestamp_column timestamp with time zone[] not null,
                                          constraint bigserial_column_pkey primary key (bigserial_column)
                                        )"""
-  def simpleDrop(uniq: String)   = s"""drop table if exists type_test_table_$uniq;
+  def simpleDrop(uniq: String) = s"""drop table if exists type_test_table_$uniq;
                                        drop type  if exists endpoint_$uniq;
                                        drop type  if exists direction_$uniq"""
 

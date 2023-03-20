@@ -23,7 +23,7 @@ import io.netty.buffer.{Unpooled, ByteBuf}
 
 class StartupMessageEncoder(charset: Charset) {
 
-  //private val log = Log.getByName("StartupMessageEncoder")
+  // private val log = Log.getByName("StartupMessageEncoder")
 
   def encode(startup: StartupMessage): ByteBuf = {
 

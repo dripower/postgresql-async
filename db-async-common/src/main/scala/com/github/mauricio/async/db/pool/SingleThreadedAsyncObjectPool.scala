@@ -33,15 +33,16 @@ object SingleThreadedAsyncObjectPool {
 }
 
 /**
- * Implements an [[com.github.mauricio.async.db.pool.AsyncObjectPool]] using a single thread from a
- * fixed executor service as an event loop to cause all calls to be sequential.
+ * Implements an [[com.github.mauricio.async.db.pool.AsyncObjectPool]] using a single thread from a fixed executor
+ * service as an event loop to cause all calls to be sequential.
  *
- * Once you are done with this object remember to call it's close method to clean up the thread pool and
- * it's objects as this might prevent your application from ending.
+ * Once you are done with this object remember to call it's close method to clean up the thread pool and it's objects as
+ * this might prevent your application from ending.
  *
  * @param factory
  * @param configuration
- * @tparam T type of the object this pool holds
+ * @tparam T
+ *   type of the object this pool holds
  */
 class SingleThreadedAsyncObjectPool[T](
   factory: ObjectFactory[T],
@@ -88,8 +89,8 @@ class SingleThreadedAsyncObjectPool[T](
   }
 
   /**
-   * Returns an object to the pool. The object is validated before being added to the collection
-   * of available objects to make sure we have a usable object. If the object isn't valid it's discarded.
+   * Returns an object to the pool. The object is validated before being added to the collection of available objects to
+   * make sure we have a usable object. If the object isn't valid it's discarded.
    *
    * @param item
    * @return
@@ -189,8 +190,8 @@ class SingleThreadedAsyncObjectPool[T](
   }
 
   /**
-   * Enqueues a promise to be fulfilled in the future when objects are sent back to the pool. If
-   * we have already reached the limit of enqueued objects, fail the promise.
+   * Enqueues a promise to be fulfilled in the future when objects are sent back to the pool. If we have already reached
+   * the limit of enqueued objects, fail the promise.
    *
    * @param promise
    */
@@ -217,8 +218,8 @@ class SingleThreadedAsyncObjectPool[T](
   }
 
   /**
-   * Checks if there is a poolable object available and returns it to the promise.
-   * If there are no objects available, create a new one using the factory and return it.
+   * Checks if there is a poolable object available and returns it to the promise. If there are no objects available,
+   * create a new one using the factory and return it.
    *
    * @param promise
    */
@@ -247,9 +248,8 @@ class SingleThreadedAsyncObjectPool[T](
   }
 
   /**
-   * Validates pooled objects not in use to make sure they are all usable, great if
-   * you're holding onto network connections since you can "ping" the destination
-   * to keep the connection alive.
+   * Validates pooled objects not in use to make sure they are all usable, great if you're holding onto network
+   * connections since you can "ping" the destination to keep the connection alive.
    */
   private def testObjects: Unit = {
     val removals = new ArrayBuffer[PoolableHolder[T]]()
