@@ -60,16 +60,21 @@ val implementationDependencies = Seq(
   logbackDependency
 )
 
+def opts(s: String) = {
+  if (s.startsWith("2.")) {
+    Seq("-Ydelambdafy:method", "-release:11")
+  } else {
+    Seq()
+  }
+}
+
 val baseSettings = Seq(
   crossScalaVersions := Seq("2.13.10", "3.2.2"),
   testOptions in Test += Tests.Argument("sequential"),
   scalaVersion := projectScalaVersion,
-  scalacOptions :=
-    Opts.compile.encoding("UTF8")
-      :+ Opts.compile.deprecation
-      :+ Opts.compile.unchecked
-      :+ "-feature"
-      :+ "-Ydelambdafy:method",
+  scalacOptions := {
+    Seq("-feature", "-deprecation") ++ opts(scalaVersion.value)
+  },
   testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
   scalacOptions in doc := Seq(
     "-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"

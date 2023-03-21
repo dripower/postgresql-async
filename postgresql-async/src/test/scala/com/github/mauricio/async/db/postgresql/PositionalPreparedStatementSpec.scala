@@ -4,7 +4,6 @@ import org.specs2.mutable.Specification
 import org.specs2.specification._
 import scala.concurrent._
 import scala.concurrent.duration.Duration
-import scala.concurrent.ExecutionContext.Implicits.global
 
 class PositionalPreparedStatementSpec extends Specification with DatabaseTestHelper {
   private def run[A](f: PostgreSQLConnection => Future[A]): A = {
