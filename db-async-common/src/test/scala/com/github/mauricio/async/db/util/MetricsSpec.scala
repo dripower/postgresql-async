@@ -13,7 +13,7 @@ class MetricsSpec extends Specification {
       Metrics.stat(sql) {
         Future(Thread.sleep(100))
       }
-      Thread.sleep(102)
+      Thread.sleep(110)
       Metrics.stats.getIfPresent("SELECT x.f1, x.f2, ... FROM foo") !== null
     }
 
