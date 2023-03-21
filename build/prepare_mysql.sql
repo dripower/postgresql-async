@@ -10,3 +10,4 @@ GRANT ALL PRIVILEGES ON *.* TO 'mysql_async'@'127.0.0.1';
 GRANT ALL PRIVILEGES ON *.* TO 'mysql_async_sha256'@'127.0.0.1';
 FLUSH PRIVILEGES;
 GRANT ALL PRIVILEGES ON *.* TO 'mysql_async_nopw'@'127.0.0.1';
+SET GLOBAL sql_mode = 'ALLOW_INVALID_DATES';

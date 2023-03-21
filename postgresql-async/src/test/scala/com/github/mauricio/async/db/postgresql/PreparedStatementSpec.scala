@@ -433,7 +433,7 @@ class PreparedStatementSpec extends Specification with DatabaseTestHelper {
           executePreparedStatement(handler, insert, Array(Array(uuid1, uuid2)))
           val result = executePreparedStatement(handler, select).rows.get
 
-          result(0)("my_id").asInstanceOf[Seq[UUID]] === Seq(uuid1, uuid2)
+          result(0)("my_id").toIndexedSeq[Seq[UUID]] === Seq(uuid1, uuid2)
         }
         success
       } else {
