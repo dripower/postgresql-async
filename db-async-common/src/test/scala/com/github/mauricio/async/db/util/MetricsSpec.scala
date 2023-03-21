@@ -10,10 +10,12 @@ class MetricsSpec extends Specification {
 
     "normalize select" in {
       val sql = "SELECT x.f1, x.f2, x.f3, x.f4 FROM foo"
-      Metrics.stat(sql) {
-        Future(Thread.sleep(100))
-      }
+      Metrics
+        .stat(sql) {
+          Future(Thread.sleep(100))
+        }
       Thread.sleep(110)
+      println(Metrics.stats.asMap())
       Metrics.stats.getIfPresent("SELECT x.f1, x.f2, ... FROM foo") !== null
     }
 
