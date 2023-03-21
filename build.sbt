@@ -62,7 +62,7 @@ val implementationDependencies = Seq(
 
 def opts(s: String) = {
   if (s.startsWith("2.")) {
-    Seq("-Ydelambdafy:method", "-release:11")
+    Seq("-Ydelambdafy:method")
   } else {
     Seq()
   }
@@ -73,7 +73,7 @@ val baseSettings = Seq(
   testOptions in Test += Tests.Argument("sequential"),
   scalaVersion := projectScalaVersion,
   scalacOptions := {
-    Seq("-feature", "-deprecation") ++ opts(scalaVersion.value)
+    Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
   },
   testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
   scalacOptions in doc := Seq(
