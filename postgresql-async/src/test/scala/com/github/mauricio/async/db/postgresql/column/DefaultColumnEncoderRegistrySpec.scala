@@ -33,7 +33,11 @@ class DefaultColumnEncoderRegistrySpec extends Specification {
     }
 
     "correctly render an array of numbers" in {
-      val items = Array(Array(1, 2, 3), Array(4, 5, 6), Array(7, null, 8))
+      val arrWithNull: Array[Any] = Array.ofDim[Any](3)
+      arrWithNull(0) = 7
+      arrWithNull(1) = null
+      arrWithNull(2) = 8
+      val items = Array.apply[Any](Array(1, 2, 3), Array(4, 5, 6), arrWithNull)
       registry.encode(items) === "{{1,2,3},{4,5,6},{7,NULL,8}}"
     }
 
