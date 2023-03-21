@@ -12,7 +12,7 @@ class MetricsSpec extends Specification {
       val sql = "SELECT x.f1, x.f2, x.f3, x.f4 FROM foo"
       Metrics
         .stat(sql) {
-          Future(Thread.sleep(100))
+          Future(scala.concurrent.blocking { Thread.sleep(10) })
         }
       Thread.sleep(110)
       println(Metrics.stats.asMap())
