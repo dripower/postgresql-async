@@ -102,8 +102,7 @@ object Metrics {
     })
 
   def stat[T](sql: String)(f: => Future[T]) = {
-    val key = normalize(sql)
-    println(s"sql->${key}")
+    val key   = normalize(sql)
     val start = System.currentTimeMillis()
     val fut   = f
     fut.onComplete {

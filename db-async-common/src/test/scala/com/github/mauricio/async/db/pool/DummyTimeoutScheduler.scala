@@ -19,14 +19,15 @@ package com.github.mauricio.async.db.pool
 import java.util.concurrent.atomic.AtomicInteger
 import com.github.mauricio.async.db.util.{NettyUtils, ExecutorServiceUtils}
 import io.netty.channel.EventLoopGroup
+import scala.concurrent.ExecutionContext
 
 /**
  * Implementation of TimeoutScheduler used for testing
  */
 class DummyTimeoutScheduler extends TimeoutScheduler {
-  implicit val internalPool          = scala.concurrent.ExecutionContext.global
-  private val timeOuts               = new AtomicInteger
-  override def onTimeout             = timeOuts.incrementAndGet
-  def timeoutCount                   = timeOuts.get()
-  def eventLoopGroup: EventLoopGroup = NettyUtils.DefaultEventLoopGroup
+  implicit val internalPool: ExecutionContext = scala.concurrent.ExecutionContext.global
+  private val timeOuts                        = new AtomicInteger
+  override def onTimeout                      = timeOuts.incrementAndGet
+  def timeoutCount                            = timeOuts.get()
+  def eventLoopGroup: EventLoopGroup          = NettyUtils.DefaultEventLoopGroup
 }

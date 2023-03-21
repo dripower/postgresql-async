@@ -21,7 +21,7 @@ import com.github.mauricio.async.db.{Connection, Configuration}
 import java.io.File
 import java.util.concurrent.{TimeoutException, TimeUnit}
 import scala.concurrent.duration._
-import scala.concurrent.{Future, Await}
+import scala.concurrent.{Future, Await, ExecutionContext}
 import com.github.mauricio.async.db.SSLConfiguration
 import com.github.mauricio.async.db.SSLConfiguration.Mode
 
@@ -31,7 +31,7 @@ object DatabaseTestHelper {
 
 trait DatabaseTestHelper {
 
-  implicit val ec = scala.concurrent.ExecutionContext.Implicits.global
+  implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   def databaseName = Some("netty_driver_test")
 

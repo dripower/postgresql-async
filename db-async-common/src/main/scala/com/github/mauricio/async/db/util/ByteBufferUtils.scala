@@ -57,9 +57,9 @@ object ByteBufferUtils {
 
     b.resetReaderIndex()
 
-    val result = b.toString(b.readerIndex(), count - 1, charset)
+    val result = b.toString(b.readerIndex(), count, charset)
 
-    b.readerIndex(b.readerIndex() + count)
+    b.readerIndex(b.readerIndex() + count + 1)
 
     result
   }

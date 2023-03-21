@@ -28,11 +28,11 @@ object ConcurrentlyRunTest extends ConnectionHelper with Runnable {
   private val counter  = new AtomicInteger()
   private val failures = new AtomicInteger()
 
-  def run() {
+  def run() = {
     1.until(50).foreach(x => execute(counter.incrementAndGet()))
   }
 
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
 
     log.info("Starting executing code")
 
@@ -52,7 +52,7 @@ object ConcurrentlyRunTest extends ConnectionHelper with Runnable {
 
   }
 
-  def execute(count: Int) {
+  def execute(count: Int) = {
     try {
       log.info(s"====> run $count")
       val create = """CREATE TEMPORARY TABLE posts (
