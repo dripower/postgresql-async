@@ -134,7 +134,7 @@ class PostgreSQLConnection(
 
     val holder = this.parsedStatements.getOrElseUpdate(
       query,
-      new PreparedStatementHolder(
+      PreparedStatementHolder(
         query,
         preparedStatementsCounter.incrementAndGet,
         positionalParamHolder

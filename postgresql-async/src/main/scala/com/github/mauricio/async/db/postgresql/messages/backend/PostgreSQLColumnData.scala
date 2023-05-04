@@ -31,13 +31,13 @@ case class PostgreSQLColumnData private (
 ) extends ColumnData
 
 object PostgreSQLColumnData {
-  private val colNameCache: LoadingCache[String, String] = CacheBuilder
+  private val columnDataCache: LoadingCache[PostgreSQLColumnData, PostgreSQLColumnData] = CacheBuilder
     .newBuilder()
     .maximumSize(10000)
     .expireAfterAccess(60, TimeUnit.SECONDS)
     .build(
-      new CacheLoader[String, String] {
-        def load(k: String) = k
+      new CacheLoader[PostgreSQLColumnData, PostgreSQLColumnData] {
+        def load(cd: PostgreSQLColumnData) = cd
       }
     )
 
@@ -50,15 +50,15 @@ object PostgreSQLColumnData {
     dataTypeModifier: Int,
     fieldFormat: Int
   ): PostgreSQLColumnData = {
-    val cachedName = colNameCache.get(name)
-    new PostgreSQLColumnData(
-      cachedName,
-      tableObjectId,
-      columnNumber,
-      dataType,
-      dataTypeSize,
-      dataTypeModifier,
-      fieldFormat
+    val cd = new PostgreSQLColumnData(
+      name = name,
+      tableObjectId = tableObjectId,
+      columnNumber = columnNumber,
+      dataType = dataType,
+      dataTypeSize = dataTypeSize,
+      dataTypeModifier = dataTypeModifier,
+      fieldFormat = fieldFormat
     )
+    columnDataCache.get(cd)
   }
 }
