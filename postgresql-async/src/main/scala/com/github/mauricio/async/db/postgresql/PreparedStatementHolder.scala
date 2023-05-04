@@ -17,17 +17,19 @@
 package com.github.mauricio.async.db.postgresql
 
 import com.github.mauricio.async.db.postgresql.messages.backend.PostgreSQLColumnData
+import com.google.common.cache._
+import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ArrayBuffer
 
-class PreparedStatementHolder(
+class PreparedStatementHolder private (
   val query: String,
   val statementId: Int,
   isPositional: Boolean = false
 ) {
 
-  val PostionalMarkPattern = "\\$\\d+".r
+  private def PostionalMarkPattern = "\\$\\d+".r
 
-  val (realQuery, paramsCount) = {
+  lazy val (realQuery, paramsCount) = {
     if (!isPositional) {
       val result = new StringBuilder(query.length + 16)
       var offset = 0
@@ -59,4 +61,25 @@ class PreparedStatementHolder(
   var prepared: Boolean                              = false
   var columnDatas: ArrayBuffer[PostgreSQLColumnData] = ArrayBuffer.empty
 
+}
+
+object PreparedStatementHolder {
+
+  private val queryCache: LoadingCache[String, String] = CacheBuilder
+    .newBuilder()
+    .maximumSize(10000)
+    .expireAfterAccess(60, TimeUnit.SECONDS)
+    .build(
+      new CacheLoader[String, String] {
+        def load(k: String) = k
+      }
+    )
+
+  def apply(
+    query: String,
+    statementId: Int,
+    isPositional: Boolean = false
+  ): PreparedStatementHolder = {
+    new PreparedStatementHolder(queryCache.get(query), statementId, isPositional)
+  }
 }
