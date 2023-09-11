@@ -75,6 +75,7 @@ class PostgreSQLConnectionHandler(
   private var processData: ProcessData = null
 
   private var currentContext: ChannelHandlerContext = null
+  private var scramHandler: ScramHandler            = null
 
   def connect: Future[PostgreSQLConnectionHandler] = {
     this.bootstrap.group(this.group)

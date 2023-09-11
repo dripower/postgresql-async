@@ -17,12 +17,7 @@
 package com.github.mauricio.async.db.postgresql.parsers
 
 import com.github.mauricio.async.db.exceptions.UnsupportedAuthenticationMethodException
-import com.github.mauricio.async.db.postgresql.messages.backend.{
-  AuthenticationChallengeMD5,
-  AuthenticationChallengeCleartextMessage,
-  AuthenticationOkMessage,
-  ServerMessage
-}
+import com.github.mauricio.async.db.postgresql.messages.backend._
 import io.netty.buffer.ByteBuf
 
 object AuthenticationStartupParser extends MessageParser {
@@ -35,6 +30,9 @@ object AuthenticationStartupParser extends MessageParser {
   val AuthenticationGSS               = 7
   val AuthenticationGSSContinue       = 8
   val AuthenticationSSPI              = 9
+  val AuthenticationSASL              = 10
+  val AuthenticationSASLCont          = 11
+  val AuthenticationSASLFin           = 12
 
   override def parseMessage(b: ByteBuf): ServerMessage = {
 
@@ -49,6 +47,18 @@ object AuthenticationStartupParser extends MessageParser {
         b.readBytes(bytes)
         new AuthenticationChallengeMD5(bytes)
       }
+      case AuthenticationSASL =>
+        val len = b.readInt()
+        val ba  = Array.ofDim[Byte](len - 8)
+        b.readBytes(ba)
+        val firstMsg = new String(ba, "UTF-8")
+        AuthSASLReq(firstMsg.split("\u0000"))
+      case AuthenticationSASLCont =>
+        val len = b.readInt()
+        val ba  = Array.ofDim[Byte](len - 8)
+        b.readBytes(ba)
+        val serverFirst = new String(ba, "UTF-8")
+        AuthSASLCont(serverFirst)
       case _ => {
         throw new UnsupportedAuthenticationMethodException(authenticationType)
       }

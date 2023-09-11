@@ -25,3 +25,4 @@ vendor/*
 .metals/
 .bsp/
 .DS_Store
+metals.sbt

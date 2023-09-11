@@ -21,7 +21,11 @@ import com.github.mauricio.async.db.column.{ColumnDecoderRegistry, ColumnEncoder
 import com.github.mauricio.async.db.exceptions.{ConnectionStillRunningQueryException, InsufficientParametersException}
 import com.github.mauricio.async.db.general.MutableResultSet
 import com.github.mauricio.async.db.pool.TimeoutScheduler
-import com.github.mauricio.async.db.postgresql.codec.{PostgreSQLConnectionDelegate, PostgreSQLConnectionHandler}
+import com.github.mauricio.async.db.postgresql.codec.{
+  PostgreSQLConnectionDelegate,
+  PostgreSQLConnectionHandler,
+  ScramHandler
+}
 import com.github.mauricio.async.db.postgresql.column.{PostgreSQLColumnDecoderRegistry, PostgreSQLColumnEncoderRegistry}
 import com.github.mauricio.async.db.postgresql.exceptions._
 import com.github.mauricio.async.db.util._
@@ -89,6 +93,7 @@ class PostgreSQLConnection(
     new CopyOnWriteArrayList[NotificationResponse => Unit]()
 
   private var queryResult: Option[QueryResult] = None
+  private var scramHandler: ScramHandler       = null
 
   override def eventLoopGroup: EventLoopGroup = group
   def isReadyForQuery: Boolean                = this.queryPromise.isEmpty
@@ -268,6 +273,20 @@ class PostgreSQLConnection(
       case m: AuthenticationChallengeMD5 => {
         write(this.credential(m))
       }
+      case m: AuthSASLReq =>
+        log.debug(s"[AuthSASLReq] ${m}")
+        this.scramHandler = ScramHandler(configuration.password.getOrElse(""), m.mechanisms)
+        val (mechanism, firstMsg) = scramHandler.clientFirstMsg()
+        write(ScramClientFirstMsg(mechanism, firstMsg))
+      case m: AuthSASLCont =>
+        log.debug(s"[AuthSASLCont] ${m}")
+        val finalMsg = this.scramHandler.clientFinalMsg(m.serverFirstMsg)
+        write(ScramClientFinalMsg(finalMsg))
+
+      case m: AuthSASLFinal =>
+        log.debug(s"[AuthSASLFinal] ${m}")
+        val vr = this.scramHandler.verifyServerFinalMsg(m.serverFinalMsg)
+        log.debug(s"[AuthSASLFinal] verify result: ${vr}")
     }
 
   }

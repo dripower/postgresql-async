@@ -2,7 +2,7 @@ val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
 val nettyVersion          = "4.1.89.Final"
-val projectScalaVersion   = "2.13.10"
+val projectScalaVersion   = "2.13.12"
 val specs2Version         = "4.19.2"
 val slf4jVersion          = "2.0.6"
 val specs2Dependency      = "org.specs2" %% "specs2-core"  % specs2Version % "test"
@@ -48,6 +48,7 @@ val commonDependencies = Seq(
   "io.netty"         % "netty-codec"                  % nettyVersion,
   "io.netty"         % "netty-handler"                % nettyVersion,
   "io.netty"         % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
+  "com.ongres.scram" % "client"                       % "2.1",
   "joda-time"        % "joda-time"                    % "2.12.2",
   "com.google.guava" % "guava"                        % "27.0.1-jre",
   specs2Dependency,
@@ -69,7 +70,7 @@ def opts(s: String) = {
 }
 
 val baseSettings = Seq(
-  crossScalaVersions := Seq("2.13.10", "3.2.2"),
+  crossScalaVersions := Seq("2.13.12", "3.3.1"),
   testOptions in Test += Tests.Argument("sequential"),
   scalaVersion := projectScalaVersion,
   scalacOptions := {
