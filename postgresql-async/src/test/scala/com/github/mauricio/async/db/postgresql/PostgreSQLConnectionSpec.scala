@@ -58,7 +58,7 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
             time_column time,
             boolean_column boolean,
             constraint bigserial_column_pkey primary key (bigserial_column)
-          ) with oids"""
+          )"""
 
   val insert = """insert into type_test_table (
             smallint_column,
