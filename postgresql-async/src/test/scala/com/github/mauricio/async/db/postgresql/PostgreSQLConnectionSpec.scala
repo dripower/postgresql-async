@@ -142,21 +142,24 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
 
         val row = result.rows.get(0)
 
-        row(0) === 10
-        row(1) === 11
-        row(2).toString === "14.9990"
-        row(3).toString === 78.34.toString
-        row(4) === 15.68
-        row(5) === 1
-        row(6) === "this is a varchar field"
-        row(7) === "this is a long text field"
-        row(8) === TimestampEncoderDecoder.Instance.decode(
+        row(0) === 1
+        row(1) === 10
+        row(2) === 11
+        row(3).toString === "14.9990"
+        row(4).toString === 78.34.toString
+        row(5) === 15.68
+        row(6) === 1
+        row(7) === "this is a varchar field"
+        row(8) === "this is a long text field"
+        row(9) === TimestampEncoderDecoder.Instance.decode(
           "1984-08-06 22:13:45.888888"
         )
-        row(9) === DateEncoderDecoder.decode("1984-08-06")
-        row(10) === TimeEncoderDecoder.Instance.decode("22:13:45.888888")
-        row(11) === true
-        row(12).asInstanceOf[Long] must beGreaterThan(0L)
+        row(10) === DateEncoderDecoder.decode("1984-08-06")
+        row(11) === TimeEncoderDecoder.Instance.decode("22:13:45.888888")
+        row(12) === true
+        row(13).asInstanceOf[AnyRef] must beAnInstanceOf[java.lang.Long]
+        row(13).asInstanceOf[Long] must beGreaterThan(0L)
+
       }
 
     }
