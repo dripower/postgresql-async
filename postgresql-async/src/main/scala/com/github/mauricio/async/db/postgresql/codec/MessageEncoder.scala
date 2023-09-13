@@ -42,6 +42,7 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
   private val startupEncoder    = new StartupMessageEncoder(charset)
   private val queryEncoder      = new QueryMessageEncoder(charset)
   private val credentialEncoder = new CredentialEncoder(charset)
+  private val scramEncoder      = new ScramClientMsgEncoder()
 
   override def encode(
     ctx: ChannelHandlerContext,
@@ -52,6 +53,7 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
     val buffer = msg match {
       case SSLRequestMessage       => SSLMessageEncoder.encode()
       case message: StartupMessage => startupEncoder.encode(message)
+      case message: ScramClientMsg => scramEncoder.encode(message)
       case message: ClientMessage => {
         val encoder = (message.kind: @switch) match {
           case ServerMessage.Close           => CloseMessageEncoder
@@ -61,7 +63,6 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
           case ServerMessage.PasswordMessage => this.credentialEncoder
           case _                             => throw new EncoderNotAvailableException(message)
         }
-
         encoder.encode(message)
       }
       case _ => {
