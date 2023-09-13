@@ -1,14 +1,13 @@
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.1.89.Final"
+val nettyVersion          = "4.1.97.Final"
 val projectScalaVersion   = "2.13.12"
 val specs2Version         = "4.19.2"
-val slf4jVersion          = "2.0.6"
-val specs2Dependency      = "org.specs2" %% "specs2-core"  % specs2Version % "test"
-val specs2JunitDependency = "org.specs2" %% "specs2-junit" % specs2Version % "test"
-// val specs2MockDependency  = "org.specs2"    %% "specs2-mock"     % specs2Version % "test"
-val logbackDependency = "ch.qos.logback" % "logback-classic" % "1.1.8" % "test"
+val slf4jVersion          = "2.0.7"
+val specs2Dependency      = "org.specs2"    %% "specs2-core"     % specs2Version % "test"
+val specs2JunitDependency = "org.specs2"    %% "specs2-junit"    % specs2Version % "test"
+val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8"       % "test"
 
 lazy val root = (project in file("."))
   .settings(baseSettings: _*)
