@@ -90,14 +90,13 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
 
   val select = "select *, oid from type_test_table"
 
-  val preparedStatementCreate = """create temp table prepared_statement_test (
-    id bigserial not null,
-    name varchar(255) not null,
-    constraint bigserial_column_pkey primary key (id)
+  val preparedStatementCreate = """create temp table prepared_statement_test(
+    id bigserial primary key,
+    name varchar(255) not null
   )"""
 
   val preparedStatementInsert =
-    " insert into prepared_statement_test (name) values ('John Doe')"
+    "insert into prepared_statement_test (name) values ('John Doe')"
   val preparedStatementInsert2 =
     " insert into prepared_statement_test (name) values ('Mary Jane')"
   val preparedStatementInsert3 =
