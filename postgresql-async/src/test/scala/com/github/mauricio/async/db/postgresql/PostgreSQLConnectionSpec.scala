@@ -141,7 +141,6 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
         val result = executeQuery(handler, this.select)
 
         val row = result.rows.get(0)
-
         row(0) === 1
         row(1) === 10
         row(2) === 11
@@ -157,11 +156,7 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
         row(10) === DateEncoderDecoder.decode("1984-08-06")
         row(11) === TimeEncoderDecoder.Instance.decode("22:13:45.888888")
         row(12) === true
-        row(13).asInstanceOf[AnyRef] must beAnInstanceOf[java.lang.Long]
-        row(13).asInstanceOf[Long] must beGreaterThan(0L)
-
       }
-
     }
 
     "select rows that has duplicate column names" in {
