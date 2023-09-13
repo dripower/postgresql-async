@@ -10,7 +10,7 @@ class ScramPasswordSpec extends Specification with DatabaseTestHelper {
         port = 5432,
         username = "postgres_scram",
         password = Some("postgres_scram"),
-        database = Some(databaseName)
+        database = databaseName
       )
       withHandler(
         cfg,
