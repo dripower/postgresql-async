@@ -22,7 +22,7 @@ import com.github.mauricio.async.db.column._
 import io.netty.buffer.ByteBuf
 import org.joda.time._
 
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 object PostgreSQLColumnEncoderRegistry {
   val Instance = new PostgreSQLColumnEncoderRegistry()

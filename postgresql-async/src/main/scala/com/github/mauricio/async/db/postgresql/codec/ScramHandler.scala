@@ -6,7 +6,7 @@ import com.ongres.scram.common.stringprep.StringPreparations
 private[postgresql] trait ScramHandler {
   def clientFirstMsg(): (String, String)
   def clientFinalMsg(serverFirstMsg: String): String
-  def verifyServerFinalMsg(serverFinalMsg: String): Either[Throwable, Unit]
+  def verifyServerFinalMsg(serverFinalMsg: String): Unit
 }
 
 private[postgresql] object ScramHandler {
@@ -18,7 +18,8 @@ private[postgresql] object ScramHandler {
       .selectMechanismBasedOnServerAdvertised(mechanisms: _*)
       .setup()
 
-    private val _session = _scramClient.scramSession("*")
+    private val _session                                                = _scramClient.scramSession("*")
+    private var clientFinalProcessor: ScramSession#ClientFinalProcessor = null
 
     def scramClient = _scramClient
 
@@ -30,8 +31,12 @@ private[postgresql] object ScramHandler {
 
     def clientFinalMsg(serverFirstMsg: String) = {
       val serverFirstProcessor = _session.receiveServerFirstMessage(serverFirstMsg)
-      val clientFinalProcessor = serverFirstProcessor.clientFinalProcessor(password)
+      clientFinalProcessor = serverFirstProcessor.clientFinalProcessor(password)
       clientFinalProcessor.clientFinalMessage()
+    }
+
+    def verifyServerFinalMsg(serverFinalMsg: String) = {
+      clientFinalProcessor.receiveServerFinalMessage(serverFinalMsg)
     }
 
   }
