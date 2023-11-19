@@ -69,7 +69,7 @@ def opts(s: String) = {
 }
 
 val baseSettings = Seq(
-  crossScalaVersions := Seq("2.13.12", "3.3.1"),
+  crossScalaVersions := Seq("2.12.18", "2.13.12", "3.3.1"),
   testOptions in Test += Tests.Argument("sequential"),
   scalaVersion := projectScalaVersion,
   scalacOptions := {

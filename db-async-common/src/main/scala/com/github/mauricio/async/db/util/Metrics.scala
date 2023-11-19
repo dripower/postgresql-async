@@ -91,9 +91,11 @@ object Metrics {
   private val metricsLogger = LoggerFactory.getLogger("async.sql.log.metrics")
   private val slowLogger    = LoggerFactory.getLogger("async.sql.log.slow")
 
+  private def maxStatStatement = sys.props.get("db.maxStats").getOrElse(10000)
+
   val stats = CacheBuilder
     .newBuilder()
-    .maximumSize(100000)
+    .maximumSize(maxStatStatement)
     .expireAfterWrite(1, TimeUnit.HOURS)
     .build(new CacheLoader[String, Stat] {
       def load(key: String) = {
