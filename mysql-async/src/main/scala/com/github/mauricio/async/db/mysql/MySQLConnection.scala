@@ -46,7 +46,7 @@ class MySQLConnection(
     with Connection
     with TimeoutScheduler {
 
-  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  implicit val executionContext: ExecutionContext = Execution.parasitic
 
   import MySQLConnection.log
 

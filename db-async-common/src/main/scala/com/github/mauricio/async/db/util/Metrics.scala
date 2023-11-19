@@ -28,7 +28,7 @@ case class Stat(
 
 object Metrics {
 
-  private implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  private implicit val ec: ExecutionContext = Execution.parasitic
 
   private def ommitNames(fields: String, max: Int) = {
 
@@ -91,7 +91,7 @@ object Metrics {
   private val metricsLogger = LoggerFactory.getLogger("async.sql.log.metrics")
   private val slowLogger    = LoggerFactory.getLogger("async.sql.log.slow")
 
-  private def maxStatStatement = sys.props.get("db.maxStats").getOrElse(10000)
+  private def maxStatStatement = sys.props.get("db.maxStats").map(_.toLong).getOrElse(10000L)
 
   val stats = CacheBuilder
     .newBuilder()
@@ -104,18 +104,24 @@ object Metrics {
     })
 
   def stat[T](sql: String)(f: => Future[T]) = {
-    val key   = normalize(sql)
-    val start = System.currentTimeMillis()
-    val fut   = f
-    fut.onComplete {
-      case _ =>
-        val end  = System.currentTimeMillis()
-        val time = end - start
-        stats.get(key).add(time)
-        logSlow(key, time)
-        logMetrics(key)
+    if (sql.length <= 4096) {
+      val key   = normalize(sql)
+      val start = System.currentTimeMillis()
+      val fut   = f
+      fut.onComplete {
+        case _ =>
+          val end  = System.currentTimeMillis()
+          val time = end - start
+          stats.get(key).add(time)
+          logSlow(key, time)
+          logMetrics(key)
+      }
+      fut
+    } else {
+      metricsLogger.info(s"Sql is too long, ignore stat, ${sql}")
+      f
     }
-    fut
+
   }
 
   @inline private def logSlow(sql: String, time: Long) = {

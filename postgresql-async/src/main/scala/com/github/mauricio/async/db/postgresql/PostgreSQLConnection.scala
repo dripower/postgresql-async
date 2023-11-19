@@ -58,7 +58,7 @@ class PostgreSQLConnection(
     with Connection
     with TimeoutScheduler {
 
-  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  implicit val executionContext: ExecutionContext = Execution.parasitic
 
   import PostgreSQLConnection._
   private val group: EventLoopGroup = configuration.eventLoopGroup

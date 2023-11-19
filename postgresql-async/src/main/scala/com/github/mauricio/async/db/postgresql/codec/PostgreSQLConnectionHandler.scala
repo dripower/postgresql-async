@@ -67,7 +67,7 @@ class PostgreSQLConnectionHandler(
     "extra_float_digits" -> "2"
   )
 
-  private implicit final val _ec: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  private implicit final val _ec: ExecutionContext = Execution.parasitic
   private final val bootstrap                      = new Bootstrap()
   private final val connectionFuture               = Promise[PostgreSQLConnectionHandler]()
   private final val disconnectionPromise =

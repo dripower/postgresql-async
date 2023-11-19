@@ -16,7 +16,7 @@
 
 package com.github.mauricio.async.db.pool
 
-import com.github.mauricio.async.db.util.ExecutorServiceUtils
+import com.github.mauricio.async.db.util._
 import com.github.mauricio.async.db.{QueryResult, Connection}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,7 +39,7 @@ class ConnectionPool[T <: Connection](
 ) extends SingleThreadedAsyncObjectPool[T](factory, configuration)
     with Connection {
 
-  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  implicit val executionContext: ExecutionContext = Execution.parasitic
 
   /**
    * Closes the pool, you should discard the object.

@@ -1,6 +1,6 @@
 package com.github.mauricio.async.db.pool;
 
-import com.github.mauricio.async.db.util.ExecutorServiceUtils
+import com.github.mauricio.async.db.util._
 import com.github.mauricio.async.db.{QueryResult, Connection}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -15,7 +15,7 @@ class PartitionedConnectionPool[T <: Connection](
     )
     with Connection {
 
-  private implicit final val _executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  private implicit final val _executionContext: ExecutionContext = Execution.parasitic
 
   def disconnect: Future[Connection] =
     if (this.isConnected) {

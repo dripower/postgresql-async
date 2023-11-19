@@ -43,13 +43,14 @@ lazy val mysql = (project in file("mysql-async"))
   .dependsOn(common)
 
 val commonDependencies = Seq(
-  "org.slf4j"        % "slf4j-api"                    % slf4jVersion,
-  "io.netty"         % "netty-codec"                  % nettyVersion,
-  "io.netty"         % "netty-handler"                % nettyVersion,
-  "io.netty"         % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
-  "com.ongres.scram" % "client"                       % "2.1",
-  "joda-time"        % "joda-time"                    % "2.12.2",
-  "com.google.guava" % "guava"                        % "27.0.1-jre",
+  "org.slf4j"               % "slf4j-api"                    % slf4jVersion,
+  "io.netty"                % "netty-codec"                  % nettyVersion,
+  "io.netty"                % "netty-handler"                % nettyVersion,
+  "io.netty"                % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
+  "org.scala-lang.modules" %% "scala-collection-compat"      % "2.11.0",
+  "com.ongres.scram"        % "client"                       % "2.1",
+  "joda-time"               % "joda-time"                    % "2.12.2",
+  "com.google.guava"        % "guava"                        % "27.0.1-jre",
   specs2Dependency,
   specs2JunitDependency,
   logbackDependency

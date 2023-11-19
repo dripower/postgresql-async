@@ -20,7 +20,7 @@ import com.github.mauricio.async.db.Configuration
 import com.github.mauricio.async.db.exceptions.ConnectionTimeoutedException
 import com.github.mauricio.async.db.pool.ObjectFactory
 import com.github.mauricio.async.db.postgresql.PostgreSQLConnection
-import com.github.mauricio.async.db.util.Log
+import com.github.mauricio.async.db.util._
 import java.nio.channels.ClosedChannelException
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -44,7 +44,7 @@ class PostgreSQLConnectionFactory(
   val configuration: Configuration
 ) extends ObjectFactory[PostgreSQLConnection] {
 
-  implicit val executionContext: ExecutionContext = scala.concurrent.ExecutionContext.parasitic
+  implicit val executionContext: ExecutionContext = Execution.parasitic
 
   import PostgreSQLConnectionFactory.log
 
