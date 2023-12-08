@@ -190,9 +190,11 @@ class PostgreSQLConnection(
       this.connectionFuture.failure(e)
       this.disconnect
     }
-
-    this.currentPreparedStatement
-      .map(p => this.parsedStatements.remove(p.query))
+    this.currentPreparedStatement.foreach { p =>
+      if (e.getMessage().contains("cached plan must not change result type")) {
+        this.parsedStatements.remove(p.query)
+      }
+    }
     this.currentPreparedStatement = None
     this.failQueryPromise(e)
   }
