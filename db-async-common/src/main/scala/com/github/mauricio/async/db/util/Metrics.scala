@@ -51,7 +51,7 @@ object Metrics {
         val time = end - start
         // stats.get(key).add(time)
         logSlow(key, time)
-        logMetrics(key)
+        // logMetrics(key)
     }
     fut
   }
