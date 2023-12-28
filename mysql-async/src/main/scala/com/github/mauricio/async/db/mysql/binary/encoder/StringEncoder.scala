@@ -26,7 +26,7 @@ object StringEncoder {
   final val log = Log.get[StringEncoder]
 }
 
-class StringEncoder( charset : Charset ) extends BinaryEncoder {
+class StringEncoder(charset: Charset) extends BinaryEncoder {
 
   def encode(value: Any, buffer: ByteBuf) {
     buffer.writeLenghtEncodedString(value.toString, charset)

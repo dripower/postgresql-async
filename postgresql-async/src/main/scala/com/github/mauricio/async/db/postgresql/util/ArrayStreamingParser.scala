@@ -26,12 +26,12 @@ object ArrayStreamingParser {
 
   def parse(content: String, delegate: ArrayStreamingParserDelegate) {
 
-    var index = 0
-    var escaping = false
-    var quoted = false
+    var index                         = 0
+    var escaping                      = false
+    var quoted                        = false
     var currentElement: StringBuilder = null
-    var opens = 0
-    var closes = 0
+    var opens                         = 0
+    var closes                        = 0
 
     while (index < content.size) {
       val char = content.charAt(index)
@@ -85,12 +85,18 @@ object ArrayStreamingParser {
     }
 
     if (opens != closes) {
-      throw new InvalidArrayException("This array is unbalanced %s".format(content))
+      throw new InvalidArrayException(
+        "This array is unbalanced %s".format(content)
+      )
     }
 
   }
 
-  def sendElementEvent(builder: mutable.StringBuilder, quoted: Boolean, delegate: ArrayStreamingParserDelegate) {
+  def sendElementEvent(
+    builder: mutable.StringBuilder,
+    quoted: Boolean,
+    delegate: ArrayStreamingParserDelegate
+  ) {
 
     val value = builder.toString()
 
@@ -101,6 +107,5 @@ object ArrayStreamingParser {
     }
 
   }
-
 
 }

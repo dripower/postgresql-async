@@ -24,7 +24,10 @@ import com.github.mauricio.async.db.mysql.column.ColumnTypes
 object CalendarEncoder extends BinaryEncoder {
   def encode(value: Any, buffer: ByteBuf) {
     val calendar = value.asInstanceOf[Calendar]
-    LocalDateTimeEncoder.encode(new LocalDateTime(calendar.getTimeInMillis), buffer)
+    LocalDateTimeEncoder.encode(
+      new LocalDateTime(calendar.getTimeInMillis),
+      buffer
+    )
   }
 
   def encodesTo: Int = ColumnTypes.FIELD_TYPE_TIMESTAMP

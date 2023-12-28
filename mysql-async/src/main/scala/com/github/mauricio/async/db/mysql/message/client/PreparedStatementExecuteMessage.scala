@@ -18,9 +18,9 @@ package com.github.mauricio.async.db.mysql.message.client
 
 import com.github.mauricio.async.db.mysql.message.server.ColumnDefinitionMessage
 
-case class PreparedStatementExecuteMessage (
-                                             statementId : Array[Byte],
-                                             values : Seq[Any],
-                                             valuesToInclude : Set[Int],
-                                             parameters : Seq[ColumnDefinitionMessage] )
-    extends ClientMessage( ClientMessage.PreparedStatementExecute )
+case class PreparedStatementExecuteMessage(
+  statementId: Array[Byte],
+  values: Seq[Any],
+  valuesToInclude: Set[Int],
+  parameters: Seq[ColumnDefinitionMessage]
+) extends ClientMessage(ClientMessage.PreparedStatementExecute)

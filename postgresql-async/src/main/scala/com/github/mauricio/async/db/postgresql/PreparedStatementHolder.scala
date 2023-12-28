@@ -18,13 +18,17 @@ package com.github.mauricio.async.db.postgresql
 
 import com.github.mauricio.async.db.postgresql.messages.backend.PostgreSQLColumnData
 
-class PreparedStatementHolder(val query : String, val statementId : Int, isPositional: Boolean = false ) {
+class PreparedStatementHolder(
+  val query: String,
+  val statementId: Int,
+  isPositional: Boolean = false
+) {
 
   val PostionalMarkPattern = "\\$\\d+".r
 
   val (realQuery, paramsCount) = {
-    if(!isPositional) {
-      val result = new StringBuilder(query.length+16)
+    if (!isPositional) {
+      val result = new StringBuilder(query.length + 16)
       var offset = 0
       var params = 0
       while (offset < query.length) {
@@ -51,7 +55,7 @@ class PreparedStatementHolder(val query : String, val statementId : Int, isPosit
     }
   }
 
-  var prepared : Boolean = false
-  var columnDatas : Array[PostgreSQLColumnData] = Array.empty
+  var prepared: Boolean                        = false
+  var columnDatas: Array[PostgreSQLColumnData] = Array.empty
 
 }

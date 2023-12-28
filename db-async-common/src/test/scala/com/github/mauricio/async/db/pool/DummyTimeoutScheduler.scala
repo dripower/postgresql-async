@@ -25,8 +25,8 @@ import io.netty.channel.EventLoopGroup
  */
 class DummyTimeoutScheduler extends TimeoutScheduler {
   implicit val internalPool = ExecutorServiceUtils.CachedExecutionContext
-  private val timeOuts = new AtomicInteger
-  override def onTimeout = timeOuts.incrementAndGet
-  def timeoutCount = timeOuts.get()
-  def eventLoopGroup : EventLoopGroup = NettyUtils.DefaultEventLoopGroup
+  private val timeOuts      = new AtomicInteger
+  override def onTimeout    = timeOuts.incrementAndGet
+  def timeoutCount          = timeOuts.get()
+  def eventLoopGroup: EventLoopGroup = NettyUtils.DefaultEventLoopGroup
 }

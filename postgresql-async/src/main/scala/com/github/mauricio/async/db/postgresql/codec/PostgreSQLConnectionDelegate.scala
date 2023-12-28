@@ -21,13 +21,13 @@ import com.github.mauricio.async.db.postgresql.messages.backend._
 trait PostgreSQLConnectionDelegate {
 
   def onAuthenticationResponse(message: AuthenticationMessage)
-  def onCommandComplete( message : CommandCompleteMessage )
-  def onDataRow( message : DataRowMessage )
-  def onError( message : ErrorMessage )
-  def onError( throwable : Throwable )
-  def onParameterStatus( message : ParameterStatusMessage )
+  def onCommandComplete(message: CommandCompleteMessage)
+  def onDataRow(message: DataRowMessage)
+  def onError(message: ErrorMessage)
+  def onError(throwable: Throwable)
+  def onParameterStatus(message: ParameterStatusMessage)
   def onReadyForQuery()
-  def onRowDescription(message : RowDescriptionMessage)
-  def onNotificationResponse(message : NotificationResponse )
+  def onRowDescription(message: RowDescriptionMessage)
+  def onNotificationResponse(message: NotificationResponse)
 
 }

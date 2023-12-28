@@ -4,7 +4,10 @@ import java.util.Locale
 import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioSocketChannel
 import io.netty.channel.epoll._
-import io.netty.util.internal.logging.{InternalLoggerFactory, Slf4JLoggerFactory}
+import io.netty.util.internal.logging.{
+  InternalLoggerFactory,
+  Slf4JLoggerFactory
+}
 
 /*
  * Copyright 2013 Maurício Linhares
@@ -26,33 +29,35 @@ object NettyUtils {
   InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE)
 
   lazy val DefaultEventLoopGroup = {
-     if(isNativeEpollSupport) {
-       new EpollEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
-     } else {
-       new NioEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
-     }
+    if (isNativeEpollSupport) {
+      new EpollEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
+    } else {
+      new NioEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
+    }
   }
 
-   private def isNativeEpollSupport() = {
-     val osName = sys.props.get("os.name")
+  private def isNativeEpollSupport() = {
+    val osName   = sys.props.get("os.name")
     val archName = sys.props.get("os.arch")
-       (osName, archName) match {
-       case (Some(o), Some(a)) =>
-         normalize(o).startsWith("linux") && normalize(a).matches("^(x8664|amd64|ia32e|em64t|x64)$")       case _ => false
-     }
-   }
+    (osName, archName) match {
+      case (Some(o), Some(a)) =>
+        normalize(o).startsWith("linux") && normalize(a).matches(
+          "^(x8664|amd64|ia32e|em64t|x64)$"
+        )
+      case _ => false
+    }
+  }
 
-   lazy val SocketChannelClass =  {
-     if(isNativeEpollSupport) {
-       classOf[EpollSocketChannel]
-     } else {
-       classOf[NioSocketChannel]
-     }
-   }
+  lazy val SocketChannelClass = {
+    if (isNativeEpollSupport) {
+      classOf[EpollSocketChannel]
+    } else {
+      classOf[NioSocketChannel]
+    }
+  }
 
-   private def normalize(os: String) = {
-     os.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "")
-   }
-
+  private def normalize(os: String) = {
+    os.toLowerCase(Locale.US).replaceAll("[^a-z0-9]+", "")
+  }
 
 }

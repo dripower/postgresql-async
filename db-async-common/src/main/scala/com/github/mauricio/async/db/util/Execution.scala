@@ -12,11 +12,13 @@ object Execution {
   }
 
   /**
-   * From https://github.com/playframework/playframework/blob/master/framework%2Fsrc%2Fiteratees%2Fsrc%2Fmain%2Fscala%2Fplay%2Fapi%2Flibs%2Fiteratee%2FExecution.scala
+   * From
+   * https://github.com/playframework/playframework/blob/master/framework%2Fsrc%2Fiteratees%2Fsrc%2Fmain%2Fscala%2Fplay%2Fapi%2Flibs%2Fiteratee%2FExecution.scala
    *
-   * Executes in the current thread. Uses a thread local trampoline to make sure the stack
-   * doesn't overflow. Since this ExecutionContext executes on the current thread, it should
-   * only be used to run small bits of fast-running code.
+   * Executes in the current thread. Uses a thread local trampoline to make sure
+   * the stack doesn't overflow. Since this ExecutionContext executes on the
+   * current thread, it should only be used to run small bits of fast-running
+   * code.
    *
    * Blocking should be strictly avoided as it could hog the current thread.
    * Also, since we're running on a single thread, blocking code risks deadlock.
@@ -82,7 +84,9 @@ object Execution {
           val runnables = arrayDeque.asInstanceOf[util.ArrayDeque[Runnable]]
           runnables.addLast(runnable)
         case illegal =>
-          throw new IllegalStateException(s"Unsupported trampoline ThreadLocal value: $illegal")
+          throw new IllegalStateException(
+            s"Unsupported trampoline ThreadLocal value: $illegal"
+          )
       }
     }
 
@@ -113,7 +117,9 @@ object Execution {
             runnable.run()
           }
         case illegal =>
-          throw new IllegalStateException(s"Unsupported trampoline ThreadLocal value: $illegal")
+          throw new IllegalStateException(
+            s"Unsupported trampoline ThreadLocal value: $illegal"
+          )
       }
     }
 

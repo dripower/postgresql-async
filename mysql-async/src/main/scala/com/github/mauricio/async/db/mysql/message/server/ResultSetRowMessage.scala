@@ -21,9 +21,8 @@ import scala.collection.mutable.ArrayBuffer
 import io.netty.buffer.ByteBuf
 
 class ResultSetRowMessage
-  extends ServerMessage( ServerMessage.Row )
-  with mutable.Buffer[ByteBuf]
-{
+    extends ServerMessage(ServerMessage.Row)
+    with mutable.Buffer[ByteBuf] {
 
   private val buffer = new ArrayBuffer[ByteBuf]()
 

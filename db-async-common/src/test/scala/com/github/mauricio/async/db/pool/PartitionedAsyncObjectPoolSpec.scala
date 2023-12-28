@@ -13,7 +13,6 @@ import com.github.mauricio.async.db.util.ExecutorServiceUtils
 import scala.concurrent.ExecutionContext
 import java.util.concurrent.Executors
 
-
 class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
   isolated
   sequential
@@ -22,7 +21,7 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
     PoolConfiguration(100, Long.MaxValue, 100, Int.MaxValue)
   private var current = new AtomicInteger
   val factory = new ObjectFactory[Int] {
-    var reject = Set[Int]()
+    var reject     = Set[Int]()
     var failCreate = false
 
     def create =
@@ -40,9 +39,9 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
       }
   }
 
-  val pool = new PartitionedAsyncObjectPool(factory, config, 2)
-  def maxObjects = config.maxObjects / 2
-  def maxIdle = config.maxIdle / 2
+  val pool         = new PartitionedAsyncObjectPool(factory, config, 2)
+  def maxObjects   = config.maxObjects / 2
+  def maxIdle      = config.maxIdle / 2
   def maxQueueSize = config.maxQueueSize / 2
 
   "pool contents" >> {
@@ -261,7 +260,7 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
   }
 
   "gives back the connection to the original pool" in {
-    val executor = Executors.newFixedThreadPool(20)
+    val executor         = Executors.newFixedThreadPool(20)
     implicit val context = ExecutionContext.fromExecutor(executor)
 
     val takes =
@@ -287,6 +286,5 @@ class PartitionedAsyncObjectPoolSpec extends SpecificationWithJUnit {
 
   private def await[T](future: Future[T]) =
     Await.result(future, Duration.Inf)
-
 
 }

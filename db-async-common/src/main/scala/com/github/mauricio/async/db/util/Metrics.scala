@@ -12,13 +12,14 @@ case class Stat(
   min: AtomicLong = new AtomicLong(Long.MaxValue),
   max: AtomicLong = new AtomicLong(0),
   total: AtomicLong = new AtomicLong(0),
-  times: AtomicLong = new AtomicLong(0)) {
+  times: AtomicLong = new AtomicLong(0)
+) {
 
   def add(duration: Long) = {
-    if(duration < min.get()) {
+    if (duration < min.get()) {
       min.set(duration)
     }
-    if(duration > max.get()) {
+    if (duration > max.get()) {
       max.set(duration)
     }
     times.incrementAndGet()
@@ -29,7 +30,7 @@ case class Stat(
 object Metrics {
 
   private val metricsLogger = LoggerFactory.getLogger("async.metrics")
-  private val slowLogger = LoggerFactory.getLogger("async.slow")
+  private val slowLogger    = LoggerFactory.getLogger("async.slow")
 
   val stats = CacheBuilder
     .newBuilder()
@@ -39,17 +40,16 @@ object Metrics {
       def load(key: String) = {
         Stat()
       }
-    }
-  )
+    })
 
   def stat[T](key: String)(f: => Future[T]) = {
     val start = System.currentTimeMillis()
-    val fut = f
+    val fut   = f
     fut.onSuccess {
       case _ =>
-        val end = System.currentTimeMillis()
+        val end  = System.currentTimeMillis()
         val time = end - start
-        stats.get(key).add(time)
+        // stats.get(key).add(time)
         logSlow(key, time)
         logMetrics(key)
     }
@@ -57,25 +57,26 @@ object Metrics {
   }
 
   @inline private def logSlow(sql: String, time: Long) = {
-    if(time > 50) {
+    if (time > 50) {
       slowLogger.info(s"SQL:[${shortKey(sql)},TIME:[${time}]ms")
     }
   }
 
   @inline def shortKey(k: String) = {
-    if(k.size > 256) {
+    if (k.size > 256) {
       k.take(256) + "..."
     } else k
   }
 
   @inline private def logMetrics(key: String) = {
     val stat = stats.get(key)
-    val t = stat.total.get()
-    val c = stat.times.get()
-    val min = stat.min.get()
-    val max = stat.max.get()
-    if(c % 1000 == 0) {
-      metricsLogger.info(s"[SQL-${shortKey(key)}], count:$c, avg:${t/math.max(1, c)}ms, max:${max}, min:${min}")
+    val t    = stat.total.get()
+    val c    = stat.times.get()
+    val min  = stat.min.get()
+    val max  = stat.max.get()
+    if (c % 1000 == 0) {
+      metricsLogger.info(s"[SQL-${shortKey(key)}], count:$c, avg:${t / math
+          .max(1, c)}ms, max:${max}, min:${min}")
     }
   }
 }
