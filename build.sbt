@@ -43,7 +43,7 @@ lazy val mysql = Project(
   .dependsOn(common)
 
 val nettyVersion  = "4.0.56.Final"
-val commonVersion = "0.2.2024"
+val commonVersion = "0.2.2025"
 val scala212      = "2.12.18"
 val scala211      = "2.11.12"
 val specs2Version = "3.8.6"
