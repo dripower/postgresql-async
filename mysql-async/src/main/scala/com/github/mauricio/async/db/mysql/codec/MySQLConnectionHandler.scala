@@ -39,23 +39,6 @@ import scala.collection.mutable.{ArrayBuffer, HashMap}
 import scala.concurrent._
 import scala.concurrent.duration.Duration
 
-object Stmt {
-
-  val StmtPool: LoadingCache[String, String] = CacheBuilder
-    .newBuilder()
-    .maximumSize(4096)
-    .expireAfterAccess(60, TimeUnit.SECONDS)
-    .build(
-      new CacheLoader[String, String] {
-        def load(k: String) = k
-      }
-    )
-
-  def pooled(stmt: String) = {
-    StmtPool.get(stmt)
-  }
-}
-
 class MySQLConnectionHandler(
   configuration: Configuration,
   charsetMapper: CharsetMapper,
@@ -253,7 +236,7 @@ class MySQLConnectionHandler(
 
     Option(
       this.parsedStatements
-        .getIfPresent(Stmt.pooled(preparedStatement.statement))
+        .getIfPresent(preparedStatement.statement)
     ) match {
       case Some(item) => {
         this.executePreparedStatement(
@@ -410,7 +393,7 @@ class MySQLConnectionHandler(
 
     if (this.currentPreparedStatementHolder != null) {
       this.parsedStatements.put(
-        Stmt.pooled(this.currentPreparedStatementHolder.statement),
+        this.currentPreparedStatementHolder.statement,
         this.currentPreparedStatementHolder
       )
       this.executePreparedStatement(
