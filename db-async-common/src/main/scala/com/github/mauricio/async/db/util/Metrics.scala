@@ -49,34 +49,26 @@ object Metrics {
       case _ =>
         val end  = System.currentTimeMillis()
         val time = end - start
-        // stats.get(key).add(time)
         logSlow(key, time)
-        // logMetrics(key)
     }
     fut
   }
 
   @inline private def logSlow(sql: String, time: Long) = {
-    if (time > 50) {
+    if (time > 100) {
       slowLogger.info(s"SQL:[${shortKey(sql)},TIME:[${time}]ms")
     }
   }
 
   @inline def shortKey(k: String) = {
-    if (k.size > 256) {
-      k.take(256) + "..."
+    if (k.length() > 100 && k.startsWith("SELECT ")) {
+      val fromIdx = k.indexOf("FROM")
+      if (fromIdx != -1) {
+        val fields     = k.substring("SELECT ".length(), fromIdx)
+        val firstComma = fields.indexOf(',')
+        val firstField = fields.substring(0, firstComma)
+        s"SELECT ${firstField},... ${k.substring(fromIdx)}"
+      } else k
     } else k
-  }
-
-  @inline private def logMetrics(key: String) = {
-    val stat = stats.get(key)
-    val t    = stat.total.get()
-    val c    = stat.times.get()
-    val min  = stat.min.get()
-    val max  = stat.max.get()
-    if (c % 1000 == 0) {
-      metricsLogger.info(s"[SQL-${shortKey(key)}], count:$c, avg:${t / math
-          .max(1, c)}ms, max:${max}, min:${min}")
-    }
   }
 }
