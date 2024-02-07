@@ -66,8 +66,12 @@ object Metrics {
       if (fromIdx != -1) {
         val fields     = k.substring("SELECT ".length(), fromIdx)
         val firstComma = fields.indexOf(',')
-        val firstField = fields.substring(0, firstComma)
-        s"SELECT ${firstField},... ${k.substring(fromIdx)}"
+        if (firstComma != -1) {
+          val firstField = fields.substring(0, firstComma)
+          s"SELECT ${firstField},... ${k.substring(fromIdx)}"
+        } else {
+          k
+        }
       } else k
     } else k
   }
