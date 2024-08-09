@@ -117,7 +117,7 @@ class PostgreSQLConnection(
     this.parameterStatus.toMap
 
   override def sendQuery(query: String): Future[QueryResult] =
-    Metrics.stat(query) {
+    Metrics.stat(query, Seq.empty) {
       validateQuery(query)
 
       val promise = Promise[QueryResult]()
@@ -131,7 +131,7 @@ class PostgreSQLConnection(
   override def sendPreparedStatement(
     query: String,
     values: Seq[Any] = List()
-  ): Future[QueryResult] = Metrics.stat(query) {
+  ): Future[QueryResult] = Metrics.stat(query, values) {
     validateQuery(query)
 
     val promise = Promise[QueryResult]()
@@ -191,9 +191,7 @@ class PostgreSQLConnection(
       this.disconnect
     }
     this.currentPreparedStatement.foreach { p =>
-      if (e.getMessage().contains("cached plan must not change result type")) {
-        this.parsedStatements.remove(p.query)
-      }
+      this.parsedStatements.remove(p.query)
     }
     this.currentPreparedStatement = None
     this.failQueryPromise(e)

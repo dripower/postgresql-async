@@ -201,7 +201,7 @@ class MySQLConnection(
       .write(new AuthenticationSwitchResponse(configuration.password, message))
   }
 
-  def sendQuery(query: String): Future[QueryResult] = Metrics.stat(query) {
+  def sendQuery(query: String): Future[QueryResult] = Metrics.stat(query, Seq.empty) {
     this.validateIsReadyForQuery()
     val promise = Promise[QueryResult]()
     this.setQueryPromise(promise)
@@ -249,7 +249,7 @@ class MySQLConnection(
   def sendPreparedStatement(
     query: String,
     values: Seq[Any]
-  ): Future[QueryResult] = Metrics.stat(query) {
+  ): Future[QueryResult] = Metrics.stat(query, values) {
     this.validateIsReadyForQuery()
     val totalParameters = query.count(_ == '?')
     if (values.length != totalParameters) {

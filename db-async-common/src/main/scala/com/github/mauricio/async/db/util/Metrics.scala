@@ -49,10 +49,27 @@ object Metrics {
           }
           sb.append(fields.slice(start, sepIndex))
           go(sepIndex + 1, sb, count + 1)
-        } else sb
+        } else {
+          sb.append(fields.slice(start, fields.length))
+          sb
+        }
       }
     }
     go(0, new StringBuilder, 0).toString
+  }
+
+  def stat[T](sql: String, params: Seq[Any])(f: => Future[T]) = {
+    val key   = normalize(sql)
+    val start = System.currentTimeMillis()
+    val fut   = f
+    fut.onComplete {
+      case _ =>
+        val end  = System.currentTimeMillis()
+        val time = end - start
+        logSlow(key, params, time)
+    }
+    fut
+
   }
 
   private def digestRowNames(sql: String): String = {
@@ -93,53 +110,10 @@ object Metrics {
 
   private def maxStatStatement = sys.props.get("db.maxStats").map(_.toLong).getOrElse(10000L)
 
-  val stats = CacheBuilder
-    .newBuilder()
-    .maximumSize(maxStatStatement)
-    .expireAfterWrite(1, TimeUnit.HOURS)
-    .build(new CacheLoader[String, Stat] {
-      def load(key: String) = {
-        Stat()
-      }
-    })
-
-  def stat[T](sql: String)(f: => Future[T]) = {
-    if (sql.length <= 4096) {
-      val key   = normalize(sql)
-      val start = System.currentTimeMillis()
-      val fut   = f
-      fut.onComplete {
-        case _ =>
-          val end  = System.currentTimeMillis()
-          val time = end - start
-          stats.get(key).add(time)
-          logSlow(key, time)
-          logMetrics(key)
-      }
-      fut
-    } else {
-      metricsLogger.info(s"Sql is too long, ignore stat, ${sql}")
-      f
-    }
-
-  }
-
-  @inline private def logSlow(sql: String, time: Long) = {
+  @inline private def logSlow(sql: String, params: Seq[Any], time: Long) = {
     if (time > 50) {
-      slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms")
-    }
-  }
-
-  @inline private def logMetrics(key: String) = {
-    val stat = stats.get(key)
-    val t    = stat.total.get()
-    val c    = stat.times.get()
-    val min  = stat.min.get()
-    val max  = stat.max.get()
-    if (c % 1000 == 0) {
-      metricsLogger.info(
-        s"[SQL-$key], count:$c, avg:${t / math.max(1, c)}ms, max:${max}, min:${min}"
-      )
+      val paramsShow = params.mkString("[", ",", "]")
+      slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms, params: ${paramsShow}")
     }
   }
 }
