@@ -110,10 +110,28 @@ object Metrics {
 
   private def maxStatStatement = sys.props.get("db.maxStats").map(_.toLong).getOrElse(10000L)
 
+  private def showParam(p: Seq[Any]): String = {
+    val sb = new StringBuilder
+    sb.append("[")
+    p.foreach { x =>
+      if (x.isInstanceOf[Seq[Any]]) {
+        val xs = x.asInstanceOf[Seq[Any]]
+        val xsStr = if (xs.size > 5) {
+          xs.take(10).mkString("[", ",", s",...${(xs.size - 5)} more]")
+        } else xs.mkString("[", ",", "]")
+        sb.append(xsStr)
+      } else {
+        sb.append(x.toString)
+      }
+      sb.append(",")
+    }
+    sb.append("]")
+    sb.toString()
+  }
+
   @inline private def logSlow(sql: String, params: Seq[Any], time: Long) = {
     if (time > 50) {
-      val paramsShow = params.mkString("[", ",", "]")
-      slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms, params: ${paramsShow}")
+      slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms, params: ${showParam(params)}")
     }
   }
 }
