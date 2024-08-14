@@ -37,10 +37,8 @@ object Metrics {
       if (count >= max) {
         if (fields.length > start) {
           sb.append(", ...")
-          sb
-        } else {
-          sb
         }
+        sb
       } else {
         val sepIndex = fields.indexOf(',', start)
         if (sepIndex != -1) {
@@ -50,6 +48,9 @@ object Metrics {
           sb.append(fields.slice(start, sepIndex))
           go(sepIndex + 1, sb, count + 1)
         } else {
+          if (count > 0) {
+            sb.append(",")
+          }
           sb.append(fields.slice(start, fields.length))
           sb
         }
