@@ -122,7 +122,8 @@ object Metrics {
         } else xs.mkString("[", ",", "]")
         sb.append(xsStr)
       } else {
-        sb.append(x.toString)
+        val xAsStr = if (x == null) "null" else x.toString()
+        sb.append(xAsStr)
       }
       sb.append(",")
     }
