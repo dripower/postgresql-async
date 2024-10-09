@@ -1,8 +1,10 @@
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.1.101.Final"
-val projectScalaVersion   = "2.13.12"
+val nettyVersion          = "4.1.114.Final"
+val scala3Version         = "3.3.4"
+val scala212Version       = "2.12.20"
+val scala213Version       = "2.13.15"
 val specs2Version         = "4.19.2"
 val slf4jVersion          = "2.0.7"
 val specs2Dependency      = "org.specs2"    %% "specs2-core"     % specs2Version % "test"
@@ -50,7 +52,7 @@ val commonDependencies = Seq(
   "org.scala-lang.modules" %% "scala-collection-compat"      % "2.11.0",
   "com.ongres.scram"        % "client"                       % "2.1",
   "joda-time"               % "joda-time"                    % "2.12.2",
-  "com.google.guava"        % "guava"                        % "27.0.1-jre",
+  "com.google.guava"        % "guava"                        % "33.3.0-jre",
   specs2Dependency,
   specs2JunitDependency,
   logbackDependency
@@ -70,23 +72,20 @@ def opts(s: String) = {
 }
 
 val baseSettings = Seq(
-  crossScalaVersions := Seq("2.12.18", "2.13.12", "3.3.1"),
+  crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version),
   testOptions in Test += Tests.Argument("sequential"),
-  scalaVersion := projectScalaVersion,
+  scalaVersion := scala213Version,
   scalacOptions := {
     Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
   },
-  testOptions in Test += Tests.Argument(TestFrameworks.Specs2, "sequential"),
-  scalacOptions in doc := Seq(
+  (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential"),
+  (doc / scalacOptions) := Seq(
     "-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"
   ),
   javacOptions := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
-  (javaOptions in Test) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
+  (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
   organization            := "com.dripower",
   parallelExecution       := false,
   publishArtifact in Test := false
 )
-(scalafmtOnCompile in ThisBuild) := true
-(compile in Compile) := {
-  (compile in Compile).dependsOn(scalafmtSbt in Compile).value
-}
+(ThisBuild / scalafmtOnCompile) := true
