@@ -20,7 +20,7 @@ import com.github.mauricio.async.db.general.ColumnData
 import com.google.common.cache._
 import java.util.concurrent.TimeUnit
 
-case class PostgreSQLColumnData private (
+case class PostgreSQLColumnData(
   name: String,
   tableObjectId: Int,
   columnNumber: Int,

@@ -1,9 +1,10 @@
 package com.github.mauricio.async.db.util
 
 import java.util.Locale
-import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.MultiThreadIoEventLoopGroup
+import io.netty.channel.nio.*
 import io.netty.channel.socket.nio.NioSocketChannel
-import io.netty.channel.epoll._
+import io.netty.channel.epoll.*
 import io.netty.util.internal.logging.{InternalLoggerFactory, Slf4JLoggerFactory}
 
 /*
@@ -26,11 +27,12 @@ object NettyUtils {
   InternalLoggerFactory.setDefaultFactory(Slf4JLoggerFactory.INSTANCE)
 
   lazy val DefaultEventLoopGroup = {
-    if (isNativeEpollSupport()) {
-      new EpollEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
+    val factory = if (isNativeEpollSupport()) {
+      EpollIoHandler.newFactory()
     } else {
-      new NioEventLoopGroup(0, DaemonThreadsFactory("db-async-netty"))
+      NioIoHandler.newFactory()
     }
+    new MultiThreadIoEventLoopGroup(factory)
   }
 
   private def isNativeEpollSupport() = {

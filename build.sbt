@@ -1,8 +1,8 @@
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.1.114.Final"
-val scala3Version         = "3.3.4"
+val nettyVersion          = "4.2.1.Final"
+val scala3Version         = "3.3.6"
 val scala212Version       = "2.12.20"
 val scala213Version       = "2.13.15"
 val specs2Version         = "4.19.2"
@@ -65,7 +65,7 @@ val implementationDependencies = Seq(
 
 def opts(s: String) = {
   if (s.startsWith("2.")) {
-    Seq("-Ydelambdafy:method")
+    Seq("-Ydelambdafy:method", "-Xsource:3")
   } else {
     Seq()
   }

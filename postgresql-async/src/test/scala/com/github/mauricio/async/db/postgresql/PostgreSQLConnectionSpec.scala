@@ -30,6 +30,7 @@ import org.specs2.mutable.Specification
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import scala.util.Try
 
 object PostgreSQLConnectionSpec {
   val log = Log.get[PostgreSQLConnectionSpec]
@@ -264,18 +265,14 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
         port = databasePort,
         database = databaseName
       )
-      try {
+      Try {
         withHandler(
           configuration,
           { handler =>
-            val result = executeQuery(handler, "SELECT 0")
-            throw new IllegalStateException("should not have arrived")
+            executeQuery(handler, "SELECT 0")
           }
         )
-      } catch {
-        case e: GenericDatabaseException =>
-          e.errorMessage.fields(InformationMessage.Routine) === "auth_failed"
-      }
+      } must beFailedTry.withThrowable[GenericDatabaseException](".*auth_failed.*")
     }
 
     "transaction and flatmap example" in {
