@@ -37,7 +37,7 @@ jobs:
       - name: Start postgresql & mysql
         working-directory: build/server
         run:
-          docker-compose up -d && docker-compose logs
+          docke -compose up -d && docker-compose logs
 
       - name: Setup database
         run: bash build/prepare_build.sh
