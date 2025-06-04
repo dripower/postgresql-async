@@ -26,3 +26,4 @@ vendor/*
 .bsp/
 .DS_Store
 metals.sbt
+.aider*

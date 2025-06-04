@@ -15,7 +15,7 @@
  */
 package com.github.mauricio.async.db.mysql.codec
 
-import io.netty.buffer.{CompositeByteBuf, PooledByteBufAllocator, ByteBuf, ByteBufAllocator}
+import io.netty.buffer.{CompositeByteBuf, ByteBuf, ByteBufAllocator}
 import java.nio.ByteOrder
 
 object LittleEndianByteBufAllocator {
@@ -26,7 +26,7 @@ object LittleEndianByteBufAllocator {
  * Allocates ByteBuf which have LITTLE_ENDIAN order.
  */
 class LittleEndianByteBufAllocator extends ByteBufAllocator {
-  private val allocator = PooledByteBufAllocator.DEFAULT
+  private val allocator = ByteBufAllocator.DEFAULT
 
   def isDirectBufferPooled: Boolean = false
 

@@ -31,13 +31,13 @@ class PartitionedAsyncObjectPool[T](
     }
   }
 
-  def giveBack(item: T) =
+  def giveBack(item: T): Future[PartitionedAsyncObjectPool[T]] =
     checkouts
       .remove(item)
       .giveBack(item)
       .map(_ => this)
 
-  def close =
+  def close: Future[PartitionedAsyncObjectPool[T]] =
     Future.sequence(pools.values.map(_.close)).map { _ =>
       this
     }

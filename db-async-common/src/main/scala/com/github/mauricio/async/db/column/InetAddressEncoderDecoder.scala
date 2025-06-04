@@ -17,16 +17,11 @@
 package com.github.mauricio.async.db.column
 
 import java.net.InetAddress
-import sun.net.util.IPAddressUtil.{textToNumericFormatV4, textToNumericFormatV6}
 
 object InetAddressEncoderDecoder extends ColumnEncoderDecoder {
 
   override def decode(value: String): Any = {
-    if (value contains ':') {
-      InetAddress.getByAddress(textToNumericFormatV6(value))
-    } else {
-      InetAddress.getByAddress(textToNumericFormatV4(value))
-    }
+    InetAddress.getByName(value)
   }
 
   override def encode(value: Any): String = {

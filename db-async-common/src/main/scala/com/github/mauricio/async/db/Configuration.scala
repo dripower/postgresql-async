@@ -18,7 +18,7 @@ package com.github.mauricio.async.db
 
 import com.github.mauricio.async.db.util.NettyUtils
 import java.nio.charset.Charset
-import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator}
+import io.netty.buffer.ByteBufAllocator
 import io.netty.channel.EventLoopGroup
 import io.netty.util.CharsetUtil
 import io.netty.channel.socket.SocketChannel
@@ -74,7 +74,7 @@ case class Configuration(
   ssl: SSLConfiguration = SSLConfiguration(),
   charset: Charset = Configuration.DefaultCharset,
   maximumMessageSize: Int = 16777216,
-  allocator: ByteBufAllocator = PooledByteBufAllocator.DEFAULT,
+  allocator: ByteBufAllocator = ByteBufAllocator.DEFAULT,
   connectTimeout: Duration = 5.seconds,
   testTimeout: Duration = 5.seconds,
   preparedStatementCacheSize: Int = 64,

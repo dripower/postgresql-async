@@ -20,7 +20,7 @@ import java.nio.charset.Charset
 
 import com.github.mauricio.async.db.{Configuration, SSLConfiguration}
 import com.github.mauricio.async.db.exceptions.UnableToParseURLException
-import io.netty.buffer.{ByteBufAllocator, PooledByteBufAllocator}
+import io.netty.buffer.ByteBufAllocator
 import org.specs2.mutable.Specification
 
 import scala.concurrent.duration.Duration
