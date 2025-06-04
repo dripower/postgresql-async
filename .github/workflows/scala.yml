@@ -34,6 +34,9 @@ jobs:
           distribution: 'temurin'
           cache: 'sbt'
 
+      - name: Install docker-compose
+        run:
+          apt-get update && apt-get install -y docker-compose-plugin
       - name: Start postgresql & mysql
         working-directory: build/server
         run:
