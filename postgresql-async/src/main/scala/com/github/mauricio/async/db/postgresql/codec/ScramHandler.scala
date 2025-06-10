@@ -18,7 +18,7 @@ private[postgresql] object ScramHandler {
     val scramClient = {
       val base = ScramClient
         .builder()
-        .advertisedMechanisms(Arrays.asList("SCRAM-SHA-256", "SCRAM-SHA-256-PLUS"))
+        .advertisedMechanisms(Arrays.asList(mechanisms *))
         .username("*")
         .password(password.toCharArray())
 
