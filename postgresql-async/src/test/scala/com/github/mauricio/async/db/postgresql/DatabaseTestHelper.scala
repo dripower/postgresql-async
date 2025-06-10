@@ -135,7 +135,7 @@ trait DatabaseTestHelper {
     handleTimeout(
       handler, {
         Await.result(
-          handler.sendPreparedStatement(statement, values),
+          handler.sendPreparedStatement(statement, values.toIndexedSeq),
           Duration(5, SECONDS)
         )
       }
