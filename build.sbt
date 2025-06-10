@@ -50,7 +50,7 @@ val commonDependencies = Seq(
   "io.netty"                % "netty-handler"                % nettyVersion,
   "io.netty"                % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
   "org.scala-lang.modules" %% "scala-collection-compat"      % "2.11.0",
-  "com.ongres.scram"        % "client"                       % "2.1",
+  "com.ongres.scram"        % "scram-client"                 % "3.1",
   "joda-time"               % "joda-time"                    % "2.12.2",
   "com.google.guava"        % "guava"                        % "33.3.0-jre",
   specs2Dependency,
@@ -72,9 +72,11 @@ def opts(s: String) = {
 }
 
 val baseSettings = Seq(
+  organization       := "com.dripower",
+  parallelExecution  := false,
   crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version),
-  testOptions in Test += Tests.Argument("sequential"),
-  scalaVersion := scala213Version,
+  scalaVersion       := scala213Version,
+  javacOptions       := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
   scalacOptions := {
     Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
   },
@@ -82,10 +84,7 @@ val baseSettings = Seq(
   (doc / scalacOptions) := Seq(
     "-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"
   ),
-  javacOptions := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
   (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
-  organization            := "com.dripower",
-  parallelExecution       := false,
-  publishArtifact in Test := false
+  (Test / publishArtifact) := false
 )
 (ThisBuild / scalafmtOnCompile) := true

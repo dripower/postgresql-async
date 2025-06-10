@@ -275,7 +275,7 @@ class PostgreSQLConnection(
       }
       case m: AuthSASLReq =>
         log.debug(s"[AuthSASLReq] ${m}")
-        this.scramHandler = ScramHandler(configuration.password.getOrElse(""), m.mechanisms)
+        this.scramHandler = ScramHandler(configuration.password.getOrElse(""), m.mechanisms, None)
         val (mechanism, firstMsg) = scramHandler.clientFirstMsg()
         write(ScramClientFirstMsg(mechanism, firstMsg))
       case m: AuthSASLCont =>
