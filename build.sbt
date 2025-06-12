@@ -1,3 +1,5 @@
+import ReleaseTransformations._
+
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
@@ -71,6 +73,17 @@ def opts(s: String) = {
   }
 }
 
+inThisBuild(
+  List(
+    organization := "com.dripower",
+    homepage     := Some(url("https://github.com/dripower/postgresql-async")),
+    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers := List(
+      Developer("jilen", "jilen", "jilen.zhang@gmail.com", url("https://github.com/jilen"))
+    )
+  )
+)
+
 val baseSettings = Seq(
   organization       := "com.dripower",
   parallelExecution  := false,
@@ -81,24 +94,10 @@ val baseSettings = Seq(
     Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
   },
   (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential"),
-  (doc / scalacOptions) := Seq(
-    "-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"
-  ),
   (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
   (Test / publishArtifact) := false
 )
 (ThisBuild / scalafmtOnCompile) := true
-
-// POM settings for Sonatype
-homepage := Some(url("https://github.com/dripower/postgresql-async"))
-
-scmInfo := Some(
-  ScmInfo(url("https://github.com/dripower/postgresql-async"), "git@github.com:dripower/postgresql-async.git")
-)
-
-developers += Developer("jilen", "jilen", "jilen.zhang@gmail.com", url("https://github.com/jilen"))
-
-licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
