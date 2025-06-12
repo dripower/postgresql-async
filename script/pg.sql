@@ -10,5 +10,4 @@ GRANT ALL PRIVILEGES ON DATABASE netty_driver_test to postgres_cleartext;
 
 CREATE USER postgres_kerberos WITH PASSWORD 'postgres_kerberos';
 GRANT ALL PRIVILEGES ON DATABASE netty_driver_test to postgres_kerberos;
-\c netty_driver_test
 CREATE TYPE example_mood AS ENUM ('sad', 'ok', 'happy');

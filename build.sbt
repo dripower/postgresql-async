@@ -1,7 +1,7 @@
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.2.1.Final"
+val nettyVersion          = "4.2.2.Final"
 val scala3Version         = "3.3.6"
 val scala212Version       = "2.12.20"
 val scala213Version       = "2.13.16"
@@ -65,7 +65,7 @@ val implementationDependencies = Seq(
 
 def opts(s: String) = {
   if (s.startsWith("2.")) {
-    Seq("-Ydelambdafy:method", "-Xsource:3")
+    Seq("-Xsource:3")
   } else {
     Seq()
   }
@@ -88,3 +88,25 @@ val baseSettings = Seq(
   (Test / publishArtifact) := false
 )
 (ThisBuild / scalafmtOnCompile) := true
+
+// POM settings for Sonatype
+homepage := Some(url("https://github.com/dripower/postgresql-async"))
+
+scmInfo := Some(
+  ScmInfo(url("https://github.com/dripower/postgresql-async"), "git@github.com:dripower/postgresql-async.git")
+)
+
+developers += Developer("jilen", "jilen", "jilen.zhang@gmail.com", url("https://github.com/jilen"))
+
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
