@@ -1,7 +1,9 @@
+import ReleaseTransformations._
+
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.2.1.Final"
+val nettyVersion          = "4.2.2.Final"
 val scala3Version         = "3.3.6"
 val scala212Version       = "2.12.20"
 val scala213Version       = "2.13.16"
@@ -65,11 +67,22 @@ val implementationDependencies = Seq(
 
 def opts(s: String) = {
   if (s.startsWith("2.")) {
-    Seq("-Ydelambdafy:method", "-Xsource:3")
+    Seq("-Xsource:3")
   } else {
     Seq()
   }
 }
+
+inThisBuild(
+  List(
+    organization := "com.dripower",
+    homepage     := Some(url("https://github.com/dripower/postgresql-async")),
+    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
+    developers := List(
+      Developer("jilen", "jilen", "jilen.zhang@gmail.com", url("https://github.com/jilen"))
+    )
+  )
+)
 
 val baseSettings = Seq(
   organization       := "com.dripower",
@@ -81,10 +94,18 @@ val baseSettings = Seq(
     Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
   },
   (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential"),
-  (doc / scalacOptions) := Seq(
-    "-doc-external-doc:scala=http://www.scala-lang.org/archives/downloads/distrib/files/nightly/docs/library/"
-  ),
   (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
   (Test / publishArtifact) := false
 )
 (ThisBuild / scalafmtOnCompile) := true
+
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  setNextVersion,
+  commitNextVersion,
+  pushChanges
+)
