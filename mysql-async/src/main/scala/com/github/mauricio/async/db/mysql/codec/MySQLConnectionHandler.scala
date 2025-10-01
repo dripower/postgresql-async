@@ -70,12 +70,12 @@ class MySQLConnectionHandler(
   private final val log                               = Log.getByName(s"[connection-handler]${connectionId}")
   private final val bootstrap                         = new Bootstrap().group(this.group)
   private final val connectionPromise                 = Promise[MySQLConnectionHandler]()
-  private final val decoder =
+  private final val decoder                           =
     new MySQLFrameDecoder(configuration.charset, connectionId)
   private final val encoder =
     new MySQLOneToOneEncoder(configuration.charset, charsetMapper)
   private final val sendLongDataEncoder = new SendLongDataEncoder()
-  private final val currentParameters =
+  private final val currentParameters   =
     new ArrayBuffer[ColumnDefinitionMessage]()
   private final val currentColumns = new ArrayBuffer[ColumnDefinitionMessage]()
   private final val parsedStatements: Cache[String, PreparedStatementHolder] =
@@ -203,7 +203,7 @@ class MySQLConnectionHandler(
             message.buffer.release()
             this.currentQuery.addRow(decoded)
           }
-          case ServerMessage.ParamProcessingFinished => {}
+          case ServerMessage.ParamProcessingFinished          => {}
           case ServerMessage.ParamAndColumnProcessingFinished => {
             this.onColumnDefinitionFinished()
           }
@@ -330,7 +330,7 @@ class MySQLConnectionHandler(
     val longValues: Seq[(Int, Any)] = longValuesOpt.flatten
 
     if (longValues.nonEmpty) {
-      val (firstIndex, firstValue) = longValues.head
+      val (firstIndex, firstValue)             = longValues.head
       var channelFuture: Future[ChannelFuture] =
         sendLongParameter(statementId, firstIndex, firstValue)
       longValues.tail foreach {

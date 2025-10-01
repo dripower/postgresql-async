@@ -54,7 +54,7 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
       case SSLRequestMessage       => SSLMessageEncoder.encode()
       case message: StartupMessage => startupEncoder.encode(message)
       case message: ScramClientMsg => scramEncoder.encode(message)
-      case message: ClientMessage => {
+      case message: ClientMessage  => {
         val encoder = (message.kind: @switch) match {
           case ServerMessage.Close           => CloseMessageEncoder
           case ServerMessage.Execute         => this.executeEncoder

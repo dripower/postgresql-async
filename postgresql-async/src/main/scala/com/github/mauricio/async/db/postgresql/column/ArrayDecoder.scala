@@ -39,7 +39,7 @@ class ArrayDecoder(private val decoder: ColumnDecoder) extends ColumnDecoder {
     var stack                     = List.empty[ArrayBuffer[Any]]
     var current: ArrayBuffer[Any] = null
     var result: IndexedSeq[Any]   = null
-    val delegate = new ArrayStreamingParserDelegate {
+    val delegate                  = new ArrayStreamingParserDelegate {
       override def arrayEnded = {
         result = stack.head
         stack = stack.tail

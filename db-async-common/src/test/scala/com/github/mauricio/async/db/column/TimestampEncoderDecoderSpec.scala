@@ -24,13 +24,13 @@ import java.util.Calendar
 
 class TimestampEncoderDecoderSpec extends Specification {
 
-  val encoder = TimestampEncoderDecoder.Instance
+  val encoder  = TimestampEncoderDecoder.Instance
   val dateTime = new DateTime()
     .withDate(2013, 12, 27)
     .withTime(8, 40, 50, 800)
 
-  val result    = "2013-12-27 08:40:50.800000"
-  val formatter = new DateTimeFormatterBuilder().appendPattern("Z").toFormatter
+  val result             = "2013-12-27 08:40:50.800000"
+  val formatter          = new DateTimeFormatterBuilder().appendPattern("Z").toFormatter
   val resultWithTimezone =
     s"2013-12-27 08:40:50.800000${formatter.print(dateTime)}"
 

@@ -106,7 +106,7 @@ trait ConnectionHelper {
   def withPool[T](fn: (ConnectionPool[MySQLConnection]) => T): T = {
 
     val factory = new MySQLConnectionFactory(this.defaultConfiguration)
-    val pool =
+    val pool    =
       new ConnectionPool[MySQLConnection](factory, PoolConfiguration.Default)
 
     try {
@@ -122,7 +122,7 @@ trait ConnectionHelper {
   )(fn: (ConnectionPool[MySQLConnection]) => T): T = {
 
     val factory = new MySQLConnectionFactory(configuration)
-    val pool =
+    val pool    =
       new ConnectionPool[MySQLConnection](factory, PoolConfiguration.Default)
 
     try {

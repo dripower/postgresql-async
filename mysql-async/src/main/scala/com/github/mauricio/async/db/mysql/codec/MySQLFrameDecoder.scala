@@ -36,9 +36,9 @@ class MySQLFrameDecoder(charset: Charset, connectionId: String) extends ByteToMe
   private final val handshakeDecoder = new HandshakeV10Decoder(charset)
   private final val errorDecoder     = new ErrorDecoder(charset)
   private final val okDecoder        = new OkDecoder(charset)
-  private final val columnDecoder =
+  private final val columnDecoder    =
     new ColumnDefinitionDecoder(charset, new DecoderRegistry(charset))
-  private final val rowDecoder = new ResultSetRowDecoder(charset)
+  private final val rowDecoder                      = new ResultSetRowDecoder(charset)
   private final val preparedStatementPrepareDecoder =
     new PreparedStatementPrepareResponseDecoder()
   private final val authenticationSwitchDecoder =

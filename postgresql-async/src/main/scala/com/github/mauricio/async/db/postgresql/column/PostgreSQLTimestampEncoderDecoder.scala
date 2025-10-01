@@ -36,20 +36,20 @@ object PostgreSQLTimestampEncoderDecoder extends ColumnEncoderDecoder {
     .appendPattern("Z")
     .toParser
 
-  private val internalFormatters = 1.until(6).inclusive.map { index =>
+  private val internalFormatter = {
     new DateTimeFormatterBuilder()
       .appendPattern("yyyy-MM-dd HH:mm:ss")
-      .appendPattern("." + ("S" * index))
+      .appendOptional(
+        new DateTimeFormatterBuilder()
+          .appendLiteral('.')
+          .appendFractionOfSecond(1, 6)
+          .toParser()
+      )
       .appendOptional(optionalTimeZone)
-      .toFormatter
+      .toFormatter()
   }
 
-  private val internalFormatterWithoutSeconds = new DateTimeFormatterBuilder()
-    .appendPattern("yyyy-MM-dd HH:mm:ss")
-    .appendOptional(optionalTimeZone)
-    .toFormatter
-
-  def formatter = internalFormatters(5)
+  def formatter = internalFormatter
 
   override def decode(
     kind: ColumnData,
@@ -64,28 +64,12 @@ object PostgreSQLTimestampEncoderDecoder extends ColumnEncoderDecoder {
     val columnType = kind.asInstanceOf[PostgreSQLColumnData]
 
     columnType.dataType match {
-      case ColumnTypes.Timestamp | ColumnTypes.TimestampArray => {
-        selectFormatter(text).parseLocalDateTime(text)
-      }
-      case ColumnTypes.TimestampWithTimezoneArray => {
-        selectFormatter(text).parseDateTime(text)
-      }
-      case ColumnTypes.TimestampWithTimezone => {
-        if (columnType.dataTypeModifier > 0) {
-          internalFormatters(columnType.dataTypeModifier - 1)
-            .parseDateTime(text)
-        } else {
-          selectFormatter(text).parseDateTime(text)
-        }
-      }
-    }
-  }
-
-  private def selectFormatter(text: String) = {
-    if (text.contains(".")) {
-      internalFormatters(5)
-    } else {
-      internalFormatterWithoutSeconds
+      case ColumnTypes.Timestamp | ColumnTypes.TimestampArray =>
+        internalFormatter.parseLocalDateTime(text)
+      case ColumnTypes.TimestampWithTimezoneArray =>
+        internalFormatter.parseDateTime(text)
+      case ColumnTypes.TimestampWithTimezone =>
+        internalFormatter.parseDateTime(text)
     }
   }
 

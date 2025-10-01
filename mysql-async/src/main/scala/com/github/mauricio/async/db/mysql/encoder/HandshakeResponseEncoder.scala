@@ -27,7 +27,7 @@ import io.netty.buffer.ByteBuf
 
 object HandshakeResponseEncoder {
 
-  final val MAX_3_BYTES = 0x00ffffff
+  final val MAX_3_BYTES          = 0x00ffffff
   final val PADDING: Array[Byte] = List
     .fill(23) {
       0.toByte
@@ -71,7 +71,7 @@ class HandshakeResponseEncoder(charset: Charset, charsetMapper: CharsetMapper) e
     ByteBufferUtils.writeCString(m.username, buffer, charset)
 
     if (m.password.isDefined) {
-      val method = m.authenticationMethod
+      val method        = m.authenticationMethod
       val authenticator = this.authenticationMethods.getOrElse(
         method, {
           throw new UnsupportedAuthenticationMethodException(method)

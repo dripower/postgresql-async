@@ -39,12 +39,12 @@ class MySQLOneToOneEncoder(charset: Charset, charsetMapper: CharsetMapper)
 
   private final val handshakeResponseEncoder =
     new HandshakeResponseEncoder(charset, charsetMapper)
-  private final val queryEncoder = new QueryMessageEncoder(charset)
-  private final val rowEncoder   = new BinaryRowEncoder(charset)
+  private final val queryEncoder   = new QueryMessageEncoder(charset)
+  private final val rowEncoder     = new BinaryRowEncoder(charset)
   private final val prepareEncoder = new PreparedStatementPrepareEncoder(
     charset
   )
-  private final val closeEncoder = new PreparedStatementCloseEncoder
+  private final val closeEncoder   = new PreparedStatementCloseEncoder
   private final val executeEncoder = new PreparedStatementExecuteEncoder(
     rowEncoder
   )
@@ -60,7 +60,7 @@ class MySQLOneToOneEncoder(charset: Charset, charsetMapper: CharsetMapper)
   ): Unit = {
     val encoder = (message.kind: @switch) match {
       case ClientMessage.ClientProtocolVersion => this.handshakeResponseEncoder
-      case ClientMessage.Quit => {
+      case ClientMessage.Quit                  => {
         sequence = 0
         QuitMessageEncoder
       }
