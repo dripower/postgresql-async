@@ -45,8 +45,8 @@ class DecoderRegistry(charset: Charset) {
           this.stringDecoder
         }
       }
-      case ColumnTypes.FIELD_TYPE_BIT      => ByteArrayDecoder
-      case ColumnTypes.FIELD_TYPE_LONGLONG => LongDecoder
+      case ColumnTypes.FIELD_TYPE_BIT                                 => ByteArrayDecoder
+      case ColumnTypes.FIELD_TYPE_LONGLONG                            => LongDecoder
       case ColumnTypes.FIELD_TYPE_LONG | ColumnTypes.FIELD_TYPE_INT24 =>
         IntegerDecoder
       case ColumnTypes.FIELD_TYPE_YEAR | ColumnTypes.FIELD_TYPE_SHORT =>
@@ -66,20 +66,20 @@ class DecoderRegistry(charset: Charset) {
 
   def textDecoderFor(columnType: Int, charsetCode: Int): ColumnDecoder = {
     (columnType: @switch) match {
-      case ColumnTypes.FIELD_TYPE_DATE => DateEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_DATE                                        => DateEncoderDecoder
       case ColumnTypes.FIELD_TYPE_DATETIME | ColumnTypes.FIELD_TYPE_TIMESTAMP =>
         LocalDateTimeEncoderDecoder
       case ColumnTypes.FIELD_TYPE_DECIMAL | ColumnTypes.FIELD_TYPE_NEW_DECIMAL | ColumnTypes.FIELD_TYPE_NUMERIC =>
         BigDecimalEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_DOUBLE   => DoubleEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_FLOAT    => FloatEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_INT24    => IntegerEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_LONG     => IntegerEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_LONGLONG => LongEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_NEWDATE  => DateEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_SHORT    => ShortEncoderDecoder
-      case ColumnTypes.FIELD_TYPE_TIME     => TextTimeDecoder
-      case ColumnTypes.FIELD_TYPE_TINY     => TextByteDecoder
+      case ColumnTypes.FIELD_TYPE_DOUBLE                                => DoubleEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_FLOAT                                 => FloatEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_INT24                                 => IntegerEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_LONG                                  => IntegerEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_LONGLONG                              => LongEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_NEWDATE                               => DateEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_SHORT                                 => ShortEncoderDecoder
+      case ColumnTypes.FIELD_TYPE_TIME                                  => TextTimeDecoder
+      case ColumnTypes.FIELD_TYPE_TINY                                  => TextByteDecoder
       case ColumnTypes.FIELD_TYPE_VARCHAR | ColumnTypes.FIELD_TYPE_ENUM =>
         StringEncoderDecoder
       case ColumnTypes.FIELD_TYPE_YEAR => ShortEncoderDecoder

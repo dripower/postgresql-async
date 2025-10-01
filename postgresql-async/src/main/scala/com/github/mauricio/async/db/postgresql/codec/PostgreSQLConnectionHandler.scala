@@ -70,7 +70,7 @@ class PostgreSQLConnectionHandler(
   private implicit final val _ec: ExecutionContext = Execution.parasitic
   private final val bootstrap                      = new Bootstrap()
   private final val connectionFuture               = Promise[PostgreSQLConnectionHandler]()
-  private final val disconnectionPromise =
+  private final val disconnectionPromise           =
     Promise[PostgreSQLConnectionHandler]()
   private var processData: ProcessData = null
 
@@ -157,7 +157,7 @@ class PostgreSQLConnectionHandler(
               val tmf = TrustManagerFactory.getInstance(
                 TrustManagerFactory.getDefaultAlgorithm()
               )
-              val ks = KeyStore.getInstance(KeyStore.getDefaultType())
+              val ks      = KeyStore.getInstance(KeyStore.getDefaultType())
               val cacerts = new FileInputStream(
                 System.getProperty("java.home") + "/lib/security/cacerts"
               )
@@ -175,7 +175,7 @@ class PostgreSQLConnectionHandler(
             ctxBuilder.trustManager(InsecureTrustManagerFactory.INSTANCE)
           }
           val sslContext = ctxBuilder.build()
-          val sslEngine = sslContext.newEngine(
+          val sslEngine  = sslContext.newEngine(
             ctx.alloc(),
             configuration.host,
             configuration.port
@@ -214,7 +214,7 @@ class PostgreSQLConnectionHandler(
           case ServerMessage.BackendKeyData => {
             this.processData = m.asInstanceOf[ProcessData]
           }
-          case ServerMessage.BindComplete => {}
+          case ServerMessage.BindComplete   => {}
           case ServerMessage.Authentication => {
             log.debug("Authentication response received {}", m: Any)
             connectionDelegate.onAuthenticationResponse(
@@ -227,7 +227,7 @@ class PostgreSQLConnectionHandler(
             )
           }
           case ServerMessage.CloseComplete => {}
-          case ServerMessage.DataRow => {
+          case ServerMessage.DataRow       => {
             connectionDelegate.onDataRow(m.asInstanceOf[DataRowMessage])
           }
           case ServerMessage.Error => {

@@ -116,7 +116,7 @@ object Metrics {
     sb.append("[")
     p.foreach { x =>
       if (x.isInstanceOf[Seq[Any]]) {
-        val xs = x.asInstanceOf[Seq[Any]]
+        val xs    = x.asInstanceOf[Seq[Any]]
         val xsStr = if (xs.size > 5) {
           xs.take(10).mkString("[", ",", s",...${(xs.size - 5)} more]")
         } else xs.mkString("[", ",", "]")

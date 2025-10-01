@@ -12,7 +12,7 @@ class AuthenticationSwitchResponseEncoder(charset: Charset) extends MessageEncod
   def encode(message: ClientMessage): ByteBuf = {
     val switch = message.asInstanceOf[AuthenticationSwitchResponse]
 
-    val method = switch.request.method
+    val method        = switch.request.method
     val authenticator = AuthenticationMethod.Availables.getOrElse(
       method, {
         throw new UnsupportedAuthenticationMethodException(method)

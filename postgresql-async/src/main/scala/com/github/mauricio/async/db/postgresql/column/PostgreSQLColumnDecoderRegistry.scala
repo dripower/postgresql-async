@@ -30,21 +30,21 @@ object PostgreSQLColumnDecoderRegistry {
 
 class PostgreSQLColumnDecoderRegistry(charset: Charset = CharsetUtil.UTF_8) extends ColumnDecoderRegistry {
 
-  private final val stringArrayDecoder = new ArrayDecoder(StringEncoderDecoder)
+  private final val stringArrayDecoder  = new ArrayDecoder(StringEncoderDecoder)
   private final val booleanArrayDecoder = new ArrayDecoder(
     BooleanEncoderDecoder
   )
-  private final val charArrayDecoder  = new ArrayDecoder(CharEncoderDecoder)
-  private final val longArrayDecoder  = new ArrayDecoder(LongEncoderDecoder)
-  private final val shortArrayDecoder = new ArrayDecoder(ShortEncoderDecoder)
+  private final val charArrayDecoder    = new ArrayDecoder(CharEncoderDecoder)
+  private final val longArrayDecoder    = new ArrayDecoder(LongEncoderDecoder)
+  private final val shortArrayDecoder   = new ArrayDecoder(ShortEncoderDecoder)
   private final val integerArrayDecoder = new ArrayDecoder(
     IntegerEncoderDecoder
   )
   private final val bigDecimalArrayDecoder = new ArrayDecoder(
     BigDecimalEncoderDecoder
   )
-  private final val floatArrayDecoder  = new ArrayDecoder(FloatEncoderDecoder)
-  private final val doubleArrayDecoder = new ArrayDecoder(DoubleEncoderDecoder)
+  private final val floatArrayDecoder     = new ArrayDecoder(FloatEncoderDecoder)
+  private final val doubleArrayDecoder    = new ArrayDecoder(DoubleEncoderDecoder)
   private final val timestampArrayDecoder = new ArrayDecoder(
     PostgreSQLTimestampEncoderDecoder
   )
@@ -61,7 +61,7 @@ class PostgreSQLColumnDecoderRegistry(charset: Charset = CharsetUtil.UTF_8) exte
   private final val intervalArrayDecoder = new ArrayDecoder(
     PostgreSQLIntervalEncoderDecoder
   )
-  private final val uuidArrayDecoder = new ArrayDecoder(UUIDEncoderDecoder)
+  private final val uuidArrayDecoder        = new ArrayDecoder(UUIDEncoderDecoder)
   private final val inetAddressArrayDecoder = new ArrayDecoder(
     InetAddressEncoderDecoder
   )

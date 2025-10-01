@@ -277,7 +277,7 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
 
     "transaction and flatmap example" in {
 
-      val handler: Connection = new PostgreSQLConnection(defaultConfiguration)
+      val handler: Connection         = new PostgreSQLConnection(defaultConfiguration)
       val result: Future[QueryResult] = handler.connect
         .map(parameters => handler)
         .flatMap(connection =>

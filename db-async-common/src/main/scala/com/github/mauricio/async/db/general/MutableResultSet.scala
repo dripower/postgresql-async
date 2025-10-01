@@ -27,7 +27,7 @@ object MutableResultSet {
 
 class MutableResultSet[T <: ColumnData](val columnTypes: ArrayBuffer[T]) extends ResultSet {
 
-  private val rows = new ArrayBuffer[RowData]()
+  private val rows                            = new ArrayBuffer[RowData]()
   private val columnMapping: Map[String, Int] = this.columnTypes.indices
     .map(index => (this.columnTypes(index).name, index))
     .toMap

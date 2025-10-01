@@ -55,7 +55,7 @@ class SingleThreadedAsyncObjectPool[T](
   private var poolables = List.empty[PoolableHolder[T]]
   private val checkouts = new ArrayBuffer[T](configuration.maxObjects)
   private val waitQueue = new Queue[Promise[T]]()
-  private val timer =
+  private val timer     =
     new Timer("async-object-pool-timer-" + Counter.incrementAndGet(), true)
   private val createSemaphore = new Semaphore(configuration.maxObjects)
   timer.scheduleAtFixedRate(
