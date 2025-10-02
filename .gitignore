@@ -2,7 +2,7 @@ databases/*
 out/*
 generate_bundles.rb
 .cache
-target/*
+target/
 bin/*
 .idea*
 .classpath
@@ -27,3 +27,4 @@ vendor/*
 .DS_Store
 metals.sbt
 .aider*
+.crush/
