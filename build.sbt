@@ -21,7 +21,7 @@ lazy val root = (project in file("."))
     publishLocal    := {},
     publishArtifact := false
   )
-  .aggregate(common, postgresql, mysql)
+  .aggregate(common, postgresql, mysql, jmh)
 
 lazy val common = (project in file("db-async-common"))
   .settings(baseSettings: _*)
@@ -45,6 +45,18 @@ lazy val mysql = (project in file("mysql-async"))
     libraryDependencies ++= implementationDependencies
   )
   .dependsOn(common)
+
+lazy val jmh = (project in file("jmh"))
+  .enablePlugins(JmhPlugin)
+  .settings(baseSettings: _*)
+  .settings(
+    publish         := {},
+    publishLocal    := {},
+    publishArtifact := false,
+    name            := "jmh-benchmarks",
+    libraryDependencies ++= commonDependencies
+  )
+  .dependsOn(postgresql)
 
 val commonDependencies = Seq(
   "org.slf4j"               % "slf4j-api"                    % slf4jVersion,
@@ -78,7 +90,7 @@ inThisBuild(
     organization := "com.dripower",
     homepage     := Some(url("https://github.com/dripower/postgresql-async")),
     licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    developers := List(
+    developers   := List(
       Developer("jilen", "jilen", "jilen.zhang@gmail.com", url("https://github.com/jilen"))
     )
   )
@@ -90,7 +102,7 @@ val baseSettings = Seq(
   crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version),
   scalaVersion       := scala213Version,
   javacOptions       := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
-  scalacOptions := {
+  scalacOptions      := {
     Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
   },
   (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential"),

@@ -21,6 +21,7 @@ import com.github.mauricio.async.db.exceptions.DateEncoderNotAvailableException
 import com.github.mauricio.async.db.general.ColumnData
 import com.github.mauricio.async.db.postgresql.messages.backend.PostgreSQLColumnData
 import com.github.mauricio.async.db.util.Log
+import com.github.mauricio.async.db.postgresql.util.DateTimeParserHelper
 import io.netty.buffer.ByteBuf
 import java.nio.charset.Charset
 import java.sql.Timestamp
@@ -36,40 +37,43 @@ object PostgreSQLTimestampEncoderDecoder extends ColumnEncoderDecoder {
     .appendPattern("Z")
     .toParser
 
-  private val internalFormatter = {
-    new DateTimeFormatterBuilder()
-      .appendPattern("yyyy-MM-dd HH:mm:ss")
-      .appendOptional(
-        new DateTimeFormatterBuilder()
-          .appendLiteral('.')
-          .appendFractionOfSecond(1, 6)
-          .toParser()
-      )
-      .appendOptional(optionalTimeZone)
-      .toFormatter()
-  }
-
-  def formatter = internalFormatter
+  val formatter = new DateTimeFormatterBuilder()
+    .appendPattern("yyyy-MM-dd HH:mm:ss.SSSSSS")
+    .appendOptional(optionalTimeZone)
+    .toFormatter()
 
   override def decode(
     kind: ColumnData,
     value: ByteBuf,
     charset: Charset
   ): Any = {
-    val bytes = new Array[Byte](value.readableBytes())
-    value.readBytes(bytes)
-
-    val text = new String(bytes, charset)
-
     val columnType = kind.asInstanceOf[PostgreSQLColumnData]
 
     columnType.dataType match {
       case ColumnTypes.Timestamp | ColumnTypes.TimestampArray =>
-        internalFormatter.parseLocalDateTime(text)
+        DateTimeParserHelper.fastParseLocalDateTime(value, charset).getOrElse {
+          // Fallback to string parsing if ByteBuf parsing fails
+          val bytes = new Array[Byte](value.readableBytes())
+          value.readBytes(bytes)
+          val text = new String(bytes, charset)
+          DateTimeParserHelper.parseLocalDateTime(text)
+        }
       case ColumnTypes.TimestampWithTimezoneArray =>
-        internalFormatter.parseDateTime(text)
+        DateTimeParserHelper.fastParseDateTime(value).getOrElse {
+          // Fallback to string parsing if ByteBuf parsing fails
+          val bytes = new Array[Byte](value.readableBytes())
+          value.readBytes(bytes)
+          val text = new String(bytes, charset)
+          DateTimeParserHelper.parseDateTime(text)
+        }
       case ColumnTypes.TimestampWithTimezone =>
-        internalFormatter.parseDateTime(text)
+        DateTimeParserHelper.fastParseDateTime(value).getOrElse {
+          // Fallback to string parsing if ByteBuf parsing fails
+          val bytes = new Array[Byte](value.readableBytes())
+          value.readBytes(bytes)
+          val text = new String(bytes, charset)
+          DateTimeParserHelper.parseDateTime(text)
+        }
     }
   }
 
