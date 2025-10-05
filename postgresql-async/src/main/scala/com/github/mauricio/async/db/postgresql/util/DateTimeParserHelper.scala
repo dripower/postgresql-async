@@ -156,17 +156,18 @@ private[postgresql] object DateTimeParserHelper {
   }
 
   private def parseFractionalSeconds(buf: ByteBuf): Int = {
-    var result = 0
-    var digits = 0
+    var result    = 0
+    var digits    = 0
+    var readFully = false
 
-    while (buf.readableBytes() > 0 && digits < 6) {
+    while (!readFully && buf.readableBytes() > 0 && digits <= 6) {
       val b = buf.getByte(buf.readerIndex())
       if (b >= '0' && b <= '9') {
         val digit = buf.readByte() - '0'
         result = result * 10 + digit
         digits += 1
-      } else {
-        throw new IllegalArgumentException(s"Illegal fractional seconds ${b}")
+      } else { // All digits have read, may followed by timezone, skip read
+        readFully = true
       }
     }
 
