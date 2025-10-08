@@ -18,6 +18,8 @@ package com.github.mauricio.async.db.column
 
 object IntegerEncoderDecoder extends ColumnEncoderDecoder {
 
-  override def decode(value: String): Int = value.toInt
+  // toIntOption is faster in scala 2.13+
+  override def decode(value: String): Int =
+    value.toIntOption.getOrElse(throw new IllegalArgumentException(s""))
 
 }
