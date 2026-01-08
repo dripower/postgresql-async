@@ -77,7 +77,7 @@ class PostgreSQLConnection(
   private val parameterStatus =
     new scala.collection.mutable.HashMap[String, String]()
   private val parsedStatements =
-    new WTinyLFUCache[PreparedStatementHolder](configuration.preparedStatementCacheSize)
+    new scala.collection.mutable.HashMap[String, PreparedStatementHolder]()
   private var authenticated = false
 
   private val connectionFuture = Promise[Connection]()
@@ -137,19 +137,14 @@ class PostgreSQLConnection(
     val promise = Promise[QueryResult]()
     this.setQueryPromise(promise)
 
-    val (holder, evicted) = this.parsedStatements.get(query) match {
-      case Some(h) => (h, None)
-      case None    =>
-        val h = PreparedStatementHolder(
-          query,
-          preparedStatementsCounter.incrementAndGet,
-          positionalParamHolder
-        )
-        val ev = this.parsedStatements.put(query, h)
-        (h, ev)
-    }
-
-    evicted.foreach(closePreparedStatement)
+    val holder = this.parsedStatements.getOrElseUpdate(
+      query,
+      PreparedStatementHolder(
+        query,
+        preparedStatementsCounter.incrementAndGet,
+        positionalParamHolder
+      )
+    )
 
     if (holder.paramsCount != values.length) {
       this.clearQueryPromise
@@ -180,12 +175,6 @@ class PostgreSQLConnection(
     promise.future
   }
 
-  private def closePreparedStatement(holder: PreparedStatementHolder): Unit = {
-    if (holder.prepared) {
-      write(new QueryMessage(s"""DEALLOCATE "${holder.statementId}""""))
-    }
-  }
-
   override def onError(exception: Throwable) = {
     this.setErrorOnFutures(exception)
   }
@@ -201,7 +190,9 @@ class PostgreSQLConnection(
       this.connectionFuture.failure(e)
       this.disconnect
     }
-    this.currentPreparedStatement = None
+    this.currentPreparedStatement.foreach { p =>
+      this.parsedStatements.remove(p.query)
+    }
     this.currentPreparedStatement = None
     this.failQueryPromise(e)
   }
