@@ -77,7 +77,7 @@ class PostgreSQLConnection(
   private val parameterStatus =
     new scala.collection.mutable.HashMap[String, String]()
   private val parsedStatements =
-    new scala.collection.mutable.HashMap[String, PreparedStatementHolder]()
+    new WTinyLFUCache[PreparedStatementHolder](configuration.preparedStatementCacheSize)
   private var authenticated = false
 
   private val connectionFuture = Promise[Connection]()
@@ -132,47 +132,66 @@ class PostgreSQLConnection(
     query: String,
     values: Seq[Any] = List()
   ): Future[QueryResult] = Metrics.stat(query, values) {
-    validateQuery(query)
-
     val promise = Promise[QueryResult]()
-    this.setQueryPromise(promise)
 
-    val holder = this.parsedStatements.getOrElseUpdate(
-      query,
-      PreparedStatementHolder(
-        query,
-        preparedStatementsCounter.incrementAndGet,
-        positionalParamHolder
-      )
-    )
-
-    if (holder.paramsCount != values.length) {
-      this.clearQueryPromise
-      throw new InsufficientParametersException(holder.paramsCount, values)
+    val (holder, evicted) = this.parsedStatements.get(query) match {
+      case Some(h) => (h, None)
+      case None    =>
+        val h = PreparedStatementHolder(
+          query,
+          preparedStatementsCounter.incrementAndGet,
+          positionalParamHolder
+        )
+        val ev = this.parsedStatements.put(query, h)
+        (h, ev)
     }
 
-    this.currentPreparedStatement = Some(holder)
-    this.currentQuery = Some(new MutableResultSet(holder.columnDatas))
-    write(
-      if (holder.prepared)
-        new PreparedStatementExecuteMessage(
-          holder.statementId,
-          holder.realQuery,
-          values,
-          this.encoderRegistry
-        )
-      else {
-        holder.prepared = true
-        new PreparedStatementOpeningMessage(
-          holder.statementId,
-          holder.realQuery,
-          values,
-          this.encoderRegistry
-        )
+    val deallocateFuture = evicted match {
+      case Some(h) => closePreparedStatement(h)
+      case None    => Future.successful(())
+    }
+
+    deallocateFuture.flatMap { _ =>
+      validateQuery(query)
+
+      this.setQueryPromise(promise)
+
+      if (holder.paramsCount != values.length) {
+        this.clearQueryPromise
+        throw new InsufficientParametersException(holder.paramsCount, values)
       }
-    )
-    addTimeout(promise, configuration.queryTimeout)
-    promise.future
+
+      this.currentPreparedStatement = Some(holder)
+      this.currentQuery = Some(new MutableResultSet(holder.columnDatas))
+      write(
+        if (holder.prepared)
+          new PreparedStatementExecuteMessage(
+            holder.statementId,
+            holder.realQuery,
+            values,
+            this.encoderRegistry
+          )
+        else {
+          holder.prepared = true
+          new PreparedStatementOpeningMessage(
+            holder.statementId,
+            holder.realQuery,
+            values,
+            this.encoderRegistry
+          )
+        }
+      )
+      addTimeout(promise, configuration.queryTimeout)
+      promise.future
+    }
+  }
+
+  private def closePreparedStatement(holder: PreparedStatementHolder): Future[Unit] = {
+    if (holder.prepared) {
+      sendQuery(s"""DEALLOCATE "${holder.statementId}"""").map(_ => ())
+    } else {
+      Future.successful(())
+    }
   }
 
   override def onError(exception: Throwable) = {
@@ -190,9 +209,7 @@ class PostgreSQLConnection(
       this.connectionFuture.failure(e)
       this.disconnect
     }
-    this.currentPreparedStatement.foreach { p =>
-      this.parsedStatements.remove(p.query)
-    }
+    this.currentPreparedStatement = None
     this.currentPreparedStatement = None
     this.failQueryPromise(e)
   }
