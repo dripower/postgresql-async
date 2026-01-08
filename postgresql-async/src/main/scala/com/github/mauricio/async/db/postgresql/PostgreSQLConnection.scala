@@ -132,7 +132,10 @@ class PostgreSQLConnection(
     query: String,
     values: Seq[Any] = List()
   ): Future[QueryResult] = Metrics.stat(query, values) {
+    validateQuery(query)
+
     val promise = Promise[QueryResult]()
+    this.setQueryPromise(promise)
 
     val (holder, evicted) = this.parsedStatements.get(query) match {
       case Some(h) => (h, None)
@@ -146,51 +149,40 @@ class PostgreSQLConnection(
         (h, ev)
     }
 
-    val deallocateFuture = evicted match {
-      case Some(h) => closePreparedStatement(h)
-      case None    => Future.successful(())
+    evicted.foreach(closePreparedStatement)
+
+    if (holder.paramsCount != values.length) {
+      this.clearQueryPromise
+      throw new InsufficientParametersException(holder.paramsCount, values)
     }
 
-    deallocateFuture.flatMap { _ =>
-      validateQuery(query)
-
-      this.setQueryPromise(promise)
-
-      if (holder.paramsCount != values.length) {
-        this.clearQueryPromise
-        throw new InsufficientParametersException(holder.paramsCount, values)
+    this.currentPreparedStatement = Some(holder)
+    this.currentQuery = Some(new MutableResultSet(holder.columnDatas))
+    write(
+      if (holder.prepared)
+        new PreparedStatementExecuteMessage(
+          holder.statementId,
+          holder.realQuery,
+          values,
+          this.encoderRegistry
+        )
+      else {
+        holder.prepared = true
+        new PreparedStatementOpeningMessage(
+          holder.statementId,
+          holder.realQuery,
+          values,
+          this.encoderRegistry
+        )
       }
-
-      this.currentPreparedStatement = Some(holder)
-      this.currentQuery = Some(new MutableResultSet(holder.columnDatas))
-      write(
-        if (holder.prepared)
-          new PreparedStatementExecuteMessage(
-            holder.statementId,
-            holder.realQuery,
-            values,
-            this.encoderRegistry
-          )
-        else {
-          holder.prepared = true
-          new PreparedStatementOpeningMessage(
-            holder.statementId,
-            holder.realQuery,
-            values,
-            this.encoderRegistry
-          )
-        }
-      )
-      addTimeout(promise, configuration.queryTimeout)
-      promise.future
-    }
+    )
+    addTimeout(promise, configuration.queryTimeout)
+    promise.future
   }
 
-  private def closePreparedStatement(holder: PreparedStatementHolder): Future[Unit] = {
+  private def closePreparedStatement(holder: PreparedStatementHolder): Unit = {
     if (holder.prepared) {
-      sendQuery(s"""DEALLOCATE "${holder.statementId}"""").map(_ => ())
-    } else {
-      Future.successful(())
+      write(new QueryMessage(s"""DEALLOCATE "${holder.statementId}""""))
     }
   }
 
