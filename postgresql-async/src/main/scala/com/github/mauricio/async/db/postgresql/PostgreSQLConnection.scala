@@ -71,13 +71,17 @@ class PostgreSQLConnection(
     group
   )
 
-  private final val currentCount              = Counter.incrementAndGet()
+  private final val currentCount = Counter.incrementAndGet()
+
   private final val preparedStatementsCounter = new AtomicInteger()
 
   private val parameterStatus =
     new scala.collection.mutable.HashMap[String, String]()
-  private val parsedStatements =
-    new scala.collection.mutable.HashMap[String, PreparedStatementHolder]()
+  private[postgresql] val parsedStatements =
+    new WTinyLFUCache[PreparedStatementHolder](configuration.preparedStatementCacheSize)
+
+  private[postgresql] def preparedStatementSize: Int = parsedStatements.size
+
   private var authenticated = false
 
   private val connectionFuture = Promise[Connection]()
@@ -137,14 +141,23 @@ class PostgreSQLConnection(
     val promise = Promise[QueryResult]()
     this.setQueryPromise(promise)
 
-    val holder = this.parsedStatements.getOrElseUpdate(
-      query,
-      PreparedStatementHolder(
-        query,
-        preparedStatementsCounter.incrementAndGet,
-        positionalParamHolder
-      )
-    )
+    val holder = this.parsedStatements.get(query) match {
+      case Some(h) => h
+      case None    =>
+        val h = PreparedStatementHolder(
+          query,
+          preparedStatementsCounter.incrementAndGet,
+          positionalParamHolder
+        )
+        val evicted = this.parsedStatements.put(query, h)._2
+        evicted.foreach { ev =>
+          if (ev.prepared) {
+            log.info("Deallocating evicted prepared statement {}", ev.statementId)
+            write(new CloseStatementMessage(s"${ev.statementId}"))
+          }
+        }
+        h
+    }
 
     if (holder.paramsCount != values.length) {
       this.clearQueryPromise

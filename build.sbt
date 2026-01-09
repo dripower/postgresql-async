@@ -3,10 +3,10 @@ import ReleaseTransformations._
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.2.2.Final"
-val scala3Version         = "3.3.6"
+val nettyVersion          = "4.2.9.Final"
+val scala3Version         = "3.3.7"
 val scala212Version       = "2.12.20"
-val scala213Version       = "2.13.16"
+val scala213Version       = "2.13.18"
 val specs2Version         = "4.22.0"
 val slf4jVersion          = "2.0.7"
 val specs2Dependency      = "org.specs2"    %% "specs2-core"     % specs2Version % "test"
@@ -21,7 +21,7 @@ lazy val root = (project in file("."))
     publishLocal    := {},
     publishArtifact := false
   )
-  .aggregate(common, postgresql, mysql, jmh)
+  .aggregate(common, postgresql, mysql)
 
 lazy val common = (project in file("db-async-common"))
   .settings(baseSettings: _*)
@@ -33,16 +33,14 @@ lazy val common = (project in file("db-async-common"))
 lazy val postgresql = (project in file("postgresql-async"))
   .settings(baseSettings: _*)
   .settings(
-    name := postgresqlName,
-    libraryDependencies ++= implementationDependencies
+    name := postgresqlName
   )
   .dependsOn(common)
 
 lazy val mysql = (project in file("mysql-async"))
   .settings(baseSettings: _*)
   .settings(
-    name := mysqlName,
-    libraryDependencies ++= implementationDependencies
+    name := mysqlName
   )
   .dependsOn(common)
 
@@ -64,16 +62,11 @@ val commonDependencies = Seq(
   "io.netty"                % "netty-handler"                % nettyVersion,
   "io.netty"                % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
   "org.scala-lang.modules" %% "scala-collection-compat"      % "2.11.0",
-  "com.ongres.scram"        % "scram-client"                 % "3.1",
-  "joda-time"               % "joda-time"                    % "2.12.2",
+  "com.ongres.scram"        % "scram-client"                 % "3.2",
+  "joda-time"               % "joda-time"                    % "2.14.0",
   "com.google.guava"        % "guava"                        % "33.3.0-jre",
   specs2Dependency,
   specs2JunitDependency,
-  logbackDependency
-)
-
-val implementationDependencies = Seq(
-  specs2Dependency,
   logbackDependency
 )
 

@@ -56,12 +56,13 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
       case message: ScramClientMsg => scramEncoder.encode(message)
       case message: ClientMessage  => {
         val encoder = (message.kind: @switch) match {
-          case ServerMessage.Close           => CloseMessageEncoder
-          case ServerMessage.Execute         => this.executeEncoder
-          case ServerMessage.Parse           => this.openEncoder
-          case ServerMessage.Query           => this.queryEncoder
-          case ServerMessage.PasswordMessage => this.credentialEncoder
-          case _                             => throw new EncoderNotAvailableException(message)
+          case ServerMessage.Close                  => CloseMessageEncoder
+          case ServerMessage.CloseStatementOrPortal => CloseStatementMessageEncoder
+          case ServerMessage.Execute                => this.executeEncoder
+          case ServerMessage.Parse                  => this.openEncoder
+          case ServerMessage.Query                  => this.queryEncoder
+          case ServerMessage.PasswordMessage        => this.credentialEncoder
+          case _                                    => throw new EncoderNotAvailableException(message)
         }
         encoder.encode(message)
       }

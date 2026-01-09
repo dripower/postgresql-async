@@ -379,10 +379,12 @@ class MySQLConnectionHandler(
     this.currentQuery = new MutableResultSet[ColumnDefinitionMessage](columns)
 
     if (this.currentPreparedStatementHolder != null) {
-      val evicted = this.parsedStatements.put(
-        this.currentPreparedStatementHolder.statement,
-        this.currentPreparedStatementHolder
-      )
+      val evicted = this.parsedStatements
+        .put(
+          this.currentPreparedStatementHolder.statement,
+          this.currentPreparedStatementHolder
+        )
+        ._2
       evicted.foreach(st => closePreparedStatment(st.statementId))
       this.executePreparedStatement(
         this.currentPreparedStatementHolder.statementId,
