@@ -41,23 +41,6 @@ import scala.concurrent._
 import scala.concurrent.duration.Duration
 import scala.util._
 
-object Stmt {
-
-  val StmtPool: LoadingCache[String, String] = CacheBuilder
-    .newBuilder()
-    .maximumSize(4096)
-    .expireAfterAccess(60, TimeUnit.SECONDS)
-    .build(
-      new CacheLoader[String, String] {
-        def load(k: String) = k
-      }
-    )
-
-  def pooled(stmt: String) = {
-    StmtPool.get(stmt)
-  }
-}
-
 class MySQLConnectionHandler(
   configuration: Configuration,
   charsetMapper: CharsetMapper,
@@ -78,23 +61,8 @@ class MySQLConnectionHandler(
   private final val currentParameters   =
     new ArrayBuffer[ColumnDefinitionMessage]()
   private final val currentColumns = new ArrayBuffer[ColumnDefinitionMessage]()
-  private final val parsedStatements: Cache[String, PreparedStatementHolder] =
-    CacheBuilder
-      .newBuilder()
-      .maximumSize(configuration.preparedStatementCacheSize)
-      .expireAfterAccess(
-        configuration.preparedStatementExpireTime.toSeconds,
-        TimeUnit.SECONDS
-      )
-      .removalListener(new RemovalListener[String, PreparedStatementHolder] {
-        def onRemoval(
-          removal: RemovalNotification[String, PreparedStatementHolder]
-        ) = {
-          log.debug("Closing preparestatement...")
-          closePreparedStatment(removal.getValue().statementId)
-        }
-      })
-      .build()
+  private final val parsedStatements: WTinyLFUCache[PreparedStatementHolder] =
+    new WTinyLFUCache[PreparedStatementHolder](configuration.preparedStatementCacheSize)
 
   private final val binaryRowDecoder = new BinaryRowDecoder()
 
@@ -257,11 +225,7 @@ class MySQLConnectionHandler(
     this.currentParameters.clear()
 
     this.currentPreparedStatement = preparedStatement
-
-    Option(
-      this.parsedStatements
-        .getIfPresent(Stmt.pooled(preparedStatement.statement))
-    ) match {
+    this.parsedStatements.get(preparedStatement.statement) match {
       case Some(item) => {
         this.executePreparedStatement(
           item.statementId,
@@ -366,8 +330,7 @@ class MySQLConnectionHandler(
       case v: Array[Byte] => v.length > SendLongDataEncoder.LONG_THRESHOLD
       case v: ByteBuffer  => v.remaining() > SendLongDataEncoder.LONG_THRESHOLD
       case v: ByteBuf     => v.readableBytes() > SendLongDataEncoder.LONG_THRESHOLD
-
-      case _ => false
+      case _              => false
     }
   }
 
@@ -416,10 +379,13 @@ class MySQLConnectionHandler(
     this.currentQuery = new MutableResultSet[ColumnDefinitionMessage](columns)
 
     if (this.currentPreparedStatementHolder != null) {
-      this.parsedStatements.put(
-        Stmt.pooled(this.currentPreparedStatementHolder.statement),
-        this.currentPreparedStatementHolder
-      )
+      val evicted = this.parsedStatements
+        .put(
+          this.currentPreparedStatementHolder.statement,
+          this.currentPreparedStatementHolder
+        )
+        ._2
+      evicted.foreach(st => closePreparedStatment(st.statementId))
       this.executePreparedStatement(
         this.currentPreparedStatementHolder.statementId,
         this.currentPreparedStatementHolder.columns.size,

@@ -25,7 +25,7 @@ object ChannelFutureTransformer {
 
   implicit class ChannelFutureSyntax(channelFuture: ChannelFuture) {
     def asScala = {
-      val promise = Promise[ChannelFuture]
+      val promise = Promise[ChannelFuture]()
       channelFuture.addListener(new ChannelFutureListener {
         def operationComplete(future: ChannelFuture): Unit = {
           if (future.isSuccess) {

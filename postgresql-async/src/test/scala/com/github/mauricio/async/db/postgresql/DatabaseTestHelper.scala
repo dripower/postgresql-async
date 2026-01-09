@@ -86,7 +86,6 @@ trait DatabaseTestHelper {
       fn(handler)
     } finally {
       handleTimeout(handler, handler.disconnect)
-      System.gc()
     }
 
   }
