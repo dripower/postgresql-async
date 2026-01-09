@@ -3,7 +3,7 @@ package com.github.mauricio.async.db.util
 import java.util.LinkedHashMap
 
 // --- Single-Threaded W-TinyLFU Implementation inspired by caffeine ---
-class WTinyLFUCache[V](capacity: Int) {
+private[db] class WTinyLFUCache[V](capacity: Int) {
   // Ratios: Window 1%, Protected 80% of Main, Probation 20% of Main
   // Caffeine ratios: Window 1%, Main 99% (Main is 80% Protected / 20% Probation)
   private val windowCap    = Math.max(1, (capacity * 0.01).toInt)

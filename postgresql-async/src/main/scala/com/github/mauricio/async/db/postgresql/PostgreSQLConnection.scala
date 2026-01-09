@@ -77,10 +77,9 @@ class PostgreSQLConnection(
 
   private val parameterStatus =
     new scala.collection.mutable.HashMap[String, String]()
+
   private[postgresql] val parsedStatements =
     new WTinyLFUCache[PreparedStatementHolder](configuration.preparedStatementCacheSize)
-
-  private[postgresql] def preparedStatementSize: Int = parsedStatements.size
 
   private var authenticated = false
 

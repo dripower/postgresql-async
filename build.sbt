@@ -26,8 +26,7 @@ lazy val root = (project in file("."))
 lazy val common = (project in file("db-async-common"))
   .settings(baseSettings: _*)
   .settings(
-    name := commonName,
-    libraryDependencies ++= commonDependencies
+    name := commonName
   )
 
 lazy val postgresql = (project in file("postgresql-async"))
@@ -100,7 +99,8 @@ val baseSettings = Seq(
   },
   (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential"),
   (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
-  (Test / publishArtifact) := false
+  (Test / publishArtifact) := false,
+  libraryDependencies ++= commonDependencies
 )
 (ThisBuild / scalafmtOnCompile) := true
 

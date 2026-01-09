@@ -453,7 +453,7 @@ class PreparedStatementSpec extends Specification with DatabaseTestHelper {
         // Check initial prepared statements count
         val initialStmts = queryPS()
 
-        val capacity = handler.configuration.preparedStatementCacheSize // default 1024
+        val capacity = handler.parsedStatements.size // default 1024
 
         val baseQuery = "SELECT id FROM messages WHERE id = ?"
         for (i <- 1 to (capacity * 2)) {
