@@ -1,6 +1,5 @@
 package com.github.mauricio.async.db.util
 
-import com.google.common.cache._
 import java.util.concurrent.atomic._
 import java.util.concurrent.TimeUnit
 import org.slf4j._
