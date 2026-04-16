@@ -16,6 +16,8 @@
 
 package com.github.mauricio.async.db.postgresql
 
+import java.time.{Duration, Period}
+
 import org.specs2.mutable.Specification
 import org.joda.time._
 
@@ -291,26 +293,28 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
       }
     }
 
-    "support intervals" in {
+    "support interval parameters and return raw interval text" in {
       withHandler { handler =>
         executeDdl(
           handler,
           "CREATE TEMP TABLE intervals (duration interval NOT NULL)"
         )
 
-        val p =
-          new Period(1, 2, 0, 4, 5, 6, 7, 8) /* postgres normalizes weeks */
         executePreparedStatement(
           handler,
           "INSERT INTO intervals (duration) VALUES (?)",
-          Array(p)
+          Array(Period.of(1, 2, 3))
+        )
+        executePreparedStatement(
+          handler,
+          "INSERT INTO intervals (duration) VALUES (?)",
+          Array(Duration.ofHours(4).plusMinutes(5).plusSeconds(6))
         )
         val rows =
-          executeQuery(handler, "SELECT duration FROM intervals").rows.get
+          executeQuery(handler, "SELECT duration FROM intervals ORDER BY duration::text").rows.get
 
-        rows.length === 1
-
-        rows(0)(0) === p
+        rows.length === 2
+        rows.map(_(0).toString) must contain(exactly("1 year 2 mons 3 days", "04:05:06"))
       }
     }
 

@@ -17,6 +17,7 @@
 package com.github.mauricio.async.db.postgresql.column
 
 import java.nio.ByteBuffer
+import java.time.{Duration, Period}
 
 import com.github.mauricio.async.db.column._
 import io.netty.buffer.ByteBuf
@@ -62,12 +63,8 @@ class PostgreSQLColumnEncoderRegistry extends ColumnEncoderRegistry {
       ReadableDateTime
     ]                        -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),
     classOf[ReadableInstant] -> (DateEncoderDecoder                  -> ColumnTypes.Date),
-    classOf[
-      ReadablePeriod
-    ] -> (PostgreSQLIntervalEncoderDecoder -> ColumnTypes.Interval),
-    classOf[
-      ReadableDuration
-    ] -> (PostgreSQLIntervalEncoderDecoder -> ColumnTypes.Interval),
+    classOf[Period]          -> (PostgreSQLIntervalEncoderDecoder    -> ColumnTypes.Interval),
+    classOf[Duration]        -> (PostgreSQLIntervalEncoderDecoder    -> ColumnTypes.Interval),
     classOf[
       java.util.Date
     ]                      -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),

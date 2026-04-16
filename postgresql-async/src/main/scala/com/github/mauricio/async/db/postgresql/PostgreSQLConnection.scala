@@ -151,7 +151,7 @@ class PostgreSQLConnection(
         val evicted = this.parsedStatements.put(query, h)._2
         evicted.foreach { ev =>
           if (ev.prepared) {
-            log.info("Deallocating evicted prepared statement {}", ev.statementId)
+            log.info("Deallocating evicted prepared statement {}", ev.query)
             write(new CloseStatementMessage(s"${ev.statementId}"))
           }
         }

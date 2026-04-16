@@ -20,14 +20,15 @@ private[db] class WTinyLFUCache[V](capacity: Int) {
 
   def get(key: String): Option[V] = {
     sketch.increment(key)
-    if (window.containsKey(key)) return Option(window.get(key))
-    if (protectedArea.containsKey(key)) return Option(protectedArea.get(key))
-    if (probation.containsKey(key)) {
+    if (window.containsKey(key)) {
+      Option(window.get(key))
+    } else if (protectedArea.containsKey(key)) {
+      Option(protectedArea.get(key))
+    } else if (probation.containsKey(key)) {
       val value = probation.remove(key)
       promoteToProtected(key, value)
-      return Option(value)
-    }
-    None
+      Option(value)
+    } else None
   }
 
   /**

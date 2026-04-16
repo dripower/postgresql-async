@@ -62,6 +62,7 @@ timestamp | LocalDateTime
 timestamp_with_timezone | DateTime
 date | LocalDate
 time | LocalTime
+interval | String
 bytea | Array[Byte] (PostgreSQL 9.0 and above only)
 
 All other types are returned as String.
@@ -91,6 +92,8 @@ LocalDate | date
 LocalDateTime | timestamp
 DateTime | timestamp_with_timezone
 LocalTime | time
+java.time.Period | interval
+java.time.Duration | interval
 
 Array types are encoded with the kind of object they hold and not the array type itself. Java `Collection` and
 Scala `Traversable` objects are also assumed to be arrays of the types they hold and will be sent to PostgreSQL
