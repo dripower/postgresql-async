@@ -62,7 +62,6 @@ val commonDependencies = Seq(
   "io.netty"                % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
   "org.scala-lang.modules" %% "scala-collection-compat"      % "2.11.0",
   "com.ongres.scram"        % "scram-client"                 % "3.2",
-  "joda-time"               % "joda-time"                    % "2.14.0",
   "com.google.guava"        % "guava"                        % "33.3.0-jre",
   specs2Dependency,
   specs2JunitDependency,

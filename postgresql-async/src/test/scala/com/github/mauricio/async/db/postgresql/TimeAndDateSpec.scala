@@ -16,10 +16,9 @@
 
 package com.github.mauricio.async.db.postgresql
 
-import java.time.{Duration, Period}
+import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, Period, ZoneOffset}
 
 import org.specs2.mutable.Specification
-import org.joda.time._
 
 class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
@@ -39,7 +38,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
         executePreparedStatement(
           handler,
           "INSERT INTO messages (moment) VALUES (?)",
-          Array[Any](new LocalTime(4, 5, 6))
+          Array[Any](LocalTime.of(4, 5, 6))
         )
 
         val rows =
@@ -47,9 +46,9 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
         val time = rows(0)("moment").asInstanceOf[LocalTime]
 
-        time.getHourOfDay === 4
-        time.getMinuteOfHour === 5
-        time.getSecondOfMinute === 6
+        time.getHour === 4
+        time.getMinute === 5
+        time.getSecond === 6
       }
 
     }
@@ -68,7 +67,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
         executePreparedStatement(
           handler,
           "INSERT INTO messages (moment) VALUES (?)",
-          Array[Any](new LocalTime(4, 5, 6, 134))
+          Array[Any](LocalTime.of(4, 5, 6, 134000000))
         )
 
         val rows =
@@ -76,10 +75,10 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
         val time = rows(0)("moment").asInstanceOf[LocalTime]
 
-        time.getHourOfDay === 4
-        time.getMinuteOfHour === 5
-        time.getSecondOfMinute === 6
-        time.getMillisOfSecond === 134
+        time.getHour === 4
+        time.getMinute === 5
+        time.getSecond === 6
+        time.getNano / 1000000 === 134
       }
 
     }
@@ -105,11 +104,11 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
         val rows =
           executePreparedStatement(handler, "select * from messages").rows.get
 
-        val time = rows(0)("moment").asInstanceOf[LocalTime]
+        val time = rows(0)("moment").asInstanceOf[java.time.OffsetTime]
 
-        time.getHourOfDay === 4
-        time.getMinuteOfHour === 5
-        time.getSecondOfMinute === 6
+        time.getHour === 4
+        time.getMinute === 5
+        time.getSecond === 6
       }
 
     }
@@ -133,11 +132,11 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
         rows.length === 1
 
-        val dateTime = rows(0)("moment").asInstanceOf[DateTime]
+        val dateTime = rows(0)("moment").asInstanceOf[OffsetDateTime]
 
         // Note: Since this assertion depends on Brazil locale, I think epoch time assertion is preferred
         // dateTime.getZone.toTimeZone.getRawOffset === -10800000
-        dateTime.getMillis === 915779106000L
+        dateTime.toInstant.toEpochMilli === 915779106000L
       }
     }
 
@@ -166,12 +165,12 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
           rows.length === 1
 
-          val dateTime = rows(0)("moment").asInstanceOf[DateTime]
+          val dateTime = rows(0)("moment").asInstanceOf[OffsetDateTime]
 
           // Note: Since this assertion depends on Brazil locale, I think epoch time assertion is preferred
           // dateTime.getZone.toTimeZone.getRawOffset === -10800000
-          dateTime.getMillis must be_>=(915779106000L)
-          dateTime.getMillis must be_<(915779107000L)
+          dateTime.toInstant.toEpochMilli must be_>=(915779106000L)
+          dateTime.toInstant.toEpochMilli must be_<(915779107000L)
         }
       }
     }
@@ -197,16 +196,16 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
         rows.length === 1
 
-        val dateTime = rows(0)("moment").asInstanceOf[DateTime]
+        val dateTime = rows(0)("moment").asInstanceOf[OffsetDateTime]
 
-        dateTime.getMillis must beCloseTo(millis, 500L)
+        dateTime.toInstant.toEpochMilli must beCloseTo(millis, 500L)
       }
     }
 
     "handle sending a time with timezone and return a LocalDateTime for a timestamp without timezone column" in {
 
       withTimeHandler { conn =>
-        val date = new DateTime(2190319)
+        val date = OffsetDateTime.ofInstant(Instant.ofEpochMilli(2190319), ZoneOffset.UTC)
 
         executePreparedStatement(conn, "CREATE TEMP TABLE TEST(T TIMESTAMP)")
         executePreparedStatement(
@@ -216,7 +215,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
         )
         val result = executePreparedStatement(conn, "SELECT T FROM TEST")
         val date2  = result.rows.get.head(0)
-        date2 === date.toDateTime(DateTimeZone.UTC).toLocalDateTime
+        date2 === date.withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime
       }
 
     }
@@ -224,7 +223,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
     "supports sending a local date and later a date time object for the same field" in {
 
       withTimeHandler { conn =>
-        val date = new LocalDate(2016, 3, 5)
+        val date = LocalDate.of(2016, 3, 5)
 
         executePreparedStatement(conn, "CREATE TEMP TABLE TEST(T TIMESTAMP)")
         executePreparedStatement(
@@ -239,7 +238,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
         )
         result.rows.get.size === 1
 
-        val dateTime       = new LocalDateTime(2016, 3, 5, 0, 0, 0, 0)
+        val dateTime       = LocalDateTime.of(2016, 3, 5, 0, 0, 0, 0)
         val dateTimeResult = executePreparedStatement(
           conn,
           "SELECT T FROM TEST WHERE T  = ?",
@@ -253,7 +252,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
     "handle sending a LocalDateTime and return a LocalDateTime for a timestamp without timezone column" in {
 
       withTimeHandler { conn =>
-        val date1 = new LocalDateTime(2190319)
+        val date1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(2190319), ZoneOffset.UTC)
 
         await(conn.sendPreparedStatement("CREATE TEMP TABLE TEST(T TIMESTAMP)"))
         await(
@@ -273,7 +272,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
     "handle sending a date with timezone and retrieving the date with the same time zone" in {
 
       withTimeHandler { conn =>
-        val date1 = new DateTime(2190319)
+        val date1 = OffsetDateTime.ofInstant(Instant.ofEpochMilli(2190319), ZoneOffset.UTC)
 
         await(
           conn.sendPreparedStatement(

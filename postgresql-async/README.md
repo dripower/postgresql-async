@@ -17,6 +17,9 @@ to PostgreSQL.
 
 [PostgreSQL protocol information and definition can be found here](http://www.postgresql.org/docs/devel/static/protocol.html)
 
+If you are upgrading from the `0.3.x` line, see [../MIGRATING_FROM_0.3_X.md](../MIGRATING_FROM_0.3_X.md) for the
+cross-driver migration notes.
+
 This driver contains Java code from the [JDBC PostgreSQL](http://jdbc.postgresql.org/) driver under the
 `com.github.mauricio.async.db.postgresql.util` package consisting of the `ParseURL` class.
 
@@ -28,7 +31,7 @@ This driver contains Java code from the [JDBC PostgreSQL](http://jdbc.postgresql
 - execute direct queries (without portals/prepared statements)
 - portals/prepared statements
 - parses most of the basic PostgreSQL types, other types are parsed as string
-- date, time and timestamp types are handled as JodaTime objects and **not** as **java.util.Date** objects
+- date, time and timestamp types are handled with the Java 8+ `java.time` API instead of `java.util.Date`
 - all work is done using the new `scala.concurrent.Future` and `scala.concurrent.Promise` objects
 - support for Byte arrays if using PostgreSQL >= 9.0
 - support for LISTEN/NOTIFY operations (check [ListenNotifySpec](https://github.com/mauricio/postgresql-async/blob/master/postgresql-async/src/test/scala/com/github/mauricio/async/db/postgresql/ListenNotifySpec.scala) for an example on how to use it );
@@ -58,10 +61,11 @@ double | Double
 text | String
 varchar | String
 bpchar | String
-timestamp | LocalDateTime
-timestamp_with_timezone | DateTime
-date | LocalDate
-time | LocalTime
+timestamp | java.time.LocalDateTime
+timestamp_with_timezone | java.time.OffsetDateTime
+date | java.time.LocalDate
+time | java.time.LocalTime
+time_with_timezone | java.time.OffsetTime
 interval | String
 bytea | Array[Byte] (PostgreSQL 9.0 and above only)
 
@@ -88,10 +92,12 @@ java.util.Date | timestamp_with_timezone
 java.sql.Timestamp | timestamp_with_timezone
 java.sql.Date | date
 java.sql.Time | time
-LocalDate | date
-LocalDateTime | timestamp
-DateTime | timestamp_with_timezone
-LocalTime | time
+java.time.LocalDate | date
+java.time.LocalDateTime | timestamp
+java.time.OffsetDateTime | timestamp_with_timezone
+java.time.Instant | timestamp_with_timezone
+java.time.LocalTime | time
+java.time.OffsetTime | time_with_timezone
 java.time.Period | interval
 java.time.Duration | interval
 

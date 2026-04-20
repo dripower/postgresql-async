@@ -1,5 +1,7 @@
 # Dripower's internal Postgres/MySQL Async
 
+If you are upgrading from the `0.3.x` line, see [MIGRATING_FROM_0.3_X.md](./MIGRATING_FROM_0.3_X.md).
+
 ## Diffs
 
 + Guava cache based `PrepareStatement` automatically close

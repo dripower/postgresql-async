@@ -17,11 +17,10 @@
 package com.github.mauricio.async.db.postgresql.column
 
 import java.nio.ByteBuffer
-import java.time.{Duration, Period}
+import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime, Period}
 
 import com.github.mauricio.async.db.column._
 import io.netty.buffer.ByteBuf
-import org.joda.time._
 
 import scala.jdk.CollectionConverters._
 
@@ -57,14 +56,11 @@ class PostgreSQLColumnEncoderRegistry extends ColumnEncoderRegistry {
     classOf[LocalDate]      -> (DateEncoderDecoder        -> ColumnTypes.Date),
     classOf[
       LocalDateTime
-    ]                 -> (TimestampEncoderDecoder.Instance    -> ColumnTypes.Timestamp),
-    classOf[DateTime] -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),
-    classOf[
-      ReadableDateTime
-    ]                        -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),
-    classOf[ReadableInstant] -> (DateEncoderDecoder                  -> ColumnTypes.Date),
-    classOf[Period]          -> (PostgreSQLIntervalEncoderDecoder    -> ColumnTypes.Interval),
-    classOf[Duration]        -> (PostgreSQLIntervalEncoderDecoder    -> ColumnTypes.Interval),
+    ]                       -> (TimestampEncoderDecoder.Instance    -> ColumnTypes.Timestamp),
+    classOf[OffsetDateTime] -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),
+    classOf[Instant]        -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),
+    classOf[Period]         -> (PostgreSQLIntervalEncoderDecoder    -> ColumnTypes.Interval),
+    classOf[Duration]       -> (PostgreSQLIntervalEncoderDecoder    -> ColumnTypes.Interval),
     classOf[
       java.util.Date
     ]                      -> (TimestampWithTimezoneEncoderDecoder -> ColumnTypes.TimestampWithTimezone),
@@ -85,10 +81,8 @@ class PostgreSQLColumnEncoderRegistry extends ColumnEncoderRegistry {
   )
 
   private final val classesSequence =
-    (classOf[LocalTime] -> (TimeEncoderDecoder.Instance -> ColumnTypes.Time)) ::
-      (classOf[
-        ReadablePartial
-      ] -> (TimeEncoderDecoder.Instance -> ColumnTypes.Time)) ::
+    (classOf[LocalTime]    -> (TimeEncoderDecoder.Instance    -> ColumnTypes.Time)) ::
+      (classOf[OffsetTime] -> (TimeWithTimezoneEncoderDecoder -> ColumnTypes.TimeWithTimezone)) ::
       classesSequence_
 
   private final val classes = classesSequence.toMap

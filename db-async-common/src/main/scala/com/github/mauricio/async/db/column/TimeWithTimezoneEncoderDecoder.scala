@@ -16,12 +16,22 @@
 
 package com.github.mauricio.async.db.column
 
-import org.joda.time.format.DateTimeFormat
+import java.time.OffsetTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 
 object TimeWithTimezoneEncoderDecoder extends TimeEncoderDecoder {
 
-  private val format = DateTimeFormat.forPattern("HH:mm:ss.SSSSSSZ")
+  protected override val format: DateTimeFormatter = new DateTimeFormatterBuilder()
+    .appendPattern("HH:mm:ss")
+    .appendFraction(ChronoField.NANO_OF_SECOND, 6, 6, true)
+    .appendOffset("+HH:mm", "Z")
+    .toFormatter()
 
   override def formatter = format
+
+  override def decode(value: String): Any =
+    OffsetTime.parse(value, formatter)
 
 }

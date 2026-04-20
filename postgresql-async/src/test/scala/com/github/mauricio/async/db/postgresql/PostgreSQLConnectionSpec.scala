@@ -17,6 +17,7 @@
 package com.github.mauricio.async.db.postgresql
 
 import java.nio.ByteBuffer
+import java.time.LocalDateTime
 
 import com.github.mauricio.async.db.column.{DateEncoderDecoder, TimeEncoderDecoder, TimestampEncoderDecoder}
 import com.github.mauricio.async.db.exceptions.UnsupportedAuthenticationMethodException
@@ -25,7 +26,6 @@ import com.github.mauricio.async.db.postgresql.messages.backend.InformationMessa
 import com.github.mauricio.async.db.util.Log
 import com.github.mauricio.async.db.{Configuration, Connection, QueryResult}
 import io.netty.buffer.Unpooled
-import org.joda.time.LocalDateTime
 import org.specs2.mutable.Specification
 
 import scala.concurrent.duration._
@@ -410,7 +410,7 @@ class PostgreSQLConnectionSpec extends Specification with DatabaseTestHelper {
 
       withHandler { handler =>
         executePreparedStatement(handler, "CREATE TEMP TABLE test(t TIMESTAMP)")
-        val date1 = new LocalDateTime
+        val date1 = LocalDateTime.now().withNano(0)
         executePreparedStatement(
           handler,
           "INSERT INTO test(t) VALUES(?)",

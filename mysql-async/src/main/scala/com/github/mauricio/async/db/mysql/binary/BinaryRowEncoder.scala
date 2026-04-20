@@ -18,11 +18,11 @@ package com.github.mauricio.async.db.mysql.binary
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
+import java.time.{Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime}
 
 import com.github.mauricio.async.db.mysql.binary.encoder._
 import com.github.mauricio.async.db.util._
 import io.netty.buffer.ByteBuf
-import org.joda.time._
 
 object BinaryRowEncoder {
   final val log = Log.get[BinaryRowEncoder]
@@ -50,7 +50,8 @@ class BinaryRowEncoder(charset: Charset) {
     classOf[Double]                                   -> DoubleEncoder,
     classOf[java.lang.Double]                         -> DoubleEncoder,
     classOf[LocalDateTime]                            -> LocalDateTimeEncoder,
-    classOf[DateTime]                                 -> DateTimeEncoder,
+    classOf[OffsetDateTime]                           -> DateTimeEncoder,
+    classOf[Instant]                                  -> ReadableInstantEncoder,
     classOf[LocalDate]                                -> LocalDateEncoder,
     classOf[java.util.Date]                           -> JavaDateEncoder,
     classOf[java.sql.Timestamp]                       -> SQLTimestampEncoder,
@@ -73,8 +74,8 @@ class BinaryRowEncoder(charset: Charset) {
           case v: java.math.BigInteger               => this.stringEncoder
           case v: BigDecimal                         => this.stringEncoder
           case v: java.math.BigDecimal               => this.stringEncoder
-          case v: ReadableDateTime                   => DateTimeEncoder
-          case v: ReadableInstant                    => ReadableInstantEncoder
+          case v: OffsetDateTime                     => DateTimeEncoder
+          case v: Instant                            => ReadableInstantEncoder
           case v: LocalDateTime                      => LocalDateTimeEncoder
           case v: java.sql.Timestamp                 => SQLTimestampEncoder
           case v: java.sql.Date                      => SQLDateEncoder

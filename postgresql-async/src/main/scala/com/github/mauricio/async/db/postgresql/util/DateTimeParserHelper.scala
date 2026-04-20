@@ -1,38 +1,34 @@
 package com.github.mauricio.async.db.postgresql.util
 
-import org.joda.time._
-import org.joda.time.format.{DateTimeFormatterBuilder, DateTimeFormatter}
 import io.netty.buffer.ByteBuf
 import java.nio.charset.Charset
+import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
+import java.time.temporal.ChronoField
+import java.time.{LocalDateTime, OffsetDateTime, ZoneId, ZoneOffset, ZonedDateTime}
 import scala.util.control.NonFatal
 
 private[postgresql] object DateTimeParserHelper {
 
-  private val optionalTimeZone = new DateTimeFormatterBuilder()
-    .appendPattern("Z")
-    .toParser
-
-  private val powerOf10 = Array(1, 10, 100, 1000, 10000)
+  private val powerOf10 = Array(1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000)
 
   val timestampFormatter: DateTimeFormatter = {
     new DateTimeFormatterBuilder()
       .appendPattern("yyyy-MM-dd HH:mm:ss")
-      .appendOptional(
-        new DateTimeFormatterBuilder()
-          .appendLiteral('.')
-          .appendFractionOfSecond(1, 6)
-          .toParser()
-      )
-      .appendOptional(optionalTimeZone)
+      .optionalStart()
+      .appendFraction(ChronoField.NANO_OF_SECOND, 1, 6, true)
+      .optionalEnd()
+      .optionalStart()
+      .appendOffset("+HH:mm", "Z")
+      .optionalEnd()
       .toFormatter()
   }
 
   def parseLocalDateTime(text: String): LocalDateTime = {
-    timestampFormatter.parseLocalDateTime(text)
+    LocalDateTime.parse(text, timestampFormatter)
   }
 
-  def parseDateTime(text: String): DateTime = {
-    timestampFormatter.parseDateTime(text)
+  def parseOffsetDateTime(text: String): OffsetDateTime = {
+    OffsetDateTime.parse(text, timestampFormatter)
   }
 
   /** Parse in-place, improve performance, if failed, reader index is reset */
@@ -44,8 +40,8 @@ private[postgresql] object DateTimeParserHelper {
           parseTimestampFromByteBuf(
             buf,
             false,
-            (year, month, day, hour, minute, second, millis, timezone) =>
-              new LocalDateTime(year, month, day, hour, minute, second, millis)
+            (year, month, day, hour, minute, second, nanos, timezone) =>
+              LocalDateTime.of(year, month, day, hour, minute, second, nanos)
           )
         )
       } catch {
@@ -55,7 +51,7 @@ private[postgresql] object DateTimeParserHelper {
   }
 
   /** Parse in-place, improve performance, if failed, reader index is reset */
-  def fastParseDateTime(buf: ByteBuf): Option[DateTime] = {
+  def fastParseOffsetDateTime(buf: ByteBuf): Option[OffsetDateTime] = {
     if (buf.readableBytes() == 0) {
       None
     } else {
@@ -63,14 +59,10 @@ private[postgresql] object DateTimeParserHelper {
         parseTimestampFromByteBuf(
           buf,
           true,
-          (year, month, day, hour, minute, second, millis, timezone) =>
+          (year, month, day, hour, minute, second, nanos, timezone) =>
             timezone match {
               case Some(zone) =>
-                Some(
-                  new DateTime(year, month, day, hour, minute, second, millis, zone).withZone(
-                    DateTimeZone.getDefault()
-                  )
-                )
+                Some(ZonedDateTime.of(year, month, day, hour, minute, second, nanos, zone).toOffsetDateTime)
               case None => None
             }
         )
@@ -83,7 +75,7 @@ private[postgresql] object DateTimeParserHelper {
   private def parseTimestampFromByteBuf[T](
     buf: ByteBuf,
     withTimezone: Boolean,
-    f: (Int, Int, Int, Int, Int, Int, Int, Option[DateTimeZone]) => T
+    f: (Int, Int, Int, Int, Int, Int, Int, Option[ZoneId]) => T
   ): T = {
     buf.markReaderIndex()
     try {
@@ -121,7 +113,7 @@ private[postgresql] object DateTimeParserHelper {
       val second = parseDigits(buf, 2)
 
       // Parse optional fractional seconds
-      val millis = if (buf.readableBytes() > 0 && buf.getByte(buf.readerIndex()) == '.') {
+      val nanos = if (buf.readableBytes() > 0 && buf.getByte(buf.readerIndex()) == '.') {
         buf.skipBytes(1) // skip '.'
         parseFractionalSeconds(buf)
       } else 0
@@ -133,7 +125,7 @@ private[postgresql] object DateTimeParserHelper {
         None
       }
 
-      f(year, month, day, hour, minute, second, millis, timezone)
+      f(year, month, day, hour, minute, second, nanos, timezone)
     } catch {
       case NonFatal(e) =>
         buf.resetReaderIndex()
@@ -171,17 +163,17 @@ private[postgresql] object DateTimeParserHelper {
       }
     }
 
-    // Scale to milliseconds (3 digits)
-    if (digits <= 3) {
-      result * powerOf10(3 - digits)
+    // Scale to nanoseconds.
+    if (digits <= 9) {
+      result * powerOf10(9 - digits)
     } else {
-      result / powerOf10(digits - 3)
+      result / powerOf10(digits - 9)
     }
   }
 
-  private def parseTimezone(buf: ByteBuf): DateTimeZone = {
+  private def parseTimezone(buf: ByteBuf): ZoneId = {
     if (buf.readableBytes() == 0) {
-      return DateTimeZone.UTC
+      return ZoneOffset.UTC
     } else {
 
       val firstChar = buf.getByte(buf.readerIndex())
@@ -191,18 +183,18 @@ private[postgresql] object DateTimeParserHelper {
       } else if (firstChar == 'Z') {
         // UTC timezone
         buf.skipBytes(1)
-        DateTimeZone.UTC
+        ZoneOffset.UTC
       } else {
         // Named timezone - fall back to string parsing
         val bytes = new Array[Byte](buf.readableBytes())
         buf.readBytes(bytes)
         val timezoneStr = new String(bytes)
-        DateTimeZone.forID(timezoneStr)
+        ZoneId.of(timezoneStr)
       }
     }
   }
 
-  private def parseOffsetTimezone(buf: ByteBuf): DateTimeZone = {
+  private def parseOffsetTimezone(buf: ByteBuf): ZoneOffset = {
     val signChar = buf.readByte().toChar
     val sign     = if (signChar == '+') 1 else -1
 
@@ -215,8 +207,7 @@ private[postgresql] object DateTimeParserHelper {
 
     val minutes = if (buf.readableBytes() >= 2) parseDigits(buf, 2) else 0
 
-    val totalOffset = sign * (hours * 60 + minutes) * 60 * 1000
-    DateTimeZone.forOffsetMillis(totalOffset)
+    ZoneOffset.ofHoursMinutes(sign * hours, sign * minutes)
   }
 
 }

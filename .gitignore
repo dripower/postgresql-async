@@ -30,3 +30,4 @@ metals.sbt
 .crush/
 .scalex/
 .codex
+.scala-build

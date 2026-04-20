@@ -15,6 +15,9 @@ This is the MySQL part of the async driver collection. As the PostgreSQL version
 
 You can find more information about the MySQL network protocol [here](http://dev.mysql.com/doc/internals/en/client-server-protocol.html).
 
+If you are upgrading from the `0.3.x` line, see [../MIGRATING_FROM_0.3_X.md](../MIGRATING_FROM_0.3_X.md) for the
+cross-driver migration notes.
+
 ## What can it do now?
 
 * connect do databases with the **mysql_native_password** method (that's the usual way)
@@ -28,9 +31,9 @@ You can find more information about the MySQL network protocol [here](http://dev
 * `unsigned` types are not supported, their behaviour when using this driver is undefined.
 * Prior to version [5.6.4](http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html) MySQL truncates millis in `datetime`, `timestamp` and `time` fields. If your date has millis,
   they will be gone ([docs here](http://dev.mysql.com/doc/refman/5.0/en/fractional-seconds.html))
-* If using `5.6` support for microseconds on `timestamp` fields (using the `timestamp(3)` syntax) you can't
-  go longer than 3 in precision since `JodaTime` and `Date` objects in Java only go as far as millis and not micro.
-  For `time` fields, since `Duration` is used, you get full microsecond precision.
+* If using `5.6` support for microseconds on `timestamp` fields, the driver uses `java.time.LocalDateTime`
+  and preserves MySQL's microsecond precision in the binary protocol. For `time` fields, since `Duration` is used,
+  you get full microsecond precision.
 * Timezone support is rather complicated ([see here](http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)),
   avoid using timezones in MySQL. This driver just stores the dates as they are and won't perform any computation
   or calculation. I'd recommend using only `datetime` fields and avoid `timestamp` fields as much as possible.
@@ -80,8 +83,11 @@ Int | mediumint
 Float | float
 Double | double
 BigDecimal | decimal
-LocalDate | date
-DateTime | timestamp
+java.time.LocalDate | date
+java.time.LocalDateTime | datetime
+java.time.LocalDateTime | timestamp
+java.time.OffsetDateTime | timestamp
+java.time.Instant | timestamp
 scala.concurrent.Duration | time
 java.sql.Date | date
 java.util.Date | timestamp
