@@ -16,23 +16,27 @@
 
 package com.github.mauricio.async.db.column
 
-import java.time.OffsetDateTime
+import java.time.{OffsetDateTime, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 
 object TimestampWithTimezoneEncoderDecoder extends TimestampEncoderDecoder {
 
+  private val systemZone = ZoneId.systemDefault()
+
   private val format: DateTimeFormatter = new DateTimeFormatterBuilder()
     .appendPattern("yyyy-MM-dd HH:mm:ss")
-    .appendFraction(ChronoField.NANO_OF_SECOND, 6, 6, true)
-    .appendOffset("+HH:mm", "Z")
+    .optionalStart()
+    .appendFraction(ChronoField.NANO_OF_SECOND, 1, 6, true)
+    .optionalEnd()
+    .appendPattern("[XXX][XX][X]")
     .toFormatter()
 
   override def formatter = format
 
   override def decode(value: String): Any = {
-    OffsetDateTime.parse(value, formatter)
+    OffsetDateTime.parse(value, formatter).atZoneSameInstant(systemZone).toOffsetDateTime
   }
 
 }
