@@ -58,9 +58,7 @@ class PostgreSQLColumnDecoderRegistry(charset: Charset = CharsetUtil.UTF_8) exte
   private final val timeWithTimestampArrayDecoder = new ArrayDecoder(
     TimeWithTimezoneEncoderDecoder
   )
-  private final val intervalArrayDecoder = new ArrayDecoder(
-    PostgreSQLIntervalEncoderDecoder
-  )
+  private final val intervalArrayDecoder    = new ArrayDecoder(StringEncoderDecoder)
   private final val uuidArrayDecoder        = new ArrayDecoder(UUIDEncoderDecoder)
   private final val inetAddressArrayDecoder = new ArrayDecoder(
     InetAddressEncoderDecoder
@@ -127,7 +125,7 @@ class PostgreSQLColumnDecoderRegistry(charset: Charset = CharsetUtil.UTF_8) exte
       case TimeWithTimezone      => TimeWithTimezoneEncoderDecoder
       case TimeWithTimezoneArray => this.timeWithTimestampArrayDecoder
 
-      case Interval      => PostgreSQLIntervalEncoderDecoder
+      case Interval      => StringEncoderDecoder
       case IntervalArray => this.intervalArrayDecoder
 
       case MoneyArray => this.stringArrayDecoder

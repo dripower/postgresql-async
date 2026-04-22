@@ -16,11 +16,12 @@
 
 package com.github.mauricio.async.db.postgresql
 
+import java.time.LocalDate
+import java.util.UUID
+
 import org.specs2.mutable.Specification
-import org.joda.time.LocalDate
 import com.github.mauricio.async.db.util.Log
 import com.github.mauricio.async.db.exceptions.InsufficientParametersException
-import java.util.UUID
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException
 
 class PreparedStatementSpec extends Specification with DatabaseTestHelper {

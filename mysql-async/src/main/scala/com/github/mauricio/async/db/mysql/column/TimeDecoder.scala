@@ -17,28 +17,35 @@
 package com.github.mauricio.async.db.mysql.column
 
 import com.github.mauricio.async.db.column.ColumnDecoder
-import scala.concurrent.duration._
+import java.time.Duration
 
 object TimeDecoder extends ColumnDecoder {
 
-  final val Hour = 1.hour.toMillis
-
   override def decode(value: String): Duration = {
+    val isNegative = value.startsWith("-")
+    val normalized = if (isNegative) value.substring(1) else value
 
-    val pieces = value.split(':')
+    val pieces = normalized.split(':')
 
-    val secondsAndMillis = pieces(2).split('.')
-
-    val parts = if (secondsAndMillis.length == 2) {
-      (secondsAndMillis(0).toInt, secondsAndMillis(1).toInt)
+    val secondsAndMicros = pieces(2).split('.')
+    val micros           = if (secondsAndMicros.length == 2) {
+      secondsAndMicros(1).padTo(6, '0').take(6).toLong
     } else {
-      (secondsAndMillis(0).toInt, 0)
+      0L
     }
 
-    val hours   = pieces(0).toInt
-    val minutes = pieces(1).toInt
+    val hours   = pieces(0).toLong
+    val minutes = pieces(1).toLong
+    val seconds = secondsAndMicros(0).toLong
 
-    hours.hours + minutes.minutes + parts._1.seconds + parts._2.millis
+    val duration =
+      Duration
+        .ofHours(hours)
+        .plusMinutes(minutes)
+        .plusSeconds(seconds)
+        .plusNanos(micros * 1000)
+
+    if (isNegative) duration.negated() else duration
   }
 
 }

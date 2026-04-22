@@ -2,24 +2,29 @@
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**
 
-- [mysql-async - an async, Netty based, MySQL driver written in Scala 2.10 and 2.11](#mysql-async---an-async-netty-based-mysql-driver-written-in-scala-210)
-	- [What can it do now?](#what-can-it-do-now)
-	- [Gotchas](#gotchas)
-	- [Supported types](#supported-types)
+- [mysql-async](#mysql-async)
+  - [What can it do now?](#what-can-it-do-now)
+  - [Gotchas](#gotchas)
+  - [Supported types](#supported-types)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# mysql-async - an async, Netty based, MySQL driver written in Scala 2.10 and 2.11
+# mysql-async
 
 This is the MySQL part of the async driver collection. As the PostgreSQL version, it is not supposed to be a JDBC replacement, but a simpler solution for those that need something that queries and then returns rows.
 
 You can find more information about the MySQL network protocol [here](http://dev.mysql.com/doc/internals/en/client-server-protocol.html).
 
+If you are upgrading from the `0.3.x` line, see [../MIGRATING_FROM_0.3_X.md](../MIGRATING_FROM_0.3_X.md) for the
+cross-driver migration notes.
+
 ## What can it do now?
 
-* connect do databases with the **mysql_native_password** method (that's the usual way)
+* connect to databases with the **mysql_native_password** method (that's the usual way)
 * execute common statements
 * execute prepared statements
+* query timeout configuration is supported through `Configuration.queryTimeout`
+* configurable Netty `eventLoopGroup` and `channelClass`
 * supports MySQL servers from 4.1 and above (should also work the same way when using MariaDB or other MySQL derived projects)
 * supports most available database types
 
@@ -28,9 +33,9 @@ You can find more information about the MySQL network protocol [here](http://dev
 * `unsigned` types are not supported, their behaviour when using this driver is undefined.
 * Prior to version [5.6.4](http://dev.mysql.com/doc/refman/5.6/en/fractional-seconds.html) MySQL truncates millis in `datetime`, `timestamp` and `time` fields. If your date has millis,
   they will be gone ([docs here](http://dev.mysql.com/doc/refman/5.0/en/fractional-seconds.html))
-* If using `5.6` support for microseconds on `timestamp` fields (using the `timestamp(3)` syntax) you can't
-  go longer than 3 in precision since `JodaTime` and `Date` objects in Java only go as far as millis and not micro.
-  For `time` fields, since `Duration` is used, you get full microsecond precision.
+* If using `5.6` support for microseconds on `timestamp` fields, the driver uses `java.time.LocalDateTime`
+  and preserves MySQL's microsecond precision in the binary protocol. For `time` fields, since `Duration` is used,
+  you get full microsecond precision.
 * Timezone support is rather complicated ([see here](http://dev.mysql.com/doc/refman/5.5/en/time-zone-support.html)),
   avoid using timezones in MySQL. This driver just stores the dates as they are and won't perform any computation
   or calculation. I'd recommend using only `datetime` fields and avoid `timestamp` fields as much as possible.
@@ -38,8 +43,9 @@ You can find more information about the MySQL network protocol [here](http://dev
   days too (you could, for instance, say that a time is __-120d 19:27:30.000 001__). As much as this does not make much
   sense, that is how it was implemented at the database and as a driver we need to stay true to it, so, while you
   **can** send `java.sql.Time` and `LocalTime` objects to the database, when reading these values you will always
-  receive a `scala.concurrent.Duration` object since it is the closest thing we have to what a `time` value in MySQL means.
-* MySQL can store dates with values like `0000-00-00` or `0000-00-00 00:00:00` but it's not possible to represent dates   like this in Java (nor there would actually be a date with a zero day or month, this is just MySQL being lenient on    invalid dates) so the driver just returns `null` for any case like that.
+  receive a `java.time.Duration` object since it is the closest thing we have to what a `time` value in MySQL means.
+* MySQL can store dates with values like `0000-00-00` or `0000-00-00 00:00:00`, but Java cannot represent them, so
+  the driver returns `null` for those cases.
 
 ## Supported types
 
@@ -47,10 +53,10 @@ When you are receiving data from a `ResultSet`:
 
 MySQL type | Scala/Java type
 --- | --- | ---
-date | LocalDate
-datetime | LocalDateTime
-new_date | LocalDate
-timestamp | LocalDateTime
+date | java.time.LocalDate
+datetime | java.time.LocalDateTime
+new_date | java.time.LocalDate
+timestamp | java.time.LocalDateTime
 tinyint | Byte
 smallint | Short
 year | Short
@@ -65,7 +71,7 @@ decimal | BigDecimal
 string | String
 var_string | String
 varchar | String
-time | scala.concurrent.Duration
+time | java.time.Duration
 text | String
 enum | String
 blob | Array[Byte]
@@ -80,8 +86,12 @@ Int | mediumint
 Float | float
 Double | double
 BigDecimal | decimal
-LocalDate | date
-DateTime | timestamp
+java.time.LocalDate | date
+java.time.LocalDateTime | datetime
+java.time.LocalDateTime | timestamp
+java.time.OffsetDateTime | timestamp
+java.time.Instant | timestamp
+java.time.Duration | time
 scala.concurrent.Duration | time
 java.sql.Date | date
 java.util.Date | timestamp
