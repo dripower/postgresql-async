@@ -4,7 +4,6 @@
  * Maurício Linhares licenses this file to you under the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
- *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -16,24 +15,19 @@
 
 package com.github.mauricio.async.db.column
 
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
+import java.time.ZoneOffset
+import org.specs2.mutable.Specification
 
-object TimestampWithTimezoneEncoderDecoder extends TimestampEncoderDecoder {
+class TimeWithTimezoneEncoderDecoderSpec extends Specification {
 
-  private val format: DateTimeFormatter = new DateTimeFormatterBuilder()
-    .appendPattern("yyyy-MM-dd HH:mm:ss")
-    .optionalStart()
-    .appendFraction(ChronoField.NANO_OF_SECOND, 1, 6, true)
-    .optionalEnd()
-    .appendPattern("[XXX][XX][X]")
-    .toFormatter()
+  "encoder" should {
 
-  override def formatter = format
+    "print an offset time" in {
+      val value = java.time.OffsetTime.of(4, 5, 6, 134000000, ZoneOffset.ofHours(-3))
 
-  override def decode(value: String): Any =
-    JavaTimeSupport.normalizeToSystemZone(OffsetDateTime.parse(value, formatter))
+      TimeWithTimezoneEncoderDecoder.encode(value) must_=== "04:05:06.134000-03:00"
+    }
+
+  }
 
 }

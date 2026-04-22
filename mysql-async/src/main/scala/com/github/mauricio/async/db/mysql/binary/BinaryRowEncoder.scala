@@ -18,7 +18,7 @@ package com.github.mauricio.async.db.mysql.binary
 
 import java.nio.ByteBuffer
 import java.nio.charset.Charset
-import java.time.{Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime}
+import java.time.{Duration, Instant, LocalDate, LocalDateTime, LocalTime, OffsetDateTime}
 
 import com.github.mauricio.async.db.mysql.binary.encoder._
 import com.github.mauricio.async.db.util._
@@ -57,6 +57,7 @@ class BinaryRowEncoder(charset: Charset) {
     classOf[java.sql.Timestamp]                       -> SQLTimestampEncoder,
     classOf[java.sql.Date]                            -> SQLDateEncoder,
     classOf[java.sql.Time]                            -> SQLTimeEncoder,
+    classOf[Duration]                                 -> DurationEncoder,
     classOf[scala.concurrent.duration.FiniteDuration] -> DurationEncoder,
     classOf[Array[Byte]]                              -> ByteArrayEncoder,
     classOf[Boolean]                                  -> BooleanEncoder,

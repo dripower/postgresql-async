@@ -18,9 +18,8 @@ package com.github.mauricio.async.db.mysql
 
 import java.sql.Timestamp
 import java.time.{LocalDate, LocalDateTime}
-import java.util.concurrent.TimeUnit
+import java.time.{Duration => JavaDuration}
 import org.specs2.mutable.Specification
-import scala.concurrent.duration.Duration
 import scala.Some
 
 class PreparedStatementsSpec extends Specification with ConnectionHelper {
@@ -121,10 +120,10 @@ class PreparedStatementsSpec extends Specification with ConnectionHelper {
         timestamp.getMinute === 14
         timestamp.getSecond === 7
 
-        result("created_at_time") === Duration(3, TimeUnit.HOURS) + Duration(
-          14,
-          TimeUnit.MINUTES
-        ) + Duration(7, TimeUnit.SECONDS)
+        result("created_at_time") === JavaDuration
+          .ofHours(3)
+          .plusMinutes(14)
+          .plusSeconds(7)
 
         val year = result("created_at_year").asInstanceOf[Short]
 
@@ -257,12 +256,8 @@ class PreparedStatementsSpec extends Specification with ConnectionHelper {
       val date      = LocalDate.of(2011, 9, 8)
       val dateTime  = LocalDateTime.of(2012, 5, 27, 15, 29, 55)
       val timestamp = Timestamp.valueOf(dateTime)
-      val time      =
-        Duration(3, TimeUnit.HOURS) + Duration(5, TimeUnit.MINUTES) + Duration(
-          10,
-          TimeUnit.SECONDS
-        )
-      val year = 2012
+      val time      = JavaDuration.ofHours(3).plusMinutes(5).plusSeconds(10)
+      val year      = 2012
 
       withConnection { connection =>
         executeQuery(connection, this.createTableTimeColumns)
@@ -307,10 +302,11 @@ class PreparedStatementsSpec extends Specification with ConnectionHelper {
         """INSERT INTO posts ( created_at_timestamp, created_at_time )
           | VALUES ( '2013-01-19 03:14:07.019', '03:14:07.019' )""".stripMargin
 
-      val time = Duration(3, TimeUnit.HOURS) +
-        Duration(14, TimeUnit.MINUTES) +
-        Duration(7, TimeUnit.SECONDS) +
-        Duration(19, TimeUnit.MILLISECONDS)
+      val time = JavaDuration
+        .ofHours(3)
+        .plusMinutes(14)
+        .plusSeconds(7)
+        .plusMillis(19)
 
       val timestamp = LocalDateTime.of(2013, 1, 19, 3, 14, 7, 19000000)
       val select    = "SELECT * FROM posts"

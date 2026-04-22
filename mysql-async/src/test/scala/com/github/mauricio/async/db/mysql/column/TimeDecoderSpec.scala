@@ -16,9 +16,8 @@
 
 package com.github.mauricio.async.db.mysql.column
 
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 import org.specs2.mutable.Specification
-import scala.concurrent.duration.Duration
 
 class TimeDecoderSpec extends Specification {
 
@@ -27,23 +26,34 @@ class TimeDecoderSpec extends Specification {
     "handle a time" in {
 
       val time     = "120:10:07"
-      val duration = Duration(120, TimeUnit.HOURS) +
-        Duration(10, TimeUnit.MINUTES) +
-        Duration(7, TimeUnit.SECONDS)
+      val duration = Duration.ofHours(120).plusMinutes(10).plusSeconds(7)
 
       TimeDecoder.decode(time) === duration
     }
 
-    "handle a time with millis" in {
+    "handle a time with microseconds" in {
 
       val time     = "120:10:07.00098"
-      val duration = Duration(120, TimeUnit.HOURS) +
-        Duration(10, TimeUnit.MINUTES) +
-        Duration(7, TimeUnit.SECONDS) +
-        Duration(98, TimeUnit.MILLISECONDS)
+      val duration = Duration
+        .ofHours(120)
+        .plusMinutes(10)
+        .plusSeconds(7)
+        .plusNanos(980000)
 
       TimeDecoder.decode(time) === duration
 
+    }
+
+    "handle a negative time" in {
+      val time     = "-120:10:07.00098"
+      val duration = Duration
+        .ofHours(120)
+        .plusMinutes(10)
+        .plusSeconds(7)
+        .plusNanos(980000)
+        .negated()
+
+      TimeDecoder.decode(time) === duration
     }
 
   }

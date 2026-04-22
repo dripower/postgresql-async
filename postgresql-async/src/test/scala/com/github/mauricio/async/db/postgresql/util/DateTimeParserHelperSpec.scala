@@ -16,6 +16,9 @@
 
 package com.github.mauricio.async.db.postgresql.util
 
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
+import java.time.{Instant, ZoneId, ZoneOffset}
 import java.nio.charset.StandardCharsets
 import io.netty.buffer.Unpooled
 import org.specs2.mutable.Specification
@@ -70,6 +73,25 @@ class DateTimeParserHelperSpec extends Specification {
         val nonFastResult = DateTimeParserHelper.parseOffsetDateTime(timestampString)
         fastResult must beSome(nonFastResult)
       }).forall
+    }
+
+    "normalize OffsetDateTime results to the system zone" in {
+      val instant         = Instant.parse("2023-12-25T14:30:45Z")
+      val systemZone      = ZoneId.systemDefault()
+      val systemOffset    = systemZone.getRules.getOffset(instant)
+      val inputOffset     = if (systemOffset != ZoneOffset.ofHours(5)) ZoneOffset.ofHours(5) else ZoneOffset.ofHours(-3)
+      val input           = instant.atOffset(inputOffset)
+      val formatter       = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd HH:mm:ssXXX").toFormatter()
+      val timestampString = formatter.format(input)
+      val expected        = input.atZoneSameInstant(systemZone).toOffsetDateTime
+
+      val buf = Unpooled.wrappedBuffer(timestampString.getBytes(StandardCharsets.UTF_8))
+      try {
+        DateTimeParserHelper.parseOffsetDateTime(timestampString) must_=== expected
+        DateTimeParserHelper.fastParseOffsetDateTime(buf) must beSome(expected)
+      } finally {
+        buf.release()
+      }
     }
 
     "handle empty ByteBuf for fastParseLocalDateTime" in {

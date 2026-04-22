@@ -1,5 +1,6 @@
 package com.github.mauricio.async.db.postgresql.util
 
+import com.github.mauricio.async.db.column.JavaTimeSupport
 import io.netty.buffer.ByteBuf
 import java.nio.charset.Charset
 import java.time.format.{DateTimeFormatter, DateTimeFormatterBuilder}
@@ -28,7 +29,7 @@ private[postgresql] object DateTimeParserHelper {
   }
 
   def parseOffsetDateTime(text: String): OffsetDateTime = {
-    OffsetDateTime.parse(text, timestampFormatter)
+    JavaTimeSupport.normalizeToSystemZone(OffsetDateTime.parse(text, timestampFormatter))
   }
 
   /** Parse in-place, improve performance, if failed, reader index is reset */
@@ -62,7 +63,11 @@ private[postgresql] object DateTimeParserHelper {
           (year, month, day, hour, minute, second, nanos, timezone) =>
             timezone match {
               case Some(zone) =>
-                Some(ZonedDateTime.of(year, month, day, hour, minute, second, nanos, zone).toOffsetDateTime)
+                Some(
+                  JavaTimeSupport.normalizeToSystemZone(
+                    ZonedDateTime.of(year, month, day, hour, minute, second, nanos, zone).toOffsetDateTime
+                  )
+                )
               case None => None
             }
         )

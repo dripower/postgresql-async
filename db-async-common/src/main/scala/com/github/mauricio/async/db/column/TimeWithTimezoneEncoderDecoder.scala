@@ -29,9 +29,18 @@ object TimeWithTimezoneEncoderDecoder extends TimeEncoderDecoder {
     .appendOffset("+HH:mm", "Z")
     .toFormatter()
 
+  protected override val printer: DateTimeFormatter = new DateTimeFormatterBuilder()
+    .appendPattern("HH:mm:ss")
+    .appendFraction(ChronoField.NANO_OF_SECOND, 6, 6, true)
+    .appendPattern("XXX")
+    .toFormatter()
+
   override def formatter = format
 
   override def decode(value: String): Any =
     OffsetTime.parse(value, formatter)
+
+  override def encode(value: Any): String =
+    printer.format(value.asInstanceOf[OffsetTime])
 
 }

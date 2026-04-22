@@ -18,9 +18,8 @@ package com.github.mauricio.async.db.mysql
 
 import com.github.mauricio.async.db.mysql.exceptions.MySQLException
 import java.time.{LocalDate, LocalDateTime}
+import java.time.{Duration => JavaDuration}
 import org.specs2.mutable.Specification
-import scala.concurrent.duration.Duration
-import java.util.concurrent.TimeUnit
 import scala.collection.IndexedSeq
 import io.netty.util.CharsetUtil
 import com.github.mauricio.async.db.exceptions.InsufficientParametersException
@@ -93,10 +92,10 @@ class QuerySpec extends Specification with ConnectionHelper {
         timestamp.getMinute === 14
         timestamp.getSecond === 7
 
-        result("created_at_time") === Duration(3, TimeUnit.HOURS) + Duration(
-          14,
-          TimeUnit.MINUTES
-        ) + Duration(7, TimeUnit.SECONDS)
+        result("created_at_time") === JavaDuration
+          .ofHours(3)
+          .plusMinutes(14)
+          .plusSeconds(7)
 
         val year = result("created_at_year").asInstanceOf[Short]
 

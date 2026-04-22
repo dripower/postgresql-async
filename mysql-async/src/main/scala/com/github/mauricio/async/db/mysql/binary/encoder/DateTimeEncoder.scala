@@ -16,6 +16,7 @@
 
 package com.github.mauricio.async.db.mysql.binary.encoder
 
+import com.github.mauricio.async.db.column.JavaTimeSupport
 import io.netty.buffer.ByteBuf
 import java.time.OffsetDateTime
 import com.github.mauricio.async.db.mysql.column.ColumnTypes
@@ -24,7 +25,7 @@ object DateTimeEncoder extends BinaryEncoder {
   def encode(value: Any, buffer: ByteBuf): Unit = {
     val instant = value.asInstanceOf[OffsetDateTime]
 
-    LocalDateTimeEncoder.encode(instant.toLocalDateTime, buffer)
+    LocalDateTimeEncoder.encode(JavaTimeSupport.toSystemLocalDateTime(instant), buffer)
   }
 
   def encodesTo: Int = ColumnTypes.FIELD_TYPE_TIMESTAMP

@@ -269,7 +269,7 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
 
     }
 
-    "handle sending a date with timezone and retrieving the date with the same time zone" in {
+    "handle sending a date with timezone and retrieving the same instant in the system zone" in {
 
       withTimeHandler { conn =>
         val date1 = OffsetDateTime.ofInstant(Instant.ofEpochMilli(2190319), ZoneOffset.UTC)
@@ -286,9 +286,9 @@ class TimeAndDateSpec extends Specification with DatabaseTestHelper {
           )
         )
         val result = await(conn.sendPreparedStatement("SELECT T FROM TEST"))
-        val date2  = result.rows.get.head(0)
+        val date2  = result.rows.get.head(0).asInstanceOf[OffsetDateTime]
 
-        date2 === date1
+        date2.toInstant === date1.toInstant
       }
     }
 

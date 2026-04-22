@@ -22,6 +22,8 @@ Compared with `0.3.x`:
 - `interval` query results now decode to raw PostgreSQL text as `String`
 - `interval` prepared statement parameters now accept `java.time.Period` and `java.time.Duration`
 - Joda `ReadablePeriod` and `ReadableDuration` are no longer accepted for PostgreSQL `interval` parameters
+- `timestamp with time zone` results are normalized to the JVM system zone while preserving the instant
+- `time with time zone` prepared statement parameters accept `java.time.OffsetTime`
 
 PostgreSQL date/time mappings are now:
 
@@ -38,7 +40,13 @@ MySQL date/time mappings remain:
 - `date` -> `java.time.LocalDate`
 - `datetime` -> `java.time.LocalDateTime`
 - `timestamp` -> `java.time.LocalDateTime`
-- `time` -> `scala.concurrent.Duration`
+- `time` -> `java.time.Duration`
+
+Compared with `0.3.x`:
+
+- MySQL date/time values now use `java.time` instead of Joda-Time
+- MySQL `time` values now decode to `java.time.Duration` instead of `scala.concurrent.Duration`
+- `java.time.OffsetDateTime` prepared statement parameters are encoded by instant in the JVM system zone
 
 ## PostgreSQL Migration
 
@@ -108,14 +116,24 @@ PostgreSQL stores those as `interval` and returns normalized text when queried.
   `java.time.Duration`.
 - If your code relied on the driver normalizing PostgreSQL interval text into Joda `Period`, that conversion now needs
   to happen outside the driver.
+- If your code compared `timestamp with time zone` values by offset or expected the original textual timezone to be
+  preserved, update it to compare by instant instead.
+- PostgreSQL `timestamp with time zone` stores an instant, not the original offset. The driver now consistently returns
+  `OffsetDateTime` normalized to the JVM system zone across scalar, array, and string decoding paths.
+- PostgreSQL `time with time zone` parameters should now be passed as `java.time.OffsetTime`.
 
 ## MySQL Migration
 
 MySQL now uses `java.time.LocalDate` and `java.time.LocalDateTime` instead of Joda types for decoded results and
-prepared statement parameters.
+prepared statement parameters. MySQL `time` now decodes to `java.time.Duration`.
+
+When writing MySQL `datetime`/`timestamp` values with `java.time.OffsetDateTime`, the driver converts them by instant
+into the JVM system zone before encoding. As with PostgreSQL `timestamp with time zone`, applications should not rely
+on the original offset being preserved through a round-trip.
 
 If you use both drivers in the same application, the practical migration difference is:
 
 - PostgreSQL and MySQL date/time value handling should move from Joda-Time to `java.time`
 - PostgreSQL `interval` write paths should move to `java.time.Period` and `java.time.Duration`
-- MySQL `time` continues to decode to `scala.concurrent.Duration`
+- MySQL `time` now decodes to `java.time.Duration`
+- For timezone-aware values, compare by instant rather than expecting the original offset text to round-trip unchanged
