@@ -19,8 +19,8 @@ package com.github.mauricio.async.db.postgresql.benchmark
 import com.github.mauricio.async.db.postgresql.util.DateTimeParserHelper
 import io.netty.buffer.{ByteBuf, Unpooled}
 import java.nio.charset.StandardCharsets
+import java.time.{LocalDateTime, OffsetDateTime}
 import org.openjdk.jmh.annotations._
-import org.joda.time.{LocalDateTime, DateTime}
 
 @State(Scope.Thread)
 class TimestampParserBenchmark {
@@ -52,12 +52,12 @@ class TimestampParserBenchmark {
 
   @Benchmark
   @BenchmarkMode(Array(Mode.Throughput))
-  def benchmarkParseDateTime(): DateTime = {
-    val slice = timestampByteBuf.slice()
+  def benchmarkParseOffsetDateTime(): OffsetDateTime = {
+    val slice = timestampWithTimezoneByteBuf.slice()
     val bytes = Array.ofDim[Byte](slice.readableBytes())
     slice.readBytes(bytes)
     val timestampWithTimezoneString = new String(bytes)
-    DateTimeParserHelper.parseDateTime(timestampWithTimezoneString)
+    DateTimeParserHelper.parseOffsetDateTime(timestampWithTimezoneString)
   }
 
   @Benchmark
@@ -68,8 +68,8 @@ class TimestampParserBenchmark {
 
   @Benchmark
   @BenchmarkMode(Array(Mode.Throughput))
-  def benchmarkFastParseDateTime(): Option[DateTime] = {
-    DateTimeParserHelper.fastParseDateTime(timestampWithTimezoneByteBuf.slice())
+  def benchmarkFastParseOffsetDateTime(): Option[OffsetDateTime] = {
+    DateTimeParserHelper.fastParseOffsetDateTime(timestampWithTimezoneByteBuf.slice())
   }
 
 }

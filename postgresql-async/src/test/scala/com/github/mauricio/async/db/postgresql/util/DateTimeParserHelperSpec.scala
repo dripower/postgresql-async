@@ -16,10 +16,12 @@
 
 package com.github.mauricio.async.db.postgresql.util
 
-import org.specs2.mutable.Specification
-import org.joda.time._
-import io.netty.buffer.Unpooled
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
+import java.time.{Instant, ZoneId, ZoneOffset}
 import java.nio.charset.StandardCharsets
+import io.netty.buffer.Unpooled
+import org.specs2.mutable.Specification
 
 class DateTimeParserHelperSpec extends Specification {
 
@@ -53,7 +55,7 @@ class DateTimeParserHelperSpec extends Specification {
       } must beTrue
     }
 
-    "parse DateTime consistently between fast and non-fast methods for supported formats" in {
+    "parse OffsetDateTime consistently between fast and non-fast methods for supported formats" in {
       val testCases = Seq(
         "2023-12-25 14:30:45+00:00",
         "2023-12-25 14:30:45.123456-02:30",
@@ -67,10 +69,29 @@ class DateTimeParserHelperSpec extends Specification {
 
       testCases must contain({ (timestampString: String) =>
         val buf           = Unpooled.wrappedBuffer(timestampString.getBytes(StandardCharsets.UTF_8))
-        val fastResult    = DateTimeParserHelper.fastParseDateTime(buf)
-        val nonFastResult = DateTimeParserHelper.parseDateTime(timestampString)
+        val fastResult    = DateTimeParserHelper.fastParseOffsetDateTime(buf)
+        val nonFastResult = DateTimeParserHelper.parseOffsetDateTime(timestampString)
         fastResult must beSome(nonFastResult)
       }).forall
+    }
+
+    "normalize OffsetDateTime results to the system zone" in {
+      val instant         = Instant.parse("2023-12-25T14:30:45Z")
+      val systemZone      = ZoneId.systemDefault()
+      val systemOffset    = systemZone.getRules.getOffset(instant)
+      val inputOffset     = if (systemOffset != ZoneOffset.ofHours(5)) ZoneOffset.ofHours(5) else ZoneOffset.ofHours(-3)
+      val input           = instant.atOffset(inputOffset)
+      val formatter       = new DateTimeFormatterBuilder().appendPattern("yyyy-MM-dd HH:mm:ssXXX").toFormatter()
+      val timestampString = formatter.format(input)
+      val expected        = input.atZoneSameInstant(systemZone).toOffsetDateTime
+
+      val buf = Unpooled.wrappedBuffer(timestampString.getBytes(StandardCharsets.UTF_8))
+      try {
+        DateTimeParserHelper.parseOffsetDateTime(timestampString) must_=== expected
+        DateTimeParserHelper.fastParseOffsetDateTime(buf) must beSome(expected)
+      } finally {
+        buf.release()
+      }
     }
 
     "handle empty ByteBuf for fastParseLocalDateTime" in {
@@ -83,10 +104,10 @@ class DateTimeParserHelperSpec extends Specification {
       }
     }
 
-    "handle empty ByteBuf for fastParseDateTime" in {
+    "handle empty ByteBuf for fastParseOffsetDateTime" in {
       val buf = Unpooled.wrappedBuffer(Array.empty[Byte])
       try {
-        val result = DateTimeParserHelper.fastParseDateTime(buf)
+        val result = DateTimeParserHelper.fastParseOffsetDateTime(buf)
         result must beNone
       } finally {
         buf.release()
@@ -116,7 +137,7 @@ class DateTimeParserHelperSpec extends Specification {
       } must beTrue
     }
 
-    "handle truly malformed timestamp for fastParseDateTime" in {
+    "handle truly malformed timestamp for fastParseOffsetDateTime" in {
       val malformedCases = Seq(
         "2023-12-25 14:30:45+25:00" // invalid timezone hour
         // Note: "2023-12-25 14:30:45+05:60" (invalid minute) is leniently parsed by fastParseDateTime
@@ -125,7 +146,7 @@ class DateTimeParserHelperSpec extends Specification {
       malformedCases.forall { malformedString =>
         val buf = Unpooled.wrappedBuffer(malformedString.getBytes(StandardCharsets.UTF_8))
         try {
-          val result = DateTimeParserHelper.fastParseDateTime(buf)
+          val result = DateTimeParserHelper.fastParseOffsetDateTime(buf)
           result.isEmpty
         } finally {
           buf.release()
@@ -146,12 +167,12 @@ class DateTimeParserHelperSpec extends Specification {
       }
     }
 
-    "preserve ByteBuf reader index on parse failure for fastParseDateTime" in {
+    "preserve ByteBuf reader index on parse failure for fastParseOffsetDateTime" in {
       val malformedString = "2023-12-25 14:30:45+25:00"
       val buf             = Unpooled.wrappedBuffer(malformedString.getBytes(StandardCharsets.UTF_8))
       try {
         val initialIndex = buf.readerIndex()
-        val result       = DateTimeParserHelper.fastParseDateTime(buf)
+        val result       = DateTimeParserHelper.fastParseOffsetDateTime(buf)
         result must beNone
         buf.readerIndex() must_=== initialIndex
       } finally {
@@ -212,8 +233,8 @@ class DateTimeParserHelperSpec extends Specification {
       edgeCases.forall { timestampString =>
         val buf = Unpooled.wrappedBuffer(timestampString.getBytes(StandardCharsets.UTF_8))
         try {
-          val fastResult    = DateTimeParserHelper.fastParseDateTime(buf)
-          val nonFastResult = DateTimeParserHelper.parseDateTime(timestampString)
+          val fastResult    = DateTimeParserHelper.fastParseOffsetDateTime(buf)
+          val nonFastResult = DateTimeParserHelper.parseOffsetDateTime(timestampString)
 
           fastResult.isDefined && fastResult.get == nonFastResult
         } finally {
@@ -222,18 +243,18 @@ class DateTimeParserHelperSpec extends Specification {
       } must beTrue
     }
 
-    "handle short timezone formats in fastParseDateTime" in {
+    "handle short timezone formats in fastParseOffsetDateTime" in {
       val shortTimezoneCases = Seq(
         "2023-12-25 14:30:45+05", // short timezone format
         "2023-12-25 14:30:45-08", // short timezone format
         "2023-12-25 14:30:45+05:" // incomplete timezone with colon
       )
 
-      // These should parse successfully with fastParseDateTime
+      // These should parse successfully with fastParseOffsetDateTime
       shortTimezoneCases.forall { timestampString =>
         val buf = Unpooled.wrappedBuffer(timestampString.getBytes(StandardCharsets.UTF_8))
         try {
-          val result = DateTimeParserHelper.fastParseDateTime(buf)
+          val result = DateTimeParserHelper.fastParseOffsetDateTime(buf)
           result.isDefined
         } finally {
           buf.release()
@@ -241,18 +262,18 @@ class DateTimeParserHelperSpec extends Specification {
       } must beTrue
     }
 
-    "handle lenient timezone parsing in fastParseDateTime" in {
+    "handle lenient timezone parsing in fastParseOffsetDateTime" in {
       val lenientTimezoneCases = Seq(
         "2023-12-25 14:30:45+05:00:00",    // extra colon but parses
         "2023-12-25 14:30:45+05:00 extra", // extra text but parses
         "2023-12-25 14:30:45+05:00+"       // duplicate + but parses
       )
 
-      // These should parse successfully with fastParseDateTime despite being non-standard
+      // These should parse successfully with fastParseOffsetDateTime despite being non-standard
       lenientTimezoneCases.forall { timestampString =>
         val buf = Unpooled.wrappedBuffer(timestampString.getBytes(StandardCharsets.UTF_8))
         try {
-          val result = DateTimeParserHelper.fastParseDateTime(buf)
+          val result = DateTimeParserHelper.fastParseOffsetDateTime(buf)
           result.isDefined
         } finally {
           buf.release()

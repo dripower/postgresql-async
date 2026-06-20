@@ -13,7 +13,7 @@ private[postgresql] trait ScramHandler {
 
 private[postgresql] object ScramHandler {
 
-  def apply(password: String, mechanisms: Array[String], cert: Option[Certificate]) = new ScramHandler {
+  def apply(password: String, mechanisms: Array[String], cert: Option[Certificate]): ScramHandler = new ScramHandler {
 
     val scramClient = {
       val base = ScramClient

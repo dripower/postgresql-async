@@ -4,7 +4,6 @@
  * Maurício Linhares licenses this file to you under the Apache License,
  * version 2.0 (the "License"); you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at:
- *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -14,16 +13,21 @@
  * under the License.
  */
 
-package com.github.mauricio.async.db.mysql.binary.encoder
+package com.github.mauricio.async.db.column
 
-import io.netty.buffer.ByteBuf
-import com.github.mauricio.async.db.mysql.column.ColumnTypes
+import java.time.ZoneOffset
+import org.specs2.mutable.Specification
 
-object SQLTimestampEncoder extends BinaryEncoder {
-  def encode(value: Any, buffer: ByteBuf) = {
-    val date = value.asInstanceOf[java.sql.Timestamp]
-    LocalDateTimeEncoder.encode(date.toLocalDateTime, buffer)
+class TimeWithTimezoneEncoderDecoderSpec extends Specification {
+
+  "encoder" should {
+
+    "print an offset time" in {
+      val value = java.time.OffsetTime.of(4, 5, 6, 134000000, ZoneOffset.ofHours(-3))
+
+      TimeWithTimezoneEncoderDecoder.encode(value) must_=== "04:05:06.134000-03:00"
+    }
+
   }
 
-  def encodesTo: Int = ColumnTypes.FIELD_TYPE_TIMESTAMP
 }

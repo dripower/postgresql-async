@@ -1,8 +1,8 @@
 package com.github.mauricio.async.db.mysql
 
 import org.specs2.mutable.Specification
-import scala.concurrent.duration.Duration
 import com.github.mauricio.async.db.RowData
+import java.time.{Duration => JavaDuration}
 
 class ZeroDatesSpec extends Specification with ConnectionHelper {
 
@@ -26,7 +26,7 @@ class ZeroDatesSpec extends Specification with ConnectionHelper {
     result("datetime_column") must beNull
     result("date_column") must beNull
     result("year_column") === 0
-    result("time_column") === Duration.Zero
+    result("time_column") === JavaDuration.ZERO
   }
 
   "client" should {

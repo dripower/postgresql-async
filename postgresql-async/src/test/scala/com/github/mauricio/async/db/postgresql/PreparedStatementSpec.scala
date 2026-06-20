@@ -16,11 +16,12 @@
 
 package com.github.mauricio.async.db.postgresql
 
+import java.time.LocalDate
+import java.util.UUID
+
 import org.specs2.mutable.Specification
-import org.joda.time.LocalDate
 import com.github.mauricio.async.db.util.Log
 import com.github.mauricio.async.db.exceptions.InsufficientParametersException
-import java.util.UUID
 import com.github.mauricio.async.db.postgresql.exceptions.GenericDatabaseException
 
 class PreparedStatementSpec extends Specification with DatabaseTestHelper {
@@ -438,6 +439,36 @@ class PreparedStatementSpec extends Specification with DatabaseTestHelper {
         success
       } else {
         pending
+      }
+    }
+
+    "deallocate evicted prepared statements" in {
+      withHandler { handler =>
+        // Create a table for testing
+        executeDdl(handler, messagesCreate)
+
+        def queryPS() = {
+          executeQuery(handler, "SELECT * FROM pg_prepared_statements").rows.get.map(row => row(0))
+        }
+
+        // Check initial prepared statements count
+        val initialStmts = queryPS()
+
+        val capacity = handler.parsedStatements.size // default 1024
+
+        val baseQuery = "SELECT id FROM messages WHERE id = ?"
+        for (i <- 1 to (capacity * 2)) {
+          val uniqueQuery = s"$baseQuery /* query_$i */"
+          val hotQuery    = s"$baseQuery /* query_${(i % capacity) / 10} */"
+          executePreparedStatement(handler, uniqueQuery, Array(i))
+          executePreparedStatement(handler, hotQuery, Array(i))
+        }
+
+        val finalStmts = queryPS()
+        val hotStmts   = finalStmts.filter(x => x.toString.toInt < (capacity / 10))
+        println(s"Hot statements(${hotStmts.size}): ${hotStmts}")
+        initialStmts.size mustEqual (0)
+        finalStmts.size must <=(capacity)
       }
     }
 

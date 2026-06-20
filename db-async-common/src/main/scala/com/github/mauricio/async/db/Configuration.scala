@@ -77,7 +77,7 @@ case class Configuration(
   allocator: ByteBufAllocator = ByteBufAllocator.DEFAULT,
   connectTimeout: Duration = 5.seconds,
   testTimeout: Duration = 5.seconds,
-  preparedStatementCacheSize: Int = 64,
+  preparedStatementCacheSize: Int = 1000,
   preparedStatementExpireTime: Duration = 60.seconds,
   eventLoopGroup: EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
   channelClass: Class[_ <: SocketChannel] = NettyUtils.SocketChannelClass,
