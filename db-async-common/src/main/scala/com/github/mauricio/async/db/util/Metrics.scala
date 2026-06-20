@@ -322,11 +322,13 @@ object Metrics {
   }
 
   @inline private def logMetrics(sql: String, time: Long) = {
-    metricsLogger.info("SQL:[{}],TIME:[{}]ms", logArgs(sql, time): _*)
+    if (metricsLogger.isInfoEnabled) {
+      metricsLogger.info("SQL:[{}],TIME:[{}]ms", logArgs(sql, time): _*)
+    }
   }
 
   @inline private def logSlow(sql: String, params: Seq[Any], time: Long) = {
-    if (time > 50) {
+    if (time > 50 && slowLogger.isInfoEnabled) {
       slowLogger.info(
         "SQL:[{}],TIME:[{}]ms, params: {}",
         logArgs(sql, time, showParam(params)): _*
