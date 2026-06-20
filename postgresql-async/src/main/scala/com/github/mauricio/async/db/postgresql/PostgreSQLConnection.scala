@@ -116,22 +116,22 @@ class PostgreSQLConnection(
   def parameterStatuses: scala.collection.immutable.Map[String, String] =
     this.parameterStatus.toMap
 
-  override def sendQuery(query: String): Future[QueryResult] =
-    Metrics.stat(query, Seq.empty) {
-      validateQuery(query)
+  override def sendQuery(query: String): Future[QueryResult] = {
+    validateQuery(query)
 
-      val promise = Promise[QueryResult]()
-      this.setQueryPromise(promise)
+    val promise = Promise[QueryResult]()
+    this.setQueryPromise(promise)
 
-      write(new QueryMessage(query))
-      addTimeout(promise, configuration.queryTimeout)
-      promise.future
-    }
+    write(new QueryMessage(query))
+    val start = System.nanoTime()
+    addTimeout(promise, configuration.queryTimeout)
+    Metrics.stat(query, Seq.empty, start)(promise.future)
+  }
 
   override def sendPreparedStatement(
     query: String,
     values: Seq[Any] = List()
-  ): Future[QueryResult] = Metrics.stat(query, values) {
+  ): Future[QueryResult] = {
     validateQuery(query)
 
     val promise = Promise[QueryResult]()
@@ -153,15 +153,15 @@ class PostgreSQLConnection(
 
     this.currentPreparedStatement = Some(holder)
     this.currentQuery = Some(new MutableResultSet(holder.columnDatas))
-    write(
-      if (holder.prepared)
+    val message =
+      if (holder.prepared) {
         new PreparedStatementExecuteMessage(
           holder.statementId,
           holder.realQuery,
           values,
           this.encoderRegistry
         )
-      else {
+      } else {
         holder.prepared = true
         new PreparedStatementOpeningMessage(
           holder.statementId,
@@ -170,9 +170,11 @@ class PostgreSQLConnection(
           this.encoderRegistry
         )
       }
-    )
+
+    write(message)
+    val start = System.nanoTime()
     addTimeout(promise, configuration.queryTimeout)
-    promise.future
+    Metrics.stat(query, values, start)(promise.future)
   }
 
   override def onError(exception: Throwable) = {
