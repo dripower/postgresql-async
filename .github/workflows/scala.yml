@@ -44,5 +44,11 @@ jobs:
       - name: Setup database
         run: bash build/prepare_build.sh
 
-      - name: Run tests
-        run: sbt ++${{matrix.scala}} test
+      - name: Run common tests
+        run: sbt ++${{matrix.scala}} common/test
+
+      - name: Run postgresql tests
+        run: sbt ++${{matrix.scala}} postgresql/test
+
+      - name: Run mysql tests
+        run: sbt ++${{matrix.scala}} mysql/test
