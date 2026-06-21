@@ -30,50 +30,25 @@ object Metrics {
 
   private implicit val ec: ExecutionContext = Execution.parasitic
 
-  private final case class NormalizeBudget(sql: String) {
-    private val maxSteps = sql.length * 4 + 128
-    private var steps    = 0
-
-    def tick(): Unit = {
-      steps += 1
-      if (steps > maxSteps) {
-        throw NormalizeBudgetExceeded(maxSteps)
-      }
-    }
-  }
-
-  private final case class NormalizeBudgetExceeded(maxSteps: Int) extends RuntimeException
-
-  private def omitNames(fields: String, max: Int, budget: NormalizeBudget) = {
+  private def omitNames(fields: String, max: Int) = {
     val sb        = new StringBuilder
     var start     = 0
     var count     = 0
-    var depth     = 0
     var i         = 0
     var truncated = false
     while (i < fields.length && !truncated) {
-      budget.tick()
-      val next = nextSqlTokenIndex(fields, i, budget)
-      if (next > i) {
-        i = next
-      } else {
-        fields.charAt(i) match {
-          case '(' =>
-            depth += 1
-          case ')' if depth > 0 =>
-            depth -= 1
-          case ',' if depth == 0 && count + 1 >= max && hasNonWhitespace(fields, i + 1) =>
-            appendField(sb, fields, start, i, count)
-            sb.append(", ...")
-            truncated = true
-          case ',' if depth == 0 =>
-            appendField(sb, fields, start, i, count)
-            count += 1
-            start = i + 1
-          case _ =>
+      if (fields.charAt(i) == ',') {
+        if (count + 1 >= max && hasNonWhitespace(fields, i + 1)) {
+          appendField(sb, fields, start, i, count)
+          sb.append(", ...")
+          truncated = true
+        } else {
+          appendField(sb, fields, start, i, count)
+          count += 1
+          start = i + 1
         }
-        i += 1
       }
+      i += 1
     }
 
     if (!truncated) {
@@ -94,75 +69,36 @@ object Metrics {
 
   }
 
-  private def digestRowNames(sql: String, selectIndex: Int, budget: NormalizeBudget): String = {
+  private def digestRowNames(sql: String, selectIndex: Int): String = {
     val fieldsStart = skipWhitespace(sql, selectIndex + SelectKeyword.length)
-    val fromIndex   = findTopLevelKeyword(sql, FromKeyword, fieldsStart, budget)
+    val fromIndex   = indexOfKeywordIgnoreCase(sql, FromKeyword, fieldsStart)
     if (fromIndex != -1) {
       val fields = sql.slice(fieldsStart, fromIndex).trim
-      sql.slice(0, fieldsStart) + omitNames(fields, 2, budget) + " " + sql.slice(fromIndex, sql.length)
+      sql.slice(0, fieldsStart) + omitNames(fields, 2) + " " + sql.slice(fromIndex, sql.length)
     } else {
       sql
     }
 
   }
 
-  private def digestInsert(sql: String, budget: NormalizeBudget) = {
+  private def digestInsert(sql: String) = {
     val insertIndex = firstNonWhitespace(sql)
-    val valuesIndex = findTopLevelKeyword(sql, ValuesKeyword, insertIndex + InsertKeyword.length, budget)
+    val valuesIndex = indexOfKeywordIgnoreCase(sql, ValuesKeyword, insertIndex + InsertKeyword.length)
     if (valuesIndex == -1) {
       sql
     } else {
-      var rowStart = skipWhitespace(sql, valuesIndex + ValuesKeyword.length)
-      var rowEnd   = -1
-      var continue = rowStart < sql.length && sql.charAt(rowStart) == '('
-      var valid    = true
-      while (continue && valid) {
-        budget.tick()
-        val end = findClosingParen(sql, rowStart, budget)
-        if (end == -1) {
-          valid = false
-        } else {
-          rowEnd = end + 1
-          val next = skipWhitespace(sql, rowEnd)
-          if (next < sql.length && sql.charAt(next) == ',') {
-            rowStart = skipWhitespace(sql, next + 1)
-            continue = rowStart < sql.length && sql.charAt(rowStart) == '('
-          } else {
-            continue = false
-          }
-        }
-      }
-      if (!valid || rowEnd == -1) {
-        sql
-      } else {
-        val suffix     = sql.slice(rowEnd, sql.length).trim
-        val normalized = sql.slice(0, valuesIndex) + "VALUES (...)"
-        if (suffix.isEmpty) {
-          normalized
-        } else {
-          s"$normalized $suffix"
-        }
-      }
+      val separator = if (valuesIndex > 0 && !sql.charAt(valuesIndex - 1).isWhitespace) " " else ""
+      sql.slice(0, valuesIndex) + separator + "VALUES (...)"
     }
   }
 
   private[util] def normalize(sql: String) = {
-    val budget = NormalizeBudget(sql)
-    try {
-      val start = firstNonWhitespace(sql)
-      if (startsWithKeyword(sql, start, SelectKeyword)) {
-        digestRowNames(sql, start, budget)
-      } else if (startsWithKeyword(sql, start, InsertKeyword)) {
-        digestInsert(sql, budget)
-      } else sql
-    } catch {
-      case NormalizeBudgetExceeded(maxSteps) =>
-        normalizeLogger.warn(
-          "SQL normalize exceeded {} steps, skip normalize. SQL: {}",
-          Array[AnyRef](maxSteps: java.lang.Integer, sql): _*
-        )
-        sql
-    }
+    val start = firstNonWhitespace(sql)
+    if (startsWithKeyword(sql, start, SelectKeyword)) {
+      digestRowNames(sql, start)
+    } else if (startsWithKeyword(sql, start, InsertKeyword)) {
+      digestInsert(sql)
+    } else sql
   }
 
   private final val SelectKeyword = "select"
@@ -195,57 +131,6 @@ object Metrics {
     }
   }
 
-  private def findTopLevelKeyword(sql: String, keyword: String, from: Int, budget: NormalizeBudget): Int = {
-    var i      = from
-    var depth  = 0
-    var result = -1
-    while (i < sql.length && result == -1) {
-      budget.tick()
-      val next = nextSqlTokenIndex(sql, i, budget)
-      if (next > i) {
-        i = next
-      } else {
-        sql.charAt(i) match {
-          case '(' =>
-            depth += 1
-          case ')' if depth > 0 =>
-            depth -= 1
-          case _ if depth == 0 && startsWithKeyword(sql, i, keyword) =>
-            result = i
-          case _ =>
-        }
-        i += 1
-      }
-    }
-    result
-  }
-
-  private def findClosingParen(sql: String, openIndex: Int, budget: NormalizeBudget): Int = {
-    var i      = openIndex
-    var depth  = 0
-    var result = -1
-    while (i < sql.length && result == -1) {
-      budget.tick()
-      val next = nextSqlTokenIndex(sql, i, budget)
-      if (next > i) {
-        i = next
-      } else {
-        sql.charAt(i) match {
-          case '(' =>
-            depth += 1
-          case ')' =>
-            depth -= 1
-            if (depth == 0) {
-              result = i
-            }
-          case _ =>
-        }
-        i += 1
-      }
-    }
-    result
-  }
-
   private def startsWithKeyword(sql: String, index: Int, keyword: String): Boolean = {
     index >= 0 &&
     index + keyword.length <= sql.length &&
@@ -258,60 +143,17 @@ object Metrics {
     c.isLetterOrDigit || c == '_' || c == '$'
   }
 
-  private def nextSqlTokenIndex(sql: String, index: Int, budget: NormalizeBudget): Int = {
-    sql.charAt(index) match {
-      case '\'' | '"' | '`' =>
-        skipQuoted(sql, index, budget)
-      case '-' if index + 1 < sql.length && sql.charAt(index + 1) == '-' =>
-        skipLineComment(sql, index + 2, budget)
-      case '/' if index + 1 < sql.length && sql.charAt(index + 1) == '*' =>
-        skipBlockComment(sql, index + 2, budget)
-      case _ =>
-        index
-    }
-  }
-
-  private def skipQuoted(sql: String, start: Int, budget: NormalizeBudget): Int = {
-    val quote  = sql.charAt(start)
-    var i      = start + 1
+  private def indexOfKeywordIgnoreCase(sql: String, keyword: String, from: Int): Int = {
+    var i      = math.max(from, 0)
     var result = -1
-    while (i < sql.length && result == -1) {
-      budget.tick()
-      if (sql.charAt(i) == '\\') {
-        i += 2
-      } else if (sql.charAt(i) == quote) {
-        if (i + 1 < sql.length && sql.charAt(i + 1) == quote) {
-          i += 2
-        } else {
-          result = i + 1
-        }
-      } else {
-        i += 1
-      }
-    }
-    if (result == -1) sql.length else result
-  }
-
-  private def skipLineComment(sql: String, start: Int, budget: NormalizeBudget): Int = {
-    var i = start
-    while (i < sql.length && sql.charAt(i) != '\n' && sql.charAt(i) != '\r') {
-      budget.tick()
-      i += 1
-    }
-    i
-  }
-
-  private def skipBlockComment(sql: String, start: Int, budget: NormalizeBudget): Int = {
-    var i      = start
-    var result = -1
-    while (i + 1 < sql.length && result == -1) {
-      budget.tick()
-      if (sql.charAt(i) == '*' && sql.charAt(i + 1) == '/') {
-        result = i + 2
+    val last   = sql.length - keyword.length
+    while (i <= last && result == -1) {
+      if (startsWithKeyword(sql, i, keyword)) {
+        result = i
       }
       i += 1
     }
-    if (result == -1) sql.length else result
+    result
   }
 
   private def hasNonWhitespace(sql: String, start: Int): Boolean = {
@@ -326,9 +168,8 @@ object Metrics {
     result
   }
 
-  private val metricsLogger   = LoggerFactory.getLogger("async.sql.log.metrics")
-  private val slowLogger      = LoggerFactory.getLogger("async.sql.log.slow")
-  private val normalizeLogger = LoggerFactory.getLogger("async.sql.log.normalize")
+  private val metricsLogger = LoggerFactory.getLogger("async.sql.log.metrics")
+  private val slowLogger    = LoggerFactory.getLogger("async.sql.log.slow")
 
   private def maxStatStatement = sys.props.get("db.maxStats").map(_.toLong).getOrElse(10000L)
 

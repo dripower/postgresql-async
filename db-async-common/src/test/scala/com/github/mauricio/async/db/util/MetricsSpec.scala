@@ -20,9 +20,14 @@ class MetricsSpec extends Specification {
         "  select id, name, ... from users"
     }
 
-    "ignore commas inside select expressions" in {
+    "find from keyword after line breaks" in {
+      Metrics.normalize("SELECT id,\nname,\ncreated_at\nFROM users") mustEqual
+        "SELECT id,\nname, ... FROM users"
+    }
+
+    "finish select expressions with commas inside functions" in {
       Metrics.normalize("SELECT concat(first_name, ',', last_name), count(*), created_at FROM users") mustEqual
-        "SELECT concat(first_name, ',', last_name), count(*), ... FROM users"
+        "SELECT concat(first_name, ', ... FROM users"
     }
 
     "skip quoted strings at the end of select statements" in {
@@ -60,11 +65,16 @@ class MetricsSpec extends Specification {
         "INSERT INTO users(id, name) VALUES (...)"
     }
 
-    "collapse nested insert values and keep the suffix" in {
+    "collapse insert values followed by parentheses" in {
+      Metrics.normalize("INSERT INTO users(id, name) VALUES(1, 'a'), (2, 'b')") mustEqual
+        "INSERT INTO users(id, name) VALUES (...)"
+    }
+
+    "collapse nested insert values" in {
       Metrics.normalize(
         "insert into events(payload) values (json_build_object('a', 1)), (json_build_object('b', 2)) returning id"
       ) mustEqual
-        "insert into events(payload) VALUES (...) returning id"
+        "insert into events(payload) VALUES (...)"
     }
 
     "finish for generated SQL fragments with quotes comments and delimiters" in {
