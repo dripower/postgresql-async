@@ -30,8 +30,21 @@ object Metrics {
 
   private implicit val ec: ExecutionContext = Execution.parasitic
 
-  private def omitNames(fields: String, max: Int) = {
+  private final case class NormalizeBudget(sql: String) {
+    private val maxSteps = sql.length * 4 + 128
+    private var steps    = 0
 
+    def tick(): Unit = {
+      steps += 1
+      if (steps > maxSteps) {
+        throw NormalizeBudgetExceeded(maxSteps)
+      }
+    }
+  }
+
+  private final case class NormalizeBudgetExceeded(maxSteps: Int) extends RuntimeException
+
+  private def omitNames(fields: String, max: Int, budget: NormalizeBudget) = {
     val sb        = new StringBuilder
     var start     = 0
     var count     = 0
@@ -39,7 +52,8 @@ object Metrics {
     var i         = 0
     var truncated = false
     while (i < fields.length && !truncated) {
-      val next = nextSqlTokenIndex(fields, i)
+      budget.tick()
+      val next = nextSqlTokenIndex(fields, i, budget)
       if (next > i) {
         i = next
       } else {
@@ -80,21 +94,21 @@ object Metrics {
 
   }
 
-  private def digestRowNames(sql: String, selectIndex: Int): String = {
+  private def digestRowNames(sql: String, selectIndex: Int, budget: NormalizeBudget): String = {
     val fieldsStart = skipWhitespace(sql, selectIndex + SelectKeyword.length)
-    val fromIndex   = findTopLevelKeyword(sql, FromKeyword, fieldsStart)
+    val fromIndex   = findTopLevelKeyword(sql, FromKeyword, fieldsStart, budget)
     if (fromIndex != -1) {
       val fields = sql.slice(fieldsStart, fromIndex).trim
-      sql.slice(0, fieldsStart) + omitNames(fields, 2) + " " + sql.slice(fromIndex, sql.length)
+      sql.slice(0, fieldsStart) + omitNames(fields, 2, budget) + " " + sql.slice(fromIndex, sql.length)
     } else {
       sql
     }
 
   }
 
-  private def digestInsert(sql: String) = {
+  private def digestInsert(sql: String, budget: NormalizeBudget) = {
     val insertIndex = firstNonWhitespace(sql)
-    val valuesIndex = findTopLevelKeyword(sql, ValuesKeyword, insertIndex + InsertKeyword.length)
+    val valuesIndex = findTopLevelKeyword(sql, ValuesKeyword, insertIndex + InsertKeyword.length, budget)
     if (valuesIndex == -1) {
       sql
     } else {
@@ -103,7 +117,8 @@ object Metrics {
       var continue = rowStart < sql.length && sql.charAt(rowStart) == '('
       var valid    = true
       while (continue && valid) {
-        val end = findClosingParen(sql, rowStart)
+        budget.tick()
+        val end = findClosingParen(sql, rowStart, budget)
         if (end == -1) {
           valid = false
         } else {
@@ -132,12 +147,22 @@ object Metrics {
   }
 
   private[util] def normalize(sql: String) = {
-    val start = firstNonWhitespace(sql)
-    if (startsWithKeyword(sql, start, SelectKeyword)) {
-      digestRowNames(sql, start)
-    } else if (startsWithKeyword(sql, start, InsertKeyword)) {
-      digestInsert(sql)
-    } else sql
+    val budget = NormalizeBudget(sql)
+    try {
+      val start = firstNonWhitespace(sql)
+      if (startsWithKeyword(sql, start, SelectKeyword)) {
+        digestRowNames(sql, start, budget)
+      } else if (startsWithKeyword(sql, start, InsertKeyword)) {
+        digestInsert(sql, budget)
+      } else sql
+    } catch {
+      case NormalizeBudgetExceeded(maxSteps) =>
+        normalizeLogger.warn(
+          "SQL normalize exceeded {} steps, skip normalize. SQL: {}",
+          Array[AnyRef](maxSteps: java.lang.Integer, sql): _*
+        )
+        sql
+    }
   }
 
   private final val SelectKeyword = "select"
@@ -170,12 +195,13 @@ object Metrics {
     }
   }
 
-  private def findTopLevelKeyword(sql: String, keyword: String, from: Int): Int = {
+  private def findTopLevelKeyword(sql: String, keyword: String, from: Int, budget: NormalizeBudget): Int = {
     var i      = from
     var depth  = 0
     var result = -1
     while (i < sql.length && result == -1) {
-      val next = nextSqlTokenIndex(sql, i)
+      budget.tick()
+      val next = nextSqlTokenIndex(sql, i, budget)
       if (next > i) {
         i = next
       } else {
@@ -194,12 +220,13 @@ object Metrics {
     result
   }
 
-  private def findClosingParen(sql: String, openIndex: Int): Int = {
+  private def findClosingParen(sql: String, openIndex: Int, budget: NormalizeBudget): Int = {
     var i      = openIndex
     var depth  = 0
     var result = -1
     while (i < sql.length && result == -1) {
-      val next = nextSqlTokenIndex(sql, i)
+      budget.tick()
+      val next = nextSqlTokenIndex(sql, i, budget)
       if (next > i) {
         i = next
       } else {
@@ -231,24 +258,25 @@ object Metrics {
     c.isLetterOrDigit || c == '_' || c == '$'
   }
 
-  private def nextSqlTokenIndex(sql: String, index: Int): Int = {
+  private def nextSqlTokenIndex(sql: String, index: Int, budget: NormalizeBudget): Int = {
     sql.charAt(index) match {
       case '\'' | '"' | '`' =>
-        skipQuoted(sql, index)
+        skipQuoted(sql, index, budget)
       case '-' if index + 1 < sql.length && sql.charAt(index + 1) == '-' =>
-        skipLineComment(sql, index + 2)
+        skipLineComment(sql, index + 2, budget)
       case '/' if index + 1 < sql.length && sql.charAt(index + 1) == '*' =>
-        skipBlockComment(sql, index + 2)
+        skipBlockComment(sql, index + 2, budget)
       case _ =>
         index
     }
   }
 
-  private def skipQuoted(sql: String, start: Int): Int = {
+  private def skipQuoted(sql: String, start: Int, budget: NormalizeBudget): Int = {
     val quote  = sql.charAt(start)
     var i      = start + 1
     var result = -1
     while (i < sql.length && result == -1) {
+      budget.tick()
       if (sql.charAt(i) == '\\') {
         i += 2
       } else if (sql.charAt(i) == quote) {
@@ -264,18 +292,20 @@ object Metrics {
     if (result == -1) sql.length else result
   }
 
-  private def skipLineComment(sql: String, start: Int): Int = {
+  private def skipLineComment(sql: String, start: Int, budget: NormalizeBudget): Int = {
     var i = start
     while (i < sql.length && sql.charAt(i) != '\n' && sql.charAt(i) != '\r') {
+      budget.tick()
       i += 1
     }
     i
   }
 
-  private def skipBlockComment(sql: String, start: Int): Int = {
+  private def skipBlockComment(sql: String, start: Int, budget: NormalizeBudget): Int = {
     var i      = start
     var result = -1
     while (i + 1 < sql.length && result == -1) {
+      budget.tick()
       if (sql.charAt(i) == '*' && sql.charAt(i + 1) == '/') {
         result = i + 2
       }
@@ -296,8 +326,9 @@ object Metrics {
     result
   }
 
-  private val metricsLogger = LoggerFactory.getLogger("async.sql.log.metrics")
-  private val slowLogger    = LoggerFactory.getLogger("async.sql.log.slow")
+  private val metricsLogger   = LoggerFactory.getLogger("async.sql.log.metrics")
+  private val slowLogger      = LoggerFactory.getLogger("async.sql.log.slow")
+  private val normalizeLogger = LoggerFactory.getLogger("async.sql.log.normalize")
 
   private def maxStatStatement = sys.props.get("db.maxStats").map(_.toLong).getOrElse(10000L)
 
