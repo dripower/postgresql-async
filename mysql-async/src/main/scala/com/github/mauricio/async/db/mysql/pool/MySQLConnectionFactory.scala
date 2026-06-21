@@ -64,7 +64,7 @@ class MySQLConnectionFactory(configuration: Configuration) extends ObjectFactory
    */
   def destroy(item: MySQLConnection): Unit = {
     try {
-      Await.result(item.disconnect, configuration.connectTimeout)
+      item.disconnect
     } catch {
       case e: Exception => {
         log.error("Failed to close the connection", e)

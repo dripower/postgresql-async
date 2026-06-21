@@ -13,8 +13,6 @@
         </encoder>
     </appender>
 
-    <logger name="async.sql.log.metrics" level="WARN"/>
-
     <root level="debug">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>

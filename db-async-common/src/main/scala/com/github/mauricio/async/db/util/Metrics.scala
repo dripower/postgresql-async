@@ -40,7 +40,7 @@ object Metrics {
     var truncated = false
     while (i < fields.length && !truncated) {
       val next = nextSqlTokenIndex(fields, i)
-      if (next != i) {
+      if (next > i) {
         i = next
       } else {
         fields.charAt(i) match {
@@ -176,7 +176,7 @@ object Metrics {
     var result = -1
     while (i < sql.length && result == -1) {
       val next = nextSqlTokenIndex(sql, i)
-      if (next != i) {
+      if (next > i) {
         i = next
       } else {
         sql.charAt(i) match {
@@ -200,7 +200,7 @@ object Metrics {
     var result = -1
     while (i < sql.length && result == -1) {
       val next = nextSqlTokenIndex(sql, i)
-      if (next != i) {
+      if (next > i) {
         i = next
       } else {
         sql.charAt(i) match {
@@ -247,8 +247,8 @@ object Metrics {
   private def skipQuoted(sql: String, start: Int): Int = {
     val quote  = sql.charAt(start)
     var i      = start + 1
-    var result = sql.length
-    while (i < sql.length && result == sql.length) {
+    var result = -1
+    while (i < sql.length && result == -1) {
       if (sql.charAt(i) == '\\') {
         i += 2
       } else if (sql.charAt(i) == quote) {
@@ -261,7 +261,7 @@ object Metrics {
         i += 1
       }
     }
-    result
+    if (result == -1) sql.length else result
   }
 
   private def skipLineComment(sql: String, start: Int): Int = {
@@ -274,14 +274,14 @@ object Metrics {
 
   private def skipBlockComment(sql: String, start: Int): Int = {
     var i      = start
-    var result = sql.length
-    while (i + 1 < sql.length && result == sql.length) {
+    var result = -1
+    while (i + 1 < sql.length && result == -1) {
       if (sql.charAt(i) == '*' && sql.charAt(i + 1) == '/') {
         result = i + 2
       }
       i += 1
     }
-    result
+    if (result == -1) sql.length else result
   }
 
   private def hasNonWhitespace(sql: String, start: Int): Boolean = {
