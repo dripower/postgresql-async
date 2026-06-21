@@ -3,7 +3,7 @@ import ReleaseTransformations._
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
-val nettyVersion          = "4.2.9.Final"
+val nettyVersion          = "4.2.15.Final"
 val scala3Version         = "3.3.8"
 val scala212Version       = "2.12.20"
 val scala213Version       = "2.13.18"
