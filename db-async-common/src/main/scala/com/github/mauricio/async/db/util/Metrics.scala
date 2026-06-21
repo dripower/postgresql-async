@@ -1,8 +1,8 @@
 package com.github.mauricio.async.db.util
 
 import com.google.common.cache._
-import java.util.concurrent.atomic._
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic._
 import org.slf4j._
 import scala.util._
 import scala.concurrent.{Future, ExecutionContext}
@@ -30,80 +30,142 @@ object Metrics {
 
   private implicit val ec: ExecutionContext = Execution.parasitic
 
-  private def ommitNames(fields: String, max: Int) = {
-
-    @annotation.tailrec
-    def go(start: Int, sb: StringBuilder, count: Int): StringBuilder = {
-      if (count >= max) {
-        if (fields.length > start) {
+  private def omitNames(fields: String, max: Int) = {
+    val sb        = new StringBuilder
+    var start     = 0
+    var count     = 0
+    var i         = 0
+    var truncated = false
+    while (i < fields.length && !truncated) {
+      if (fields.charAt(i) == ',') {
+        if (count + 1 >= max && hasNonWhitespace(fields, i + 1)) {
+          appendField(sb, fields, start, i, count)
           sb.append(", ...")
-        }
-        sb
-      } else {
-        val sepIndex = fields.indexOf(',', start)
-        if (sepIndex != -1) {
-          if (count > 0) {
-            sb.append(",")
-          }
-          sb.append(fields.slice(start, sepIndex))
-          go(sepIndex + 1, sb, count + 1)
+          truncated = true
         } else {
-          if (count > 0) {
-            sb.append(",")
-          }
-          sb.append(fields.slice(start, fields.length))
-          sb
+          appendField(sb, fields, start, i, count)
+          count += 1
+          start = i + 1
         }
       }
+      i += 1
     }
-    go(0, new StringBuilder, 0).toString
+
+    if (!truncated) {
+      appendField(sb, fields, start, fields.length, count)
+    }
+    sb.toString
   }
 
-  def stat[T](sql: String, params: Seq[Any])(f: => Future[T]) = {
-    val key   = normalize(sql)
-    val start = System.currentTimeMillis()
-    val fut   = f
-    fut.onComplete {
+  def stat[T](sql: String, params: Seq[Any], start: Long)(future: Future[T]) = {
+    val key = normalize(sql)
+    future.onComplete {
       case _ =>
-        val end  = System.currentTimeMillis()
-        val time = end - start
+        val time = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start)
+        logMetrics(key, time)
         logSlow(key, params, time)
     }
-    fut
+    future
 
   }
 
-  private def digestRowNames(sql: String): String = {
-    val fromIndex = sql.indexOf("FROM")
-    if (sql.startsWith("SELECT ") || sql.startsWith("select ") && fromIndex != -1) {
-      val fields = sql.slice(7, fromIndex)
-      sql.slice(0, 7) + ommitNames(fields, 2) + " " + sql.slice(fromIndex, sql.length)
+  private def digestRowNames(sql: String, selectIndex: Int): String = {
+    val fieldsStart = skipWhitespace(sql, selectIndex + SelectKeyword.length)
+    val fromIndex   = indexOfKeywordIgnoreCase(sql, FromKeyword, fieldsStart)
+    if (fromIndex != -1) {
+      val fields = sql.slice(fieldsStart, fromIndex).trim
+      sql.slice(0, fieldsStart) + omitNames(fields, 2) + " " + sql.slice(fromIndex, sql.length)
     } else {
       sql
     }
 
   }
 
-  private final val InsertValuesPart = {
-    val rowExpr = "\\s*\\([^\\)]+\\)\\s*"
-    s"(?im)VALUES(${rowExpr}(\\,${rowExpr})*)".r
-  }
-
   private def digestInsert(sql: String) = {
-    InsertValuesPart.replaceAllIn(
-      sql,
-      { m =>
-        "VALUES (...) "
-      }
-    )
+    val insertIndex = firstNonWhitespace(sql)
+    val valuesIndex = indexOfKeywordIgnoreCase(sql, ValuesKeyword, insertIndex + InsertKeyword.length)
+    if (valuesIndex == -1) {
+      sql
+    } else {
+      val separator = if (valuesIndex > 0 && !sql.charAt(valuesIndex - 1).isWhitespace) " " else ""
+      sql.slice(0, valuesIndex) + separator + "VALUES (...)"
+    }
   }
 
-  private def normalize(sql: String) = {
-    if (sql.contains("SELECT") || sql.contains("select")) {
-      digestRowNames(sql)
-    } else if (sql.trim.startsWith("INSERT") || sql.trim.startsWith("insert")) {
+  private[util] def normalize(sql: String) = {
+    val start = firstNonWhitespace(sql)
+    if (startsWithKeyword(sql, start, SelectKeyword)) {
+      digestRowNames(sql, start)
+    } else if (startsWithKeyword(sql, start, InsertKeyword)) {
       digestInsert(sql)
     } else sql
+  }
+
+  private final val SelectKeyword = "select"
+  private final val FromKeyword   = "from"
+  private final val InsertKeyword = "insert"
+  private final val ValuesKeyword = "values"
+
+  private def appendField(sb: StringBuilder, fields: String, start: Int, end: Int, count: Int): Unit = {
+    if (count > 0) {
+      sb.append(",")
+    }
+    sb.append(fields.slice(start, end))
+  }
+
+  @annotation.tailrec
+  private def firstNonWhitespace(sql: String, index: Int = 0): Int = {
+    if (index >= sql.length || !sql.charAt(index).isWhitespace) {
+      index
+    } else {
+      firstNonWhitespace(sql, index + 1)
+    }
+  }
+
+  @annotation.tailrec
+  private def skipWhitespace(sql: String, index: Int): Int = {
+    if (index >= sql.length || !sql.charAt(index).isWhitespace) {
+      index
+    } else {
+      skipWhitespace(sql, index + 1)
+    }
+  }
+
+  private def startsWithKeyword(sql: String, index: Int, keyword: String): Boolean = {
+    index >= 0 &&
+    index + keyword.length <= sql.length &&
+    sql.regionMatches(true, index, keyword, 0, keyword.length) &&
+    (index == 0 || !isIdentifierPart(sql.charAt(index - 1))) &&
+    (index + keyword.length == sql.length || !isIdentifierPart(sql.charAt(index + keyword.length)))
+  }
+
+  private def isIdentifierPart(c: Char): Boolean = {
+    c.isLetterOrDigit || c == '_' || c == '$'
+  }
+
+  private def indexOfKeywordIgnoreCase(sql: String, keyword: String, from: Int): Int = {
+    var i      = math.max(from, 0)
+    var result = -1
+    val last   = sql.length - keyword.length
+    while (i <= last && result == -1) {
+      if (startsWithKeyword(sql, i, keyword)) {
+        result = i
+      }
+      i += 1
+    }
+    result
+  }
+
+  private def hasNonWhitespace(sql: String, start: Int): Boolean = {
+    var i      = start
+    var result = false
+    while (i < sql.length && !result) {
+      if (!sql.charAt(i).isWhitespace) {
+        result = true
+      }
+      i += 1
+    }
+    result
   }
 
   private val metricsLogger = LoggerFactory.getLogger("async.sql.log.metrics")
@@ -131,9 +193,22 @@ object Metrics {
     sb.toString()
   }
 
-  @inline private def logSlow(sql: String, params: Seq[Any], time: Long) = {
-    if (time > 50) {
-      slowLogger.info(s"SQL:[$sql],TIME:[${time}]ms, params: ${showParam(params)}")
+  @inline private def logMetrics(sql: String, time: Long) = {
+    if (metricsLogger.isInfoEnabled) {
+      metricsLogger.info("SQL:[{}],TIME:[{}]ms", logArgs(sql, time): _*)
     }
+  }
+
+  @inline private def logSlow(sql: String, params: Seq[Any], time: Long) = {
+    if (time > 50 && slowLogger.isInfoEnabled) {
+      slowLogger.info(
+        "SQL:[{}],TIME:[{}]ms, params: {}",
+        logArgs(sql, time, showParam(params)): _*
+      )
+    }
+  }
+
+  private def logArgs(sql: String, time: Long, args: AnyRef*) = {
+    Array[AnyRef](sql, time: java.lang.Long) ++ args
   }
 }

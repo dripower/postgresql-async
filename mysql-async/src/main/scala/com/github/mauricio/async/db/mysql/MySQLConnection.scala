@@ -201,13 +201,14 @@ class MySQLConnection(
       .write(new AuthenticationSwitchResponse(configuration.password, message))
   }
 
-  def sendQuery(query: String): Future[QueryResult] = Metrics.stat(query, Seq.empty) {
+  def sendQuery(query: String): Future[QueryResult] = {
     this.validateIsReadyForQuery()
     val promise = Promise[QueryResult]()
     this.setQueryPromise(promise)
     this.connectionHandler.write(new QueryMessage(query))
+    val start = System.nanoTime()
     addTimeout(promise, configuration.queryTimeout)
-    promise.future
+    Metrics.stat(query, Seq.empty, start)(promise.future)
   }
 
   private def failQueryPromise(t: Throwable): Unit = {
@@ -249,7 +250,7 @@ class MySQLConnection(
   def sendPreparedStatement(
     query: String,
     values: Seq[Any]
-  ): Future[QueryResult] = Metrics.stat(query, values) {
+  ): Future[QueryResult] = {
     this.validateIsReadyForQuery()
     val totalParameters = query.count(_ == '?')
     if (values.length != totalParameters) {
@@ -258,8 +259,9 @@ class MySQLConnection(
     val promise = Promise[QueryResult]()
     this.setQueryPromise(promise)
     this.connectionHandler.sendPreparedStatement(query, values)
+    val start = System.nanoTime()
     addTimeout(promise, configuration.queryTimeout)
-    promise.future
+    Metrics.stat(query, values, start)(promise.future)
   }
 
   override def toString: String = {
