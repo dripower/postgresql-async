@@ -32,7 +32,7 @@ object NettyUtils {
     } else {
       NioIoHandler.newFactory()
     }
-    new MultiThreadIoEventLoopGroup(factory)
+    new MultiThreadIoEventLoopGroup(DaemonThreadsFactory("db-async-netty"), factory)
   }
 
   private def isNativeEpollSupport() = {
