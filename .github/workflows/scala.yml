@@ -51,4 +51,27 @@ jobs:
         run: sbt ++${{matrix.scala}} postgresql/test
 
       - name: Run mysql tests
-        run: sbt ++${{matrix.scala}} mysql/test
+        run: |
+          sbt ++${{matrix.scala}} mysql/test &
+          sbt_pid=$!
+
+          (
+            sleep 240
+            if kill -0 "$sbt_pid" 2>/dev/null; then
+              echo "::error::mysql/test is still running after 240 seconds; printing JVM thread dumps"
+              jcmd || true
+              for pid in $(jcmd | awk '{print $1}'); do
+                echo "===== Thread dump for JVM $pid ====="
+                jcmd "$pid" Thread.print || true
+              done
+              echo "===== Process list ====="
+              ps -ef
+              kill "$sbt_pid" 2>/dev/null || true
+            fi
+          ) &
+          watchdog_pid=$!
+
+          wait "$sbt_pid"
+          status=$?
+          kill "$watchdog_pid" 2>/dev/null || true
+          exit "$status"
