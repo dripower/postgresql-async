@@ -1,5 +1,3 @@
-import ReleaseTransformations._
-
 val commonName            = "db-async-common"
 val postgresqlName        = "postgresql-async"
 val mysqlName             = "mysql-async"
@@ -14,52 +12,39 @@ val specs2JunitDependency = "org.specs2"    %% "specs2-junit"    % specs2Version
 val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8"       % "test"
 
 lazy val root = (project in file("."))
-  .settings(baseSettings: _*)
+  .settings(baseSettings *)
   .settings(
     name            := "db-async-base",
-    publish         := {},
-    publishLocal    := {},
+    publish / skip  := true,
     publishArtifact := false
   )
   .aggregate(common, postgresql, mysql)
 
 lazy val common = (project in file("db-async-common"))
-  .settings(baseSettings: _*)
+  .settings(baseSettings *)
   .settings(
     name := commonName
   )
 
 lazy val postgresql = (project in file("postgresql-async"))
-  .settings(baseSettings: _*)
+  .settings(baseSettings *)
   .settings(
     name := postgresqlName
   )
   .dependsOn(common)
 
 lazy val mysql = (project in file("mysql-async"))
-  .settings(baseSettings: _*)
+  .settings(baseSettings *)
   .settings(
     name := mysqlName
   )
   .dependsOn(common)
 
-lazy val jmh = (project in file("jmh"))
-  .enablePlugins(JmhPlugin)
-  .settings(baseSettings: _*)
-  .settings(
-    publish         := {},
-    publishLocal    := {},
-    publishArtifact := false,
-    name            := "jmh-benchmarks",
-    libraryDependencies ++= commonDependencies
-  )
-  .dependsOn(postgresql)
-
 val commonDependencies = Seq(
   "org.slf4j"               % "slf4j-api"                    % slf4jVersion,
   "io.netty"                % "netty-codec"                  % nettyVersion,
   "io.netty"                % "netty-handler"                % nettyVersion,
-  "io.netty"                % "netty-transport-native-epoll" % nettyVersion classifier "linux-x86_64",
+  ("io.netty"               % "netty-transport-native-epoll" % nettyVersion).classifier("linux-x86_64"),
   "org.scala-lang.modules" %% "scala-collection-compat"      % "2.11.0",
   "com.ongres.scram"        % "scram-client"                 % "3.2",
   "com.google.guava"        % "guava"                        % "33.3.0-jre",
@@ -76,15 +61,11 @@ def opts(s: String) = {
   }
 }
 
-inThisBuild(
-  List(
-    organization := "com.dripower",
-    homepage     := Some(url("https://github.com/dripower/postgresql-async")),
-    licenses     := List("Apache-2.0" -> url("http://www.apache.org/licenses/LICENSE-2.0")),
-    developers   := List(
-      Developer("jilen", "jilen", "jilen.zhang@gmail.com", url("https://github.com/jilen"))
-    )
-  )
+organization := "com.dripower"
+homepage     := Some(uri("https://github.com/dripower/postgresql-async"))
+licenses     := List(License("Apache-2.0", uri("http://www.apache.org/licenses/LICENSE-2.0")))
+developers   := List(
+  Developer("jilen", "jilen", "jilen.zhang@gmail.com", uri("https://github.com/jilen"))
 )
 
 val baseSettings = Seq(
@@ -100,16 +81,4 @@ val baseSettings = Seq(
   (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
   (Test / publishArtifact) := false,
   libraryDependencies ++= commonDependencies
-)
-(ThisBuild / scalafmtOnCompile) := true
-
-releaseProcess := Seq[ReleaseStep](
-  checkSnapshotDependencies,
-  inquireVersions,
-  setReleaseVersion,
-  commitReleaseVersion,
-  tagRelease,
-  setNextVersion,
-  commitNextVersion,
-  pushChanges
 )
