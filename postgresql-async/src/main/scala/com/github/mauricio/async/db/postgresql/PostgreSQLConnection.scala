@@ -36,6 +36,8 @@ import messages.backend._
 import messages.frontend._
 
 import scala.concurrent._
+import scala.concurrent.duration.FiniteDuration
+import scala.util.hashing.MurmurHash3
 import io.netty.channel.EventLoopGroup
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -47,6 +49,11 @@ object PostgreSQLConnection {
   final val Counter          = new AtomicLong()
   final val ServerVersionKey = "server_version"
   final val log              = Log.get[PostgreSQLConnection]
+
+  private final class PreparedStatementExecutionCount(
+    var windowStartedAtNanos: Long,
+    var count: Int
+  )
 }
 
 class PostgreSQLConnection(
@@ -80,6 +87,15 @@ class PostgreSQLConnection(
 
   private[postgresql] val parsedStatements =
     new WTinyLFUCache[PreparedStatementHolder](configuration.preparedStatementCacheSize)
+
+  private final val preparedStatementExecutions =
+    new WTinyLFUCache[PreparedStatementExecutionCount](configuration.preparedStatementTrackingCacheSize)
+
+  private final val preparedStatementExecutionWindowNanos =
+    configuration.preparedStatementExpireTime match {
+      case duration: FiniteDuration => duration.toNanos
+      case _                        => Long.MaxValue
+    }
 
   private var authenticated = false
 
@@ -140,29 +156,60 @@ class PostgreSQLConnection(
     val promise = Promise[QueryResult]()
     this.setQueryPromise(promise)
 
-    val holder = this.parsedStatements.get(query) match {
-      case Some(h) => h
-      case None    =>
-        val h = PreparedStatementHolder(
-          query,
-          preparedStatementsCounter.incrementAndGet,
-          positionalParamHolder
-        )
-        val evicted = this.parsedStatements.put(query, h)._2
-        evicted.foreach { ev =>
-          if (ev.prepared) {
-            log.info("Deallocating evicted prepared statement {}", ev.query)
-            write(new CloseStatementMessage(s"${ev.statementId}"))
+    val namedCacheKey = query
+
+    this.parsedStatements.get(namedCacheKey) match {
+      case Some(holder) =>
+        validatePreparedStatementParameters(holder.paramsCount, values)
+        executeNamedPreparedStatement(holder, values)
+      case None =>
+        val parsedStatement = PreparedStatementHolder(query, 0, positionalParamHolder)
+        validatePreparedStatementParameters(parsedStatement.paramsCount, values)
+
+        val trackingKey = preparedStatementTrackingKey(query, parsedStatement.paramsCount)
+        if (shouldPromotePreparedStatement(trackingKey)) {
+          prepareNamedStatementHolder(namedCacheKey, query) match {
+            case Some(holder) => executeNamedPreparedStatement(holder, values)
+            case None         => executeUnnamedPreparedStatement(parsedStatement.realQuery, values)
           }
+        } else {
+          executeUnnamedPreparedStatement(parsedStatement.realQuery, values)
         }
-        h
     }
 
-    if (holder.paramsCount != values.length) {
+    val start = System.nanoTime()
+    addTimeout(promise, configuration.queryTimeout)
+    Metrics.stat(query, values, start)(promise.future)
+  }
+
+  private def validatePreparedStatementParameters(
+    expectedParamsCount: Int,
+    values: Seq[Any]
+  ): Unit =
+    if (expectedParamsCount != values.length) {
       this.clearQueryPromise
-      throw new InsufficientParametersException(holder.paramsCount, values)
+      throw new InsufficientParametersException(expectedParamsCount, values)
     }
 
+  private def executeUnnamedPreparedStatement(
+    query: String,
+    values: Seq[Any]
+  ): Unit = {
+    this.currentPreparedStatement = None
+    this.currentQuery = Some(new MutableResultSet(ArrayBuffer.empty))
+    write(
+      new UnnamedPreparedStatementMessage(
+        query,
+        values,
+        this.encoderRegistry
+      )
+    )
+  }
+
+  private def executeNamedPreparedStatement(
+    holder: PreparedStatementHolder,
+    values: Seq[Any]
+  ): Unit = {
     this.currentPreparedStatement = Some(holder)
     this.currentQuery = Some(new MutableResultSet(holder.columnDatas))
     val message =
@@ -182,12 +229,72 @@ class PostgreSQLConnection(
           this.encoderRegistry
         )
       }
-
     write(message)
-    val start = System.nanoTime()
-    addTimeout(promise, configuration.queryTimeout)
-    Metrics.stat(query, values, start)(promise.future)
   }
+
+  private def prepareNamedStatementHolder(
+    cacheKey: String,
+    query: String
+  ): Option[PreparedStatementHolder] = {
+    val holder = PreparedStatementHolder(
+      query,
+      preparedStatementsCounter.incrementAndGet,
+      positionalParamHolder
+    )
+    val evicted = this.parsedStatements.put(cacheKey, holder)._2
+    evicted.foreach { ev =>
+      if (ev.prepared) {
+        log.info("Deallocating evicted prepared statement {}", ev.query)
+        write(new CloseStatementMessage(s"${ev.statementId}"))
+      }
+    }
+
+    if (this.parsedStatements.contains(cacheKey)) {
+      Some(holder)
+    } else {
+      None
+    }
+  }
+
+  private def preparedStatementTrackingKey(query: String, paramsCount: Int): String = {
+    val firstChar = if (query.isEmpty) 0 else query.charAt(0).toInt
+    val lastChar  = if (query.isEmpty) 0 else query.charAt(query.length - 1).toInt
+    s"${MurmurHash3.stringHash(query)}:${query.length}:${paramsCount}:${firstChar}:${lastChar}"
+  }
+
+  private def shouldPromotePreparedStatement(trackingKey: String): Boolean = {
+    val threshold = configuration.preparedStatementPrepareThreshold
+    if (threshold <= 0) {
+      false
+    } else if (threshold == 1) {
+      true
+    } else {
+      val now   = System.nanoTime()
+      val usage = this.preparedStatementExecutions.get(trackingKey) match {
+        case Some(existing) => existing
+        case None           =>
+          val created = new PreparedStatementExecutionCount(now, 0)
+          this.preparedStatementExecutions.put(trackingKey, created)
+          created
+      }
+
+      if (isPreparedStatementExecutionWindowExpired(usage, now)) {
+        usage.windowStartedAtNanos = now
+        usage.count = 1
+      } else {
+        usage.count += 1
+      }
+
+      usage.count >= threshold
+    }
+  }
+
+  private def isPreparedStatementExecutionWindowExpired(
+    usage: PreparedStatementExecutionCount,
+    now: Long
+  ): Boolean =
+    preparedStatementExecutionWindowNanos <= 0 ||
+      now - usage.windowStartedAtNanos >= preparedStatementExecutionWindowNanos
 
   override def onError(exception: Throwable) = {
     this.setErrorOnFutures(exception)

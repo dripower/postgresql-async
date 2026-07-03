@@ -39,6 +39,8 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
     new ExecutePreparedStatementEncoder(charset, encoderRegistry)
   private val openEncoder =
     new PreparedStatementOpeningEncoder(charset, encoderRegistry)
+  private val unnamedPreparedStatementEncoder =
+    new UnnamedPreparedStatementEncoder(charset, encoderRegistry)
   private val startupEncoder    = new StartupMessageEncoder(charset)
   private val queryEncoder      = new QueryMessageEncoder(charset)
   private val credentialEncoder = new CredentialEncoder(charset)
@@ -59,10 +61,14 @@ class MessageEncoder(charset: Charset, encoderRegistry: ColumnEncoderRegistry) e
           case ServerMessage.Close                  => CloseMessageEncoder
           case ServerMessage.CloseStatementOrPortal => CloseStatementMessageEncoder
           case ServerMessage.Execute                => this.executeEncoder
-          case ServerMessage.Parse                  => this.openEncoder
-          case ServerMessage.Query                  => this.queryEncoder
-          case ServerMessage.PasswordMessage        => this.credentialEncoder
-          case _                                    => throw new EncoderNotAvailableException(message)
+          case ServerMessage.Parse                  =>
+            message match {
+              case _: UnnamedPreparedStatementMessage => this.unnamedPreparedStatementEncoder
+              case _                                  => this.openEncoder
+            }
+          case ServerMessage.Query           => this.queryEncoder
+          case ServerMessage.PasswordMessage => this.credentialEncoder
+          case _                             => throw new EncoderNotAvailableException(message)
         }
         encoder.encode(message)
       }

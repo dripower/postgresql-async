@@ -64,6 +64,16 @@ object Configuration {
  *   the timeout for connection tests performed by pools
  * @param queryTimeout
  *   the optional query timeout
+ * @param preparedStatementCacheSize
+ *   the maximum number of named server-side prepared statements cached per connection
+ * @param preparedStatementTrackingCacheSize
+ *   the maximum number of prepared statement execution counters retained per connection before promotion
+ * @param preparedStatementExpireTime
+ *   the time window used to count prepared statement executions before promotion to a named server-side prepared
+ *   statement
+ * @param preparedStatementPrepareThreshold
+ *   the number of executions within preparedStatementExpireTime before a prepared statement is promoted to a named
+ *   server-side prepared statement. A value less than or equal to zero disables promotion.
  */
 case class Configuration(
   username: String,
@@ -78,8 +88,10 @@ case class Configuration(
   connectTimeout: Duration = 5.seconds,
   testTimeout: Duration = 5.seconds,
   preparedStatementCacheSize: Int = 1000,
+  preparedStatementTrackingCacheSize: Int = 10000,
   preparedStatementExpireTime: Duration = 60.seconds,
   eventLoopGroup: EventLoopGroup = NettyUtils.DefaultEventLoopGroup,
   channelClass: Class[_ <: SocketChannel] = NettyUtils.SocketChannelClass,
-  queryTimeout: Option[Duration] = None
+  queryTimeout: Option[Duration] = None,
+  preparedStatementPrepareThreshold: Int = 5
 )
