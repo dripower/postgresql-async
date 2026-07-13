@@ -12,7 +12,6 @@ val specs2JunitDependency = "org.specs2"    %% "specs2-junit"    % specs2Version
 val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8"       % "test"
 
 lazy val root = (project in file("."))
-  .settings(baseSettings *)
   .settings(
     name            := "db-async-base",
     publish / skip  := true,
@@ -21,20 +20,17 @@ lazy val root = (project in file("."))
   .aggregate(common, postgresql, mysql)
 
 lazy val common = (project in file("db-async-common"))
-  .settings(baseSettings *)
   .settings(
     name := commonName
   )
 
 lazy val postgresql = (project in file("postgresql-async"))
-  .settings(baseSettings *)
   .settings(
     name := postgresqlName
   )
   .dependsOn(common)
 
 lazy val mysql = (project in file("mysql-async"))
-  .settings(baseSettings *)
   .settings(
     name := mysqlName
   )
@@ -68,17 +64,15 @@ developers   := List(
   Developer("jilen", "jilen", "jilen.zhang@gmail.com", uri("https://github.com/jilen"))
 )
 
-val baseSettings = Seq(
-  organization       := "com.dripower",
-  parallelExecution  := false,
-  crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version),
-  scalaVersion       := scala213Version,
-  javacOptions       := Seq("-source", "11", "-target", "11", "-encoding", "UTF8"),
-  scalacOptions      := {
-    Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
-  },
-  (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential"),
-  (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid"),
-  (Test / publishArtifact) := false,
-  libraryDependencies ++= commonDependencies
-)
+parallelExecution  := false
+crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version)
+scalaVersion       := scala213Version
+javacOptions       := Seq("-source", "11", "-target", "11", "-encoding", "UTF8")
+scalacOptions      := Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
+
+(Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential")
+Test / testQuick / aggregate := false
+(Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid")
+(Test / publishArtifact) := false
+
+libraryDependencies ++= commonDependencies
