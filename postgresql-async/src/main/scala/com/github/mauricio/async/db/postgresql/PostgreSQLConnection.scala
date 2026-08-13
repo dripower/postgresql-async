@@ -136,11 +136,12 @@ class PostgreSQLConnection(
     this.parameterStatus.toMap
 
   override def sendQuery(query: String): Future[QueryResult] = {
+    validateQuery(query)
+
     val promise = Promise[QueryResult]()
     val start   = System.nanoTime()
     this.connectionHandler.runOnEventLoop(() => {
       try {
-        validateQuery(query)
         this.setQueryPromise(promise)
 
         write(new QueryMessage(query))
@@ -157,23 +158,24 @@ class PostgreSQLConnection(
     query: String,
     values: Seq[Any] = List()
   ): Future[QueryResult] = {
+    validateQuery(query)
+
+    // 参数数量校验不触碰连接状态，保持在调用线程同步抛出（与历史行为一致）
+    val parsedStatement = PreparedStatementHolder(query, 0, positionalParamHolder)
+    validatePreparedStatementParameters(parsedStatement.paramsCount, values)
+
     val promise = Promise[QueryResult]()
     val start   = System.nanoTime()
     this.connectionHandler.runOnEventLoop(() => {
       try {
-        validateQuery(query)
         this.setQueryPromise(promise)
 
         val namedCacheKey = query
 
         this.parsedStatements.get(namedCacheKey) match {
           case Some(holder) =>
-            validatePreparedStatementParameters(holder.paramsCount, values)
             executeNamedPreparedStatement(holder, values)
           case None =>
-            val parsedStatement = PreparedStatementHolder(query, 0, positionalParamHolder)
-            validatePreparedStatementParameters(parsedStatement.paramsCount, values)
-
             val trackingKey = preparedStatementTrackingKey(query, parsedStatement.paramsCount)
             if (shouldPromotePreparedStatement(trackingKey)) {
               prepareNamedStatementHolder(namedCacheKey, query) match {
