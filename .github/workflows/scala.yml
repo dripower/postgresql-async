@@ -23,7 +23,7 @@ jobs:
       PGV: '15'
     strategy:
      matrix:
-       scala: ["2.13.18", "3.3.8", "2.12.20"]
+       scala: [2.13, 3.3, 2.12]
 
     steps:
       - uses: actions/checkout@v4
@@ -45,5 +45,4 @@ jobs:
         run: bash build/prepare_build.sh
 
       - name: Run tests
-        # sbt 2.x 的 ++ 命令会执行两遍 test（导致 CI 测试对象互相干扰），改用 set 切换版本
-        run: sbt 'set scalaVersion := "${{matrix.scala}}"; test'
+        run: sbt ++${{matrix.scala}} test

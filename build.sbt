@@ -15,7 +15,6 @@ lazy val root = (project in file("."))
     name                     := "db-async-base",
     publish / skip           := true,
     publishArtifact          := false,
-    Test / parallelExecution := false,
     Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
   .aggregate(common, postgresql, mysql)
@@ -23,14 +22,12 @@ lazy val root = (project in file("."))
 lazy val common = (project in file("db-async-common"))
   .settings(
     name                     := commonName,
-    Test / parallelExecution := false,
     Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
 
 lazy val postgresql = (project in file("postgresql-async"))
   .settings(
     name                     := postgresqlName,
-    Test / parallelExecution := false,
     Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
   .dependsOn(common)
@@ -38,7 +35,6 @@ lazy val postgresql = (project in file("postgresql-async"))
 lazy val mysql = (project in file("mysql-async"))
   .settings(
     name                     := mysqlName,
-    Test / parallelExecution := false,
     Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
   .dependsOn(common)
@@ -70,15 +66,14 @@ developers   := List(
   Developer("jilen", "jilen", "jilen.zhang@gmail.com", uri("https://github.com/jilen"))
 )
 
-parallelExecution  := false
+Test / parallelExecution  := false
 crossScalaVersions := Seq(scala212Version, scala213Version, scala3Version)
 scalaVersion       := scala213Version
 javacOptions       := Seq("-source", "11", "-target", "11", "-encoding", "UTF8")
 scalacOptions      := Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
 
 (Test / testOptions) += Tests.Argument(TestFrameworks.Specs2, "sequential")
-Test / testQuick / aggregate := false
 (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid")
-(Test / publishArtifact) := false
+
 
 libraryDependencies ++= commonDependencies
