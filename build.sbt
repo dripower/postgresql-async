@@ -8,7 +8,6 @@ val scala213Version       = "2.13.18"
 val specs2Version         = "4.22.0"
 val slf4jVersion          = "2.0.7"
 val specs2Dependency      = "org.specs2"    %% "specs2-core"     % specs2Version % "test"
-val specs2JunitDependency = "org.specs2"    %% "specs2-junit"    % specs2Version % "test"
 val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8"       % "test"
 
 lazy val root = (project in file("."))
@@ -16,27 +15,31 @@ lazy val root = (project in file("."))
     name                     := "db-async-base",
     publish / skip           := true,
     publishArtifact          := false,
-    Test / parallelExecution := false
+    Test / parallelExecution := false,
+    Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
   .aggregate(common, postgresql, mysql)
 
 lazy val common = (project in file("db-async-common"))
   .settings(
     name                     := commonName,
-    Test / parallelExecution := false
+    Test / parallelExecution := false,
+    Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
 
 lazy val postgresql = (project in file("postgresql-async"))
   .settings(
     name                     := postgresqlName,
-    Test / parallelExecution := false
+    Test / parallelExecution := false,
+    Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
   .dependsOn(common)
 
 lazy val mysql = (project in file("mysql-async"))
   .settings(
     name                     := mysqlName,
-    Test / parallelExecution := false
+    Test / parallelExecution := false,
+    Test / testFrameworks    := Seq(TestFrameworks.Specs2)
   )
   .dependsOn(common)
 
@@ -49,7 +52,6 @@ val commonDependencies = Seq(
   "com.ongres.scram"        % "scram-client"                 % "3.2",
   "com.google.guava"        % "guava"                        % "33.3.0-jre",
   specs2Dependency,
-  specs2JunitDependency,
   logbackDependency
 )
 
