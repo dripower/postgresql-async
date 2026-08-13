@@ -13,26 +13,30 @@ val logbackDependency     = "ch.qos.logback" % "logback-classic" % "1.1.8"      
 
 lazy val root = (project in file("."))
   .settings(
-    name            := "db-async-base",
-    publish / skip  := true,
-    publishArtifact := false
+    name                     := "db-async-base",
+    publish / skip           := true,
+    publishArtifact          := false,
+    Test / parallelExecution := false
   )
   .aggregate(common, postgresql, mysql)
 
 lazy val common = (project in file("db-async-common"))
   .settings(
-    name := commonName
+    name                     := commonName,
+    Test / parallelExecution := false
   )
 
 lazy val postgresql = (project in file("postgresql-async"))
   .settings(
-    name := postgresqlName
+    name                     := postgresqlName,
+    Test / parallelExecution := false
   )
   .dependsOn(common)
 
 lazy val mysql = (project in file("mysql-async"))
   .settings(
-    name := mysqlName
+    name                     := mysqlName,
+    Test / parallelExecution := false
   )
   .dependsOn(common)
 
