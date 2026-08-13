@@ -136,50 +136,62 @@ class PostgreSQLConnection(
     this.parameterStatus.toMap
 
   override def sendQuery(query: String): Future[QueryResult] = {
-    validateQuery(query)
-
     val promise = Promise[QueryResult]()
-    this.setQueryPromise(promise)
+    val start   = System.nanoTime()
+    this.connectionHandler.runOnEventLoop(() => {
+      try {
+        validateQuery(query)
+        this.setQueryPromise(promise)
 
-    write(new QueryMessage(query))
-    val start = System.nanoTime()
-    addTimeout(promise, configuration.queryTimeout)
+        write(new QueryMessage(query))
+        addTimeout(promise, configuration.queryTimeout)
+      } catch {
+        case e: Throwable => promise.tryFailure(e)
+      }
+    })
     Metrics.stat(query, Seq.empty, start)(promise.future)
+    promise.future
   }
 
   override def sendPreparedStatement(
     query: String,
     values: Seq[Any] = List()
   ): Future[QueryResult] = {
-    validateQuery(query)
-
     val promise = Promise[QueryResult]()
-    this.setQueryPromise(promise)
+    val start   = System.nanoTime()
+    this.connectionHandler.runOnEventLoop(() => {
+      try {
+        validateQuery(query)
+        this.setQueryPromise(promise)
 
-    val namedCacheKey = query
+        val namedCacheKey = query
 
-    this.parsedStatements.get(namedCacheKey) match {
-      case Some(holder) =>
-        validatePreparedStatementParameters(holder.paramsCount, values)
-        executeNamedPreparedStatement(holder, values)
-      case None =>
-        val parsedStatement = PreparedStatementHolder(query, 0, positionalParamHolder)
-        validatePreparedStatementParameters(parsedStatement.paramsCount, values)
+        this.parsedStatements.get(namedCacheKey) match {
+          case Some(holder) =>
+            validatePreparedStatementParameters(holder.paramsCount, values)
+            executeNamedPreparedStatement(holder, values)
+          case None =>
+            val parsedStatement = PreparedStatementHolder(query, 0, positionalParamHolder)
+            validatePreparedStatementParameters(parsedStatement.paramsCount, values)
 
-        val trackingKey = preparedStatementTrackingKey(query, parsedStatement.paramsCount)
-        if (shouldPromotePreparedStatement(trackingKey)) {
-          prepareNamedStatementHolder(namedCacheKey, query) match {
-            case Some(holder) => executeNamedPreparedStatement(holder, values)
-            case None         => executeUnnamedPreparedStatement(parsedStatement.realQuery, values)
-          }
-        } else {
-          executeUnnamedPreparedStatement(parsedStatement.realQuery, values)
+            val trackingKey = preparedStatementTrackingKey(query, parsedStatement.paramsCount)
+            if (shouldPromotePreparedStatement(trackingKey)) {
+              prepareNamedStatementHolder(namedCacheKey, query) match {
+                case Some(holder) => executeNamedPreparedStatement(holder, values)
+                case None         => executeUnnamedPreparedStatement(parsedStatement.realQuery, values)
+              }
+            } else {
+              executeUnnamedPreparedStatement(parsedStatement.realQuery, values)
+            }
         }
-    }
 
-    val start = System.nanoTime()
-    addTimeout(promise, configuration.queryTimeout)
+        addTimeout(promise, configuration.queryTimeout)
+      } catch {
+        case e: Throwable => promise.tryFailure(e)
+      }
+    })
     Metrics.stat(query, values, start)(promise.future)
+    promise.future
   }
 
   private def validatePreparedStatementParameters(
