@@ -138,6 +138,17 @@ class PostgreSQLConnectionHandler(
     }
   }
 
+  // All connection state must only be accessed on the channel's event loop thread
+  def runOnEventLoop(task: Runnable): Unit = {
+    val ctx = this.currentContext
+    if (ctx == null) {
+      task.run()
+    } else {
+      val executor = ctx.executor()
+      if (executor.inEventLoop()) task.run() else executor.execute(task)
+    }
+  }
+
   override def channelActive(ctx: ChannelHandlerContext): Unit = {
     if (configuration.ssl.mode == Mode.Disable)
       ctx.writeAndFlush(new StartupMessage(this.properties))
