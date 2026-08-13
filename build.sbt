@@ -65,7 +65,7 @@ developers   := List(
 
 Test / parallelExecution := false
 crossScalaVersions       := Seq(scala212Version, scala213Version, scala3Version)
-scalaVersion             := scala213Version
+scalaVersion             := sys.props.getOrElse("ci.scala.version", scala213Version)
 javacOptions             := Seq("-source", "11", "-target", "11", "-encoding", "UTF8")
 scalacOptions            := Seq("-feature", "-deprecation", "-release:11") ++ opts(scalaVersion.value)
 
@@ -73,3 +73,4 @@ scalacOptions            := Seq("-feature", "-deprecation", "-release:11") ++ op
 (Test / javaOptions) ++= Seq("-Dio.netty.leakDetection.level=paranoid")
 
 libraryDependencies ++= commonDependencies
+
